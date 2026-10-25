@@ -26,6 +26,12 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import com.sovereignseasons.core.greenhouse.GreenhouseDetector;
 import com.sovereignseasons.core.calendar.WorldCalendarManager;
@@ -233,6 +239,52 @@ public class CropGrowthListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        for (Block b : event.blockList()) {
+            handleBlockModification(b);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        for (Block b : event.blockList()) {
+            handleBlockModification(b);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        Block placed = event.getBlockClicked().getRelative(event.getBlockFace());
+        handleBlockModification(placed);
+        if (event.getBucket() == Material.LAVA_BUCKET) {
+            greenhouseService.invalidateRadius(placed.getLocation(), config.getHeatRadius() + 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBucketFill(PlayerBucketFillEvent event) {
+        Block filled = event.getBlockClicked();
+        handleBlockModification(filled);
+        greenhouseService.invalidateRadius(filled.getLocation(), config.getHeatRadius() + 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        for (Block b : event.getBlocks()) {
+            handleBlockModification(b);
+            handleBlockModification(b.getRelative(event.getDirection()));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        for (Block b : event.getBlocks()) {
+            handleBlockModification(b);
+            handleBlockModification(b.getRelative(event.getDirection()));
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldUnload(WorldUnloadEvent event) {
         World world = event.getWorld();
@@ -249,10 +301,11 @@ public class CropGrowthListener implements Listener {
         Material type = block.getType();
         boolean isGlass = config.getAllowedGlassMaterials().contains(type);
         boolean isHeat = config.getAllowedHeatSources().contains(type);
+        boolean isSolid = type.isSolid();
         boolean isOccluding = type.isOccluding();
 
-        if (isGlass || isOccluding) {
-            // Glass or occluding blocks affect vertical line of sight downwards
+        if (isGlass || isOccluding || isSolid) {
+            // Glass or solid/occluding blocks affect vertical line of sight downwards
             int ceilingHeight = config.getMaxCeilingHeight();
             Location loc = block.getLocation();
             for (int dy = 0; dy <= ceilingHeight; dy++) {

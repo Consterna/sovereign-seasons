@@ -123,8 +123,8 @@ public class GreenhouseDetector implements GreenhouseService {
                     break;
                 }
 
-                // If block is solid and opaque (not air and not passable), it obstructs the roof
-                if (!type.isAir() && blockAbove.getType().isOccluding()) {
+                // If block is solid (slabs, stairs, full cubes, etc.) or occluding, it obstructs the roof
+                if (!type.isAir() && (type.isSolid() || type.isOccluding())) {
                     failureReason = "Obstrucción sólida (" + type.name() + ") bajo el techo en Y=" + y;
                     break;
                 }

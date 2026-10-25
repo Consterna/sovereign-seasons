@@ -89,6 +89,13 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
             foliaLib.getImpl().cancelAllTasks();
         }
 
+        SovereignSeasonsApi.Holder.set(null);
+        try {
+            if (getServer() != null && getServer().getServicesManager() != null) {
+                getServer().getServicesManager().unregisterAll(this);
+            }
+        } catch (Throwable ignored) {}
+
         getLogger().info("Sovereign Seasons Core disabled successfully.");
     }
 

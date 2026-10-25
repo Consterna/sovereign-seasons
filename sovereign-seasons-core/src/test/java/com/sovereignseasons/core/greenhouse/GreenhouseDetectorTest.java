@@ -215,4 +215,23 @@ class GreenhouseDetectorTest {
         assertThat(detector.getCacheMisses()).isEqualTo(2);
         assertThat(detector.getCacheHits()).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("Fails greenhouse detection when solid non-occluding block (slab, stairs, wall) obstructs glass roof")
+    void shouldFailWhenSolidNonOccludingBlockObstructs() {
+        GreenhouseDetector detector = new GreenhouseDetector(config);
+        Location cropLoc = new Location(mockWorld, 10, 64, 10);
+
+        // Stone slab at Y=66 (solid but not occluding), glass at Y=68, lit campfire at radius 4
+        setBlock(10, 66, 10, Material.STONE_SLAB);
+        setBlock(10, 68, 10, Material.GLASS);
+        setCampfire(11, 64, 10, true);
+
+        assertThat(detector.isGreenhouse(cropLoc)).isFalse();
+
+        GreenhouseReport report = detector.inspect(cropLoc);
+        assertThat(report.isGreenhouse()).isFalse();
+        assertThat(report.glassCeilingValid()).isFalse();
+        assertThat(report.failureReason()).contains("Obstrucción sólida (STONE_SLAB)");
+    }
 }

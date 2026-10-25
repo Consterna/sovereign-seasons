@@ -49,7 +49,7 @@ En **Invierno (`WINTER`)**:
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (86 tests automatizados)
+# Ejecutar todas las pruebas unitarias (97 tests automatizados)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas

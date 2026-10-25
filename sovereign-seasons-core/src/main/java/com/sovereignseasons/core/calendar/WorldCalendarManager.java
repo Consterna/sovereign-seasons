@@ -94,6 +94,29 @@ public class WorldCalendarManager implements SeasonService {
             if (logger != null) {
                 logger.severe("Could not save calendar_data.yml: " + e.getMessage());
             }
+        } finally {
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Resynchronizes calendar tracking state and reloads persisted offsets.
+     * Prevents false season transitions after config reloads.
+     */
+    public synchronized void reload() {
+        loadData();
+        if (Bukkit.getServer() != null) {
+            for (World world : Bukkit.getWorlds()) {
+                if (isEnabledInWorld(world)) {
+                    CalendarDate current = getDate(world);
+                    if (current != null) {
+                        lastObservedEffectiveDay.put(world.getUID(), current.totalDaysElapsed());
+                        lastObservedSeason.put(world.getUID(), current.season());
+                    }
+                }
+            }
         }
     }
 
@@ -152,6 +175,12 @@ public class WorldCalendarManager implements SeasonService {
         int rawInGameDay = (int) (fullTime / ticksPerDay);
 
         int offset = dayOffsets.getOrDefault(world.getUID(), 0);
+        if (rawInGameDay + offset < 0) {
+            // When world time was reset backwards, normalize offset so calendar does not freeze
+            offset = -rawInGameDay;
+            dayOffsets.put(world.getUID(), offset);
+            saveData();
+        }
         int effectiveDay = Math.max(0, rawInGameDay + offset);
 
         long timeOfDay = world.getTime();
@@ -162,6 +191,10 @@ public class WorldCalendarManager implements SeasonService {
 
     @Override
     public void setSeason(World world, Season targetSeason) {
+        applySeason(world, targetSeason, true);
+    }
+
+    private void applySeason(World world, Season targetSeason, boolean fireEvent) {
         if (world == null || targetSeason == null) return;
 
         CalendarDate current = getDate(world);
@@ -170,13 +203,16 @@ public class WorldCalendarManager implements SeasonService {
         int currentYear = current.year();
         Season previousSeason = current.season();
 
-        // Fire SeasonChangeEvent BEFORE applying changes
-        SeasonChangeEvent event = new SeasonChangeEvent(world, previousSeason, targetSeason, currentYear);
-        callEventSafely(event);
-        if (event.isCancelled()) {
-            return; // Cancelled by external plugin/listener
+        Season finalSeason = targetSeason;
+        if (fireEvent) {
+            // Fire SeasonChangeEvent BEFORE applying changes
+            SeasonChangeEvent event = new SeasonChangeEvent(world, previousSeason, targetSeason, currentYear);
+            callEventSafely(event);
+            if (event.isCancelled()) {
+                return; // Cancelled by external plugin/listener
+            }
+            finalSeason = event.getNewSeason() != null ? event.getNewSeason() : targetSeason;
         }
-        Season finalSeason = event.getNewSeason() != null ? event.getNewSeason() : targetSeason;
 
         int daysPerSeason = config.getDaysPerSeason();
         int daysPerYear = daysPerSeason * 4;
@@ -280,7 +316,10 @@ public class WorldCalendarManager implements SeasonService {
                     // Revert effective day to the last day of lastSeason
                     int daysPerSeason = config.getDaysPerSeason();
                     int daysPerYear = daysPerSeason * 4;
-                    int yearBaseDay = (current.year() - 1) * daysPerYear;
+                    int previousSeasonYear = (lastSeason == Season.WINTER && currentSeason == Season.SPRING)
+                            ? current.year() - 1
+                            : current.year();
+                    int yearBaseDay = (previousSeasonYear - 1) * daysPerYear;
                     int rollbackEffectiveDay = yearBaseDay + (lastSeason.ordinal() * daysPerSeason) + (daysPerSeason - 1);
 
                     long fullTime = world.getFullTime();
@@ -295,7 +334,7 @@ public class WorldCalendarManager implements SeasonService {
                 }
 
                 if (seasonEvent.getNewSeason() != currentSeason) {
-                    setSeason(world, seasonEvent.getNewSeason());
+                    applySeason(world, seasonEvent.getNewSeason(), false);
                     return;
                 }
 

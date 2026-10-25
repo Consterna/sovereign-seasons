@@ -312,4 +312,120 @@ class WeatherAndIceProtectionTest {
         // Crop has glass above, but campfire is waterlogged: detection must FAIL!
         assertThat(detector.isGreenhouse(cropLoc)).isFalse();
     }
+
+    @Test
+    @DisplayName("Explosions destroy blocks and trigger spatial cache invalidation")
+    void shouldInvalidateOnExplosions() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+
+        Location glassLoc = new Location(mockWorld, 10, 70, 10);
+        Block glassBlock = createMockBlock(Material.GLASS, glassLoc);
+
+        Location campfireLoc = new Location(mockWorld, 12, 64, 12);
+        Block campfireBlock = createMockBlock(Material.CAMPFIRE, campfireLoc);
+
+        org.bukkit.event.entity.EntityExplodeEvent entityExplode = new org.bukkit.event.entity.EntityExplodeEvent(
+                null, glassLoc, new ArrayList<>(List.of(glassBlock, campfireBlock)), 1.0f
+        );
+        listener.onEntityExplode(entityExplode);
+
+        assertThat(invalidatedLocations).isNotEmpty();
+        assertThat(invalidatedRadiiLocations).contains(campfireLoc);
+    }
+
+    @Test
+    @DisplayName("Bucket actions placing or scooping lava invalidate spatial cache radius")
+    void shouldInvalidateOnBucketActions() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+
+        Location lavaLoc = new Location(mockWorld, 15, 64, 15);
+        Block clickedBlock = (Block) Proxy.newProxyInstance(
+                Block.class.getClassLoader(),
+                new Class<?>[]{Block.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getWorld" -> mockWorld;
+                    case "getType" -> Material.DIRT;
+                    case "getLocation" -> lavaLoc;
+                    case "getRelative" -> createMockBlock(Material.LAVA, new Location(mockWorld, 15, 65, 15));
+                    default -> null;
+                }
+        );
+
+        try {
+            java.lang.reflect.Constructor<?> ctor = org.bukkit.event.player.PlayerBucketEmptyEvent.class.getConstructors()[0];
+            Class<?>[] paramTypes = ctor.getParameterTypes();
+            Object[] args = new Object[paramTypes.length];
+            for (int i = 0; i < paramTypes.length; i++) {
+                Class<?> pt = paramTypes[i];
+                if (pt == org.bukkit.entity.Player.class) {
+                    args[i] = Proxy.newProxyInstance(
+                            org.bukkit.entity.Player.class.getClassLoader(),
+                            new Class<?>[]{org.bukkit.entity.Player.class},
+                            (p, m, a) -> null
+                    );
+                } else if (pt == Block.class) {
+                    args[i] = clickedBlock;
+                } else if (pt == org.bukkit.block.BlockFace.class) {
+                    args[i] = org.bukkit.block.BlockFace.UP;
+                } else if (pt == Material.class) {
+                    args[i] = Material.LAVA_BUCKET;
+                } else if (pt == org.bukkit.inventory.ItemStack.class) {
+                    args[i] = new org.bukkit.inventory.ItemStack(Material.LAVA_BUCKET);
+                } else if (pt == org.bukkit.inventory.EquipmentSlot.class) {
+                    args[i] = org.bukkit.inventory.EquipmentSlot.HAND;
+                }
+            }
+            org.bukkit.event.player.PlayerBucketEmptyEvent emptyEvent =
+                    (org.bukkit.event.player.PlayerBucketEmptyEvent) ctor.newInstance(args);
+
+            listener.onBucketEmpty(emptyEvent);
+            assertThat(invalidatedRadiiLocations).isNotEmpty();
+
+            // Test bucket fill
+            java.lang.reflect.Constructor<?> fillCtor = org.bukkit.event.player.PlayerBucketFillEvent.class.getConstructors()[0];
+            Class<?>[] fillParamTypes = fillCtor.getParameterTypes();
+            Object[] fillArgs = new Object[fillParamTypes.length];
+            for (int i = 0; i < fillParamTypes.length; i++) {
+                Class<?> pt = fillParamTypes[i];
+                if (pt == org.bukkit.entity.Player.class) {
+                    fillArgs[i] = Proxy.newProxyInstance(
+                            org.bukkit.entity.Player.class.getClassLoader(),
+                            new Class<?>[]{org.bukkit.entity.Player.class},
+                            (p, m, a) -> null
+                    );
+                } else if (pt == Block.class) {
+                    fillArgs[i] = clickedBlock;
+                } else if (pt == org.bukkit.block.BlockFace.class) {
+                    fillArgs[i] = org.bukkit.block.BlockFace.UP;
+                } else if (pt == Material.class) {
+                    fillArgs[i] = Material.BUCKET;
+                } else if (pt == org.bukkit.inventory.ItemStack.class) {
+                    fillArgs[i] = new org.bukkit.inventory.ItemStack(Material.BUCKET);
+                } else if (pt == org.bukkit.inventory.EquipmentSlot.class) {
+                    fillArgs[i] = org.bukkit.inventory.EquipmentSlot.HAND;
+                }
+            }
+            org.bukkit.event.player.PlayerBucketFillEvent fillEvent =
+                    (org.bukkit.event.player.PlayerBucketFillEvent) fillCtor.newInstance(fillArgs);
+            listener.onBucketFill(fillEvent);
+            assertThat(invalidatedRadiiLocations).hasSizeGreaterThanOrEqualTo(2);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @DisplayName("Breaking a solid non-occluding block (STONE_SLAB) invalidates downward column")
+    void shouldInvalidateDownwardColumnOnSolidNonOccludingBlockModification() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+
+        Location slabLoc = new Location(mockWorld, 10, 70, 10);
+        Block slabBlock = createMockBlock(Material.STONE_SLAB, slabLoc);
+
+        BlockBreakEvent breakEvent = new BlockBreakEvent(slabBlock, null);
+        listener.onBlockBreak(breakEvent);
+
+        assertThat(invalidatedLocations).isNotEmpty();
+        assertThat(invalidatedLocations).anyMatch(loc -> loc.getBlockY() == 70 - config.getMaxCeilingHeight());
+    }
 }

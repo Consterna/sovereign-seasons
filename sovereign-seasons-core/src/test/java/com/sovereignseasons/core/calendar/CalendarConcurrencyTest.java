@@ -306,4 +306,62 @@ class CalendarConcurrencyTest {
         assertThat(finished).isTrue();
         assertThat(successfulOps.get()).isEqualTo(threadCount * operationsPerThread);
     }
+
+    @Test
+    @DisplayName("Cancelling SeasonChangeEvent when transitioning Winter to Spring rolls back to Year 1 Winter without year over-jump")
+    void shouldRollbackToPreviousYearWinterWhenWinterToSpringCancelled(@TempDir File tempDir) {
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+        UUID uid = UUID.randomUUID();
+        // Day 27 (Year 1, Winter Day 7) = 27 * 24000L
+        AtomicLong fullTime = new AtomicLong(27 * 24000L);
+        World world = createMockWorld("world", uid, fullTime);
+
+        manager.tickWorld(world);
+        CalendarDate beforeTransition = manager.getDate(world);
+        assertThat(beforeTransition.season()).isEqualTo(Season.WINTER);
+        assertThat(beforeTransition.year()).isEqualTo(1);
+        assertThat(beforeTransition.dayOfSeason()).isEqualTo(7);
+        assertThat(beforeTransition.totalDaysElapsed()).isEqualTo(27);
+
+        // Arm cancel on season transition
+        cancelSeasonEvent.set(true);
+
+        // Tick into Year 2 Spring Day 1 (Day 28)
+        fullTime.set(28 * 24000L);
+        manager.tickWorld(world);
+
+        // Verification: MUST rollback to Day 27 (Year 1 Winter Day 7), NOT jump forward to Day 55 (Year 2 Winter)!
+        CalendarDate date = manager.getDate(world);
+        assertThat(date.season()).isEqualTo(Season.WINTER);
+        assertThat(date.year()).isEqualTo(1);
+        assertThat(date.dayOfSeason()).isEqualTo(7);
+        assertThat(date.totalDaysElapsed()).isEqualTo(27);
+    }
+
+    @Test
+    @DisplayName("Mutating SeasonChangeEvent in tickWorld does not fire a duplicate SeasonChangeEvent")
+    void shouldNotFireDuplicateSeasonChangeEventWhenMutatedInTickWorld(@TempDir File tempDir) {
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+        UUID uid = UUID.randomUUID();
+        // Day 6 (Spring Day 7)
+        AtomicLong fullTime = new AtomicLong(6 * 24000L);
+        World world = createMockWorld("world", uid, fullTime);
+
+        manager.tickWorld(world);
+        firedEvents.clear();
+
+        // Mutate target season from Summer to Winter
+        mutateSeasonTarget = Season.WINTER;
+
+        // Tick into Day 7
+        fullTime.set(7 * 24000L);
+        manager.tickWorld(world);
+
+        // Verify final season is WINTER
+        assertThat(manager.getSeason(world)).isEqualTo(Season.WINTER);
+
+        // Verification: exactly ONE SeasonChangeEvent was fired during this transition!
+        long seasonChangeCount = firedEvents.stream().filter(e -> e instanceof SeasonChangeEvent).count();
+        assertThat(seasonChangeCount).isEqualTo(1);
+    }
 }

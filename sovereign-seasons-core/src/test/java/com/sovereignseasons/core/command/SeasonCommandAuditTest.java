@@ -46,27 +46,32 @@ class SeasonCommandAuditTest {
 
         UUID uidA = UUID.randomUUID();
         UUID uidB = UUID.randomUUID();
+        UUID uidDisabled = UUID.randomUUID();
         mockWorldA = createMockWorld("world_a", uidA);
         mockWorldB = createMockWorld("world_b", uidB);
+        World mockWorldDisabled = createMockWorld("disabled_world", uidDisabled);
 
         serverWorlds.put("world_a", mockWorldA);
         serverWorlds.put("world_b", mockWorldB);
+        serverWorlds.put("disabled_world", mockWorldDisabled);
 
         installMockBukkit();
 
         Map<UUID, Season> worldSeasons = new HashMap<>();
         worldSeasons.put(uidA, Season.SPRING);
         worldSeasons.put(uidB, Season.AUTUMN);
+        worldSeasons.put(uidDisabled, Season.SPRING);
 
         Map<UUID, Integer> worldDays = new HashMap<>();
         worldDays.put(uidA, 1);
         worldDays.put(uidB, 4);
+        worldDays.put(uidDisabled, 1);
 
         mockSeasonService = (SeasonService) Proxy.newProxyInstance(
                 SeasonService.class.getClassLoader(),
                 new Class<?>[]{SeasonService.class},
                 (proxy, method, args) -> switch (method.getName()) {
-                    case "isEnabledInWorld" -> true;
+                    case "isEnabledInWorld" -> !((World) args[0]).getName().contains("disabled");
                     case "getDate" -> {
                         World w = (World) args[0];
                         Season s = worldSeasons.getOrDefault(w.getUID(), Season.SPRING);
@@ -336,5 +341,32 @@ class SeasonCommandAuditTest {
         // /season setday 3 <tab>
         List<String> setDayTab = cmd.onTabComplete(admin, createDummyCommand(), "season", new String[]{"setday", "3", "wor"});
         assertThat(setDayTab).contains("world_a", "world_b");
+    }
+
+    @Test
+    @DisplayName("Commands set and setday warn when targeting world where seasons are disabled")
+    void shouldWarnWhenSettingSeasonOnDisabledWorld(@TempDir File tempDir) {
+        SeasonCommand cmd = new SeasonCommand(config, mockSeasonService, mockGreenhouseService, tempDir);
+        CommandSender admin = createMockSender(Set.of("sovereignseasons.admin"));
+
+        // /season set winter disabled_world
+        cmd.onCommand(admin, createDummyCommand(), "season", new String[]{"set", "winter", "disabled_world"});
+        assertThat(sentMessages).anyMatch(msg -> msg.toLowerCase().contains("no están activadas"));
+
+        // /season setday 3 disabled_world
+        sentMessages.clear();
+        cmd.onCommand(admin, createDummyCommand(), "season", new String[]{"setday", "3", "disabled_world"});
+        assertThat(sentMessages).anyMatch(msg -> msg.toLowerCase().contains("no están activadas"));
+    }
+
+    @Test
+    @DisplayName("Tab completion suggests no subcommands when sender has zero permissions")
+    void shouldNotSuggestSubcommandsWithoutPermissions(@TempDir File tempDir) {
+        SeasonCommand cmd = new SeasonCommand(config, mockSeasonService, mockGreenhouseService, tempDir);
+        // Sender with ZERO permissions
+        CommandSender user = createMockSender(Collections.emptySet());
+
+        List<String> suggestions = cmd.onTabComplete(user, createDummyCommand(), "season", new String[]{""});
+        assertThat(suggestions).isEmpty();
     }
 }

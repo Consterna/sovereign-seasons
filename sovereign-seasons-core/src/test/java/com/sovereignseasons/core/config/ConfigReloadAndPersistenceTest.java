@@ -159,4 +159,69 @@ class ConfigReloadAndPersistenceTest {
             assertThat(manager.getSeason(world)).isEqualTo(Season.SPRING);
         }).doesNotThrowAnyException();
     }
+
+    @Test
+    @DisplayName("Hot reload resyncs WorldCalendarManager so subsequent ticks do not fire spurious SeasonChangeEvents")
+    void shouldNotFireSpuriousSeasonChangeEventOnHotReload(@TempDir File tempDir) throws Exception {
+        java.util.List<org.bukkit.event.Event> fired = new java.util.ArrayList<>();
+        org.bukkit.plugin.PluginManager mockPm = (org.bukkit.plugin.PluginManager) Proxy.newProxyInstance(
+                org.bukkit.plugin.PluginManager.class.getClassLoader(),
+                new Class<?>[]{org.bukkit.plugin.PluginManager.class},
+                (proxy, method, args) -> {
+                    if ("callEvent".equals(method.getName())) {
+                        fired.add((org.bukkit.event.Event) args[0]);
+                    }
+                    return null;
+                }
+        );
+
+        UUID uid = UUID.randomUUID();
+        // Day 10 in 7 days/season is Summer Day 4
+        AtomicLong fullTime = new AtomicLong(10 * 24000L);
+        World world = createMockWorld("world", uid, fullTime);
+
+        org.bukkit.Server mockServer = (org.bukkit.Server) Proxy.newProxyInstance(
+                org.bukkit.Server.class.getClassLoader(),
+                new Class<?>[]{org.bukkit.Server.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getPluginManager" -> mockPm;
+                    case "getWorlds" -> java.util.List.of(world);
+                    case "getLogger" -> java.util.logging.Logger.getGlobal();
+                    default -> null;
+                }
+        );
+
+        java.lang.reflect.Field serverField = org.bukkit.Bukkit.class.getDeclaredField("server");
+        serverField.setAccessible(true);
+        serverField.set(null, mockServer);
+
+        try {
+            SeasonsConfig config = new SeasonsConfig(null);
+            config.setDaysPerSeason(7);
+            WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+
+            manager.tickWorld(world);
+            assertThat(manager.getSeason(world)).isEqualTo(Season.SUMMER);
+            fired.clear();
+
+            // Config reloaded to 14 days per season
+            String reloadYaml = """
+                    calendar:
+                      days-per-season: 14
+                    """;
+            writeConfigFile(new File(tempDir, "config.yml"), reloadYaml);
+            config.load(tempDir, null);
+            manager.reload();
+
+            // Next day passes: tick 11
+            fullTime.set(11 * 24000L);
+            manager.tickWorld(world);
+
+            // Season is still SPRING under 14 days/season! No false season change event must be fired!
+            long seasonChanges = fired.stream().filter(e -> e instanceof com.sovereignseasons.api.event.SeasonChangeEvent).count();
+            assertThat(seasonChanges).isZero();
+        } finally {
+            serverField.set(null, null);
+        }
+    }
 }

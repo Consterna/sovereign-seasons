@@ -132,4 +132,27 @@ class EdgeCasesTest {
         assertThat(date.season()).isEqualTo(Season.SPRING);
         assertThat(date.dayOfSeason()).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("SovereignSeasonsApi.Holder resets to null on unbind and throws clean exception when uninitialized")
+    void shouldHandleApiHolderLifecycle() {
+        com.sovereignseasons.api.SovereignSeasonsApi.Holder.set(null);
+        org.assertj.core.api.Assertions.assertThatThrownBy(com.sovereignseasons.api.SovereignSeasonsApi::get)
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("SovereignSeasonsApi has not been initialized yet");
+
+        com.sovereignseasons.api.SovereignSeasonsApi mockApi = (com.sovereignseasons.api.SovereignSeasonsApi) Proxy.newProxyInstance(
+                com.sovereignseasons.api.SovereignSeasonsApi.class.getClassLoader(),
+                new Class<?>[]{com.sovereignseasons.api.SovereignSeasonsApi.class},
+                (proxy, method, args) -> null
+        );
+
+        com.sovereignseasons.api.SovereignSeasonsApi.Holder.set(mockApi);
+        assertThat(com.sovereignseasons.api.SovereignSeasonsApi.get()).isSameAs(mockApi);
+
+        // Reset to null on plugin disable
+        com.sovereignseasons.api.SovereignSeasonsApi.Holder.set(null);
+        org.assertj.core.api.Assertions.assertThatThrownBy(com.sovereignseasons.api.SovereignSeasonsApi::get)
+                .isInstanceOf(NullPointerException.class);
+    }
 }

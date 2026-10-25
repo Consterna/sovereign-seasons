@@ -195,6 +195,11 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (!seasonService.isEnabledInWorld(world)) {
+            sendMsg(sender, "<yellow>Las estaciones no están activadas en el mundo <white>" + world.getName() + "</white>.</yellow>");
+            return;
+        }
+
         seasonService.setSeason(world, target);
         sendMsg(sender, "<green>Estación del mundo <white>" + world.getName() + "</white> cambiada a: " + target.getMiniMessageTag() + "</green>");
     }
@@ -239,6 +244,11 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (!seasonService.isEnabledInWorld(world)) {
+            sendMsg(sender, "<yellow>Las estaciones no están activadas en el mundo <white>" + world.getName() + "</white>.</yellow>");
+            return;
+        }
+
         seasonService.setDayOfSeason(world, day);
         sendMsg(sender, "<green>Día de la estación ajustado a <white>" + day + "</white> en el mundo <white>" + world.getName() + "</white>.</green>");
     }
@@ -272,6 +282,9 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         InputStream defaultStream = getClass().getClassLoader().getResourceAsStream("config.yml");
         config.load(dataFolder, defaultStream);
         greenhouseService.clearCache();
+        if (seasonService instanceof com.sovereignseasons.core.calendar.WorldCalendarManager wcm) {
+            wcm.reload();
+        }
 
         sendMsg(sender, "<green>Configuración recargada y caché de invernadero limpiada exitosamente.</green>");
     }
@@ -284,7 +297,13 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args
     ) {
         if (args.length == 1) {
-            List<String> subcommands = new ArrayList<>(List.of("info", "greenhouse"));
+            List<String> subcommands = new ArrayList<>();
+            if (sender.hasPermission("sovereignseasons.command.info")) {
+                subcommands.add("info");
+            }
+            if (sender.hasPermission("sovereignseasons.command.greenhouse")) {
+                subcommands.add("greenhouse");
+            }
             if (sender.hasPermission("sovereignseasons.admin")) {
                 subcommands.addAll(List.of("set", "setday", "stats", "reload"));
             }
@@ -292,8 +311,11 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
-            List<String> worlds = org.bukkit.Bukkit.getWorlds().stream().map(World::getName).toList();
-            return filterPrefix(worlds, args[1]);
+            if (sender.hasPermission("sovereignseasons.command.info")) {
+                List<String> worlds = org.bukkit.Bukkit.getWorlds().stream().map(World::getName).toList();
+                return filterPrefix(worlds, args[1]);
+            }
+            return Collections.emptyList();
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("set")) {

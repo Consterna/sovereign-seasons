@@ -243,4 +243,36 @@ class TimeDesyncAndDaylightTest {
         assertThat(dateExcess.timeOfDayTicks()).isEqualTo(2_000L); // 50000 % 24000 = 2000
         assertThat(dateExcess.getSeasonProgressPercent()).isBetween(0.0, 100.0);
     }
+
+    @Test
+    @DisplayName("Backward time reset (/time set 0) after /season set unfreezes offset and advances future days normally")
+    void shouldNotFreezeCalendarWhenWorldTimeResetAfterSeasonSet(@TempDir File tempDir) {
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+        UUID uid = UUID.randomUUID();
+        // Day 100: 100 * 24000L = 2,400,000L
+        AtomicLong fullTime = new AtomicLong(100 * 24000L);
+        World world = createMockWorld("world", uid, fullTime, new AtomicLong(0L));
+
+        manager.tickWorld(world);
+
+        // Admin runs /season set spring while world is on day 100 (Day 100 is Year 4; Spring Day 1 is day 84)
+        manager.setSeason(world, Season.SPRING);
+        CalendarDate dateAfterSet = manager.getDate(world);
+        assertThat(dateAfterSet.season()).isEqualTo(Season.SPRING);
+        assertThat(dateAfterSet.totalDaysElapsed()).isEqualTo(84);
+
+        // Admin runs /time set 0 (resets rawInGameDay to 0)
+        fullTime.set(0L);
+        manager.tickWorld(world);
+
+        // Next day in Minecraft passes: fullTime becomes 24000L (raw day 1)
+        fullTime.set(24000L);
+        manager.tickWorld(world);
+
+        // Calendar MUST NOT be frozen at day 0! It must advance to day 1!
+        CalendarDate dateNextDay = manager.getDate(world);
+        assertThat(dateNextDay.totalDaysElapsed()).isEqualTo(1);
+        assertThat(dateNextDay.dayOfSeason()).isEqualTo(2);
+        assertThat(dateNextDay.season()).isEqualTo(Season.SPRING);
+    }
 }
