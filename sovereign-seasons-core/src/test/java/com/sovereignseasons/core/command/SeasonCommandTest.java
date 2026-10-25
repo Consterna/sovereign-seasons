@@ -203,5 +203,8 @@ class SeasonCommandTest {
         // Season arguments for /season set
         List<String> seasonArgs = cmd.onTabComplete(admin, createDummyCommand(), "season", new String[]{"set", "w"});
         assertThat(seasonArgs).containsExactly("winter");
+
+        List<String> spanishArgs = cmd.onTabComplete(admin, createDummyCommand(), "season", new String[]{"set", "i"});
+        assertThat(spanishArgs).containsExactly("invierno");
     }
 }

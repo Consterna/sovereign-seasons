@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -221,5 +223,91 @@ class CropGrowthListenerTest {
         StructureGrowEvent eventInside = new StructureGrowEvent(loc, org.bukkit.TreeType.TREE, false, null, new ArrayList<>());
         listener.onSaplingGrow(eventInside);
         assertThat(eventInside.isCancelled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Bone meal fertilization is blocked in winter outside greenhouse on affected crops")
+    void shouldCancelBoneMealFertilizationInWinterOutsideGreenhouse() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+        isWinter.set(true);
+        isInsideGreenhouse.set(false);
+
+        AtomicReference<Material> blockType = new AtomicReference<>(Material.WHEAT);
+        Block block = createMockCropBlock(Material.WHEAT, blockType);
+
+        BlockFertilizeEvent event = new BlockFertilizeEvent(block, null, new ArrayList<>());
+        listener.onCropFertilize(event);
+
+        assertThat(event.isCancelled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Bone meal fertilization is allowed in winter inside a functional greenhouse")
+    void shouldAllowBoneMealFertilizationInWinterInsideGreenhouse() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+        isWinter.set(true);
+        isInsideGreenhouse.set(true); // Protected!
+
+        AtomicReference<Material> blockType = new AtomicReference<>(Material.CARROTS);
+        Block block = createMockCropBlock(Material.CARROTS, blockType);
+
+        BlockFertilizeEvent event = new BlockFertilizeEvent(block, null, new ArrayList<>());
+        listener.onCropFertilize(event);
+
+        assertThat(event.isCancelled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Bone meal fertilization is allowed in non-winter seasons outdoors")
+    void shouldAllowBoneMealFertilizationInSpring() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+        isWinter.set(false);
+        isInsideGreenhouse.set(false);
+
+        AtomicReference<Material> blockType = new AtomicReference<>(Material.POTATOES);
+        Block block = createMockCropBlock(Material.POTATOES, blockType);
+
+        BlockFertilizeEvent event = new BlockFertilizeEvent(block, null, new ArrayList<>());
+        listener.onCropFertilize(event);
+
+        assertThat(event.isCancelled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Breaking ceiling glass invalidates downward column of cached greenhouse evaluations")
+    void shouldInvalidateDownwardColumnWhenCeilingGlassBreaks() {
+        java.util.List<Location> invalidatedLocations = new ArrayList<>();
+        GreenhouseService trackingGreenhouseService = (GreenhouseService) Proxy.newProxyInstance(
+                GreenhouseService.class.getClassLoader(),
+                new Class<?>[]{GreenhouseService.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "invalidate" -> {
+                        invalidatedLocations.add((Location) args[0]);
+                        yield null;
+                    }
+                    case "invalidateRadius" -> null;
+                    default -> null;
+                }
+        );
+
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, trackingGreenhouseService);
+
+        Location glassLoc = new Location(mockWorld, 10, 80, 10);
+        Block glassBlock = (Block) Proxy.newProxyInstance(
+                Block.class.getClassLoader(),
+                new Class<?>[]{Block.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getType" -> Material.GLASS;
+                    case "getLocation" -> glassLoc;
+                    default -> null;
+                }
+        );
+
+        BlockBreakEvent breakEvent = new BlockBreakEvent(glassBlock, null);
+        listener.onBlockBreak(breakEvent);
+
+        // Ceiling height is 16, so 0..16 down the column (17 locations total) must be invalidated
+        assertThat(invalidatedLocations).hasSize(17);
+        assertThat(invalidatedLocations).anyMatch(loc -> loc.getBlockY() == 64); // Crop level at Y=64!
     }
 }

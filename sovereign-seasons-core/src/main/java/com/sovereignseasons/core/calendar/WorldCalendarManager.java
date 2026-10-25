@@ -37,7 +37,7 @@ public class WorldCalendarManager implements SeasonService {
     public WorldCalendarManager(SeasonsConfig config, File dataFolder, Logger logger) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.logger = logger;
-        this.storageFile = new File(dataFolder, "calendar_data.yml");
+        this.storageFile = dataFolder != null ? new File(dataFolder, "calendar_data.yml") : new File("calendar_data.yml");
         loadData();
     }
 
@@ -58,7 +58,7 @@ public class WorldCalendarManager implements SeasonService {
     }
 
     public synchronized void saveData() {
-        if (!storageFile.getParentFile().exists()) {
+        if (storageFile.getParentFile() != null && !storageFile.getParentFile().exists()) {
             storageFile.getParentFile().mkdirs();
         }
         YamlConfiguration yaml = new YamlConfiguration();
@@ -86,6 +86,31 @@ public class WorldCalendarManager implements SeasonService {
         return config.getEnabledWorlds().contains(world.getName());
     }
 
+    public CalendarDate calculateDate(int effectiveDay, long timeOfDay) {
+        int daysPerSeason = config.getDaysPerSeason();
+        int daysPerYear = daysPerSeason * 4;
+
+        int safeDay = Math.max(0, effectiveDay);
+        int year = (safeDay / daysPerYear) + 1;
+        int dayOfYear = safeDay % daysPerYear; // 0 to daysPerYear - 1
+
+        int seasonIndex = dayOfYear / daysPerSeason; // 0, 1, 2, 3
+        Season season = Season.values()[seasonIndex % Season.values().length];
+
+        int dayOfSeason = (dayOfYear % daysPerSeason) + 1; // 1 to daysPerSeason
+        SubSeason subSeason = SubSeason.calculate(dayOfSeason, daysPerSeason);
+
+        return new CalendarDate(
+                season,
+                subSeason,
+                dayOfSeason,
+                daysPerSeason,
+                safeDay,
+                year,
+                timeOfDay
+        );
+    }
+
     @Override
     public CalendarDate getDate(World world) {
         if (world == null) return null;
@@ -97,29 +122,7 @@ public class WorldCalendarManager implements SeasonService {
         int offset = dayOffsets.getOrDefault(world.getUID(), 0);
         int effectiveDay = Math.max(0, rawInGameDay + offset);
 
-        int daysPerSeason = config.getDaysPerSeason();
-        int daysPerYear = daysPerSeason * 4;
-
-        int year = (effectiveDay / daysPerYear) + 1;
-        int dayOfYear = effectiveDay % daysPerYear; // 0 to daysPerYear - 1
-
-        int seasonIndex = dayOfYear / daysPerSeason; // 0, 1, 2, 3
-        Season season = Season.values()[seasonIndex % Season.values().length];
-
-        int dayOfSeason = (dayOfYear % daysPerSeason) + 1; // 1 to daysPerSeason
-        SubSeason subSeason = SubSeason.calculate(dayOfSeason, daysPerSeason);
-
-        long timeOfDay = world.getTime();
-
-        return new CalendarDate(
-                season,
-                subSeason,
-                dayOfSeason,
-                daysPerSeason,
-                effectiveDay,
-                year,
-                timeOfDay
-        );
+        return calculateDate(effectiveDay, world.getTime());
     }
 
     @Override
@@ -143,6 +146,13 @@ public class WorldCalendarManager implements SeasonService {
         int newOffset = targetEffectiveDay - rawInGameDay;
         dayOffsets.put(world.getUID(), newOffset);
         saveData();
+
+        // Fire DayChangeEvent if the effective day changed
+        CalendarDate newDate = getDate(world);
+        if (current.totalDaysElapsed() != targetEffectiveDay) {
+            DayChangeEvent dayEvent = new DayChangeEvent(world, current, newDate);
+            callEventSafely(dayEvent);
+        }
 
         // Fire SeasonChangeEvent
         Season previousSeason = current.season();
@@ -212,16 +222,8 @@ public class WorldCalendarManager implements SeasonService {
             // Day changed!
             lastObservedEffectiveDay.put(uid, currentEffectiveDay);
 
-            // Construct previous date for event
-            CalendarDate previousDate = new CalendarDate(
-                    lastSeason != null ? lastSeason : currentSeason,
-                    SubSeason.calculate(Math.max(1, current.dayOfSeason() - 1), current.totalDaysPerSeason()),
-                    Math.max(1, current.dayOfSeason() - 1),
-                    current.totalDaysPerSeason(),
-                    lastDay,
-                    current.year(),
-                    0L
-            );
+            // Construct exact, accurate previous date
+            CalendarDate previousDate = calculateDate(lastDay, 0L);
 
             DayChangeEvent dayEvent = new DayChangeEvent(world, previousDate, current);
             callEventSafely(dayEvent);

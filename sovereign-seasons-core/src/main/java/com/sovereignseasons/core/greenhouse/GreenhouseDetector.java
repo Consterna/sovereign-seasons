@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class GreenhouseDetector implements GreenhouseService {
     private final SeasonsConfig config;
-    private Cache<BlockPos, GreenhouseReport> cache;
+    private volatile Cache<BlockPos, GreenhouseReport> cache;
 
     public GreenhouseDetector(SeasonsConfig config) {
         this.config = Objects.requireNonNull(config, "config cannot be null");

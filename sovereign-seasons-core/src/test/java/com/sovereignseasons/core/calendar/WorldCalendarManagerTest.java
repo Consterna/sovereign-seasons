@@ -139,4 +139,43 @@ class WorldCalendarManagerTest {
         assertThat(updated.season()).isEqualTo(Season.SPRING);
         assertThat(updated.dayOfSeason()).isEqualTo(5);
     }
+
+    @Test
+    @DisplayName("calculateDate computes exact dates across boundaries")
+    void shouldComputeExactDates() {
+        WorldCalendarManager manager = new WorldCalendarManager(config, dataFolder, null);
+
+        // Day 27 (Winter Day 7, Year 1)
+        CalendarDate date27 = manager.calculateDate(27, 0L);
+        assertThat(date27.season()).isEqualTo(Season.WINTER);
+        assertThat(date27.dayOfSeason()).isEqualTo(7);
+        assertThat(date27.year()).isEqualTo(1);
+
+        // Day 28 (Spring Day 1, Year 2)
+        CalendarDate date28 = manager.calculateDate(28, 0L);
+        assertThat(date28.season()).isEqualTo(Season.SPRING);
+        assertThat(date28.dayOfSeason()).isEqualTo(1);
+        assertThat(date28.year()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("tickWorld accurately calculates previous date on day, season, and year rollover")
+    void shouldTrackRolloverAccurately() {
+        WorldCalendarManager manager = new WorldCalendarManager(config, dataFolder, null);
+        UUID worldUid = UUID.randomUUID();
+        AtomicLong fullTime = new AtomicLong(27 * 24000L); // Day 27 (Winter Day 7, Year 1)
+        World world = createMockWorld("survival", worldUid, fullTime, new AtomicLong(0L));
+
+        // Initial tick records Day 27
+        manager.tickWorld(world);
+
+        // Advance to Day 28 (Spring Day 1, Year 2)
+        fullTime.set(28 * 24000L);
+        manager.tickWorld(world);
+
+        CalendarDate currentDate = manager.getDate(world);
+        assertThat(currentDate.season()).isEqualTo(Season.SPRING);
+        assertThat(currentDate.dayOfSeason()).isEqualTo(1);
+        assertThat(currentDate.year()).isEqualTo(2);
+    }
 }

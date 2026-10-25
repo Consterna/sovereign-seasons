@@ -116,4 +116,20 @@ class EdgeCasesTest {
 
         assertThat(detector.isGreenhouse(loc)).isFalse();
     }
+
+    @Test
+    @DisplayName("Handles negative world time without index out of bounds or negative day calculations")
+    void shouldHandleNegativeWorldTime(@TempDir File tempDir) {
+        SeasonsConfig config = new SeasonsConfig(null);
+        config.setDaysPerSeason(7);
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+
+        World world = createMockWorld(World.Environment.NORMAL, new AtomicLong(-100000L));
+        CalendarDate date = manager.getDate(world);
+
+        assertThat(date.totalDaysElapsed()).isZero();
+        assertThat(date.year()).isEqualTo(1);
+        assertThat(date.season()).isEqualTo(Season.SPRING);
+        assertThat(date.dayOfSeason()).isEqualTo(1);
+    }
 }

@@ -62,6 +62,8 @@ public class SeasonsConfig {
         addIfPresent(affectedCrops, "SWEET_BERRY_BUSH");
         addIfPresent(affectedCrops, "MELON_STEM");
         addIfPresent(affectedCrops, "PUMPKIN_STEM");
+        addIfPresent(affectedCrops, "ATTACHED_MELON_STEM");
+        addIfPresent(affectedCrops, "ATTACHED_PUMPKIN_STEM");
         addIfPresent(affectedCrops, "TORCHFLOWER_CROP");
         addIfPresent(affectedCrops, "PITCHER_CROP");
 

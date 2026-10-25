@@ -248,7 +248,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             if (sender.hasPermission("sovereignseasons.admin")) {
-                return filterPrefix(List.of("spring", "summer", "autumn", "winter"), args[1]);
+                return filterPrefix(List.of("spring", "summer", "autumn", "winter", "primavera", "verano", "otoño", "invierno"), args[1]);
             }
         }
 
