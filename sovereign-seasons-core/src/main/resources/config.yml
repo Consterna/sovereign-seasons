@@ -124,5 +124,8 @@ greenhouse:
   # Cantidad máxima de bloques almacenados en la caché LRU para evitar uso excesivo de memoria.
   cache-max-size: 10000
 
+  # Evitar que el agua se congele en hielo y que la nieve cubra los cultivos dentro de un invernadero.
+  prevent-freeze-and-snow: true
+
 messages:
   prefix: "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> "

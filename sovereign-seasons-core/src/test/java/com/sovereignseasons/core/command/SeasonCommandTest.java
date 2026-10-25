@@ -98,7 +98,11 @@ class SeasonCommandTest {
                 CommandSender.class.getClassLoader(),
                 new Class<?>[]{CommandSender.class},
                 (proxy, method, args) -> switch (method.getName()) {
-                    case "hasPermission" -> isAdmin;
+                    case "hasPermission" -> {
+                        String perm = (String) args[0];
+                        if (isAdmin) yield true;
+                        yield perm.equals("sovereignseasons.command.info") || perm.equals("sovereignseasons.command.greenhouse");
+                    }
                     case "sendMessage" -> {
                         if (args[0] instanceof Component comp) {
                             sentMessages.add(comp.toString());
@@ -118,7 +122,11 @@ class SeasonCommandTest {
                 Player.class.getClassLoader(),
                 new Class<?>[]{Player.class},
                 (proxy, method, args) -> switch (method.getName()) {
-                    case "hasPermission" -> isAdmin;
+                    case "hasPermission" -> {
+                        String perm = (String) args[0];
+                        if (isAdmin) yield true;
+                        yield perm.equals("sovereignseasons.command.info") || perm.equals("sovereignseasons.command.greenhouse");
+                    }
                     case "getWorld" -> mockWorld;
                     case "getLocation" -> loc;
                     case "sendMessage" -> {

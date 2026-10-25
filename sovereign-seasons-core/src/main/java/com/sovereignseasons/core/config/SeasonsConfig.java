@@ -39,6 +39,7 @@ public class SeasonsConfig {
     private int heatRadius = 4;
     private int cacheTtlSeconds = 30;
     private int cacheMaxSize = 10000;
+    private boolean preventFreezeAndSnow = true;
     private final Set<Material> allowedGlassMaterials = EnumSet.noneOf(Material.class);
     private final Set<Material> allowedHeatSources = EnumSet.noneOf(Material.class);
 
@@ -138,10 +139,9 @@ public class SeasonsConfig {
         this.witherMaterial = matchMat != null ? matchMat : Material.DEAD_BUSH;
         this.playWitherEffects = config.getBoolean("crops.play-wither-effects", true);
 
-        List<String> customCrops = config.getStringList("crops.affected-crops");
-        if (!customCrops.isEmpty()) {
+        if (config.contains("crops.affected-crops")) {
             affectedCrops.clear();
-            for (String cropName : customCrops) {
+            for (String cropName : config.getStringList("crops.affected-crops")) {
                 addIfPresent(affectedCrops, cropName);
             }
         }
@@ -154,19 +154,18 @@ public class SeasonsConfig {
         this.heatRadius = Math.max(1, config.getInt("greenhouse.heat-radius", 4));
         this.cacheTtlSeconds = Math.max(1, config.getInt("greenhouse.cache-ttl-seconds", 30));
         this.cacheMaxSize = Math.max(100, config.getInt("greenhouse.cache-max-size", 10000));
+        this.preventFreezeAndSnow = config.getBoolean("greenhouse.prevent-freeze-and-snow", true);
 
-        List<String> customGlass = config.getStringList("greenhouse.allowed-glass-materials");
-        if (!customGlass.isEmpty()) {
+        if (config.contains("greenhouse.allowed-glass-materials")) {
             allowedGlassMaterials.clear();
-            for (String matName : customGlass) {
+            for (String matName : config.getStringList("greenhouse.allowed-glass-materials")) {
                 addIfPresent(allowedGlassMaterials, matName);
             }
         }
 
-        List<String> customHeat = config.getStringList("greenhouse.allowed-heat-sources");
-        if (!customHeat.isEmpty()) {
+        if (config.contains("greenhouse.allowed-heat-sources")) {
             allowedHeatSources.clear();
-            for (String matName : customHeat) {
+            for (String matName : config.getStringList("greenhouse.allowed-heat-sources")) {
                 addIfPresent(allowedHeatSources, matName);
             }
         }
@@ -219,6 +218,9 @@ public class SeasonsConfig {
 
     public int getCacheMaxSize() { return cacheMaxSize; }
     public void setCacheMaxSize(int size) { this.cacheMaxSize = size; }
+
+    public boolean isPreventFreezeAndSnow() { return preventFreezeAndSnow; }
+    public void setPreventFreezeAndSnow(boolean prevent) { this.preventFreezeAndSnow = prevent; }
 
     public Set<Material> getAllowedGlassMaterials() { return Collections.unmodifiableSet(allowedGlassMaterials); }
     public Set<Material> getAllowedHeatSources() { return Collections.unmodifiableSet(allowedHeatSources); }

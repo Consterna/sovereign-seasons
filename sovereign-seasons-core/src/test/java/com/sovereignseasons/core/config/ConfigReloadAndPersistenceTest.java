@@ -1,0 +1,162 @@
+package com.sovereignseasons.core.config;
+
+import com.sovereignseasons.api.CalendarDate;
+import com.sovereignseasons.api.Season;
+import com.sovereignseasons.core.calendar.WorldCalendarManager;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+class ConfigReloadAndPersistenceTest {
+
+    private void writeConfigFile(File file, String yamlContent) throws IOException {
+        Files.writeString(file.toPath(), yamlContent, StandardCharsets.UTF_8);
+    }
+
+    private World createMockWorld(String name, UUID uid, AtomicLong fullTime) {
+        return (World) Proxy.newProxyInstance(
+                World.class.getClassLoader(),
+                new Class<?>[]{World.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "getName" -> name;
+                    case "getUID" -> uid;
+                    case "getEnvironment" -> World.Environment.NORMAL;
+                    case "getFullTime" -> fullTime.get();
+                    case "getTime" -> fullTime.get() % 24000L;
+                    case "hashCode" -> uid.hashCode();
+                    case "equals" -> args[0] == proxy;
+                    default -> null;
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("Hot reload replaces material lists without retaining stale default entries")
+    void shouldReplaceListsWithoutStaleEntries(@TempDir File tempDir) throws IOException {
+        SeasonsConfig config = new SeasonsConfig(null);
+
+        // Verify initial defaults populated
+        assertThat(config.getAffectedCrops()).hasSizeGreaterThan(5);
+        assertThat(config.getAllowedGlassMaterials()).hasSizeGreaterThan(5);
+        assertThat(config.getAllowedHeatSources()).hasSizeGreaterThan(5);
+
+        // Write custom config with single item lists
+        String customYaml = """
+                crops:
+                  affected-crops:
+                    - WHEAT
+                greenhouse:
+                  allowed-glass-materials:
+                    - GLASS
+                  allowed-heat-sources:
+                    - TORCH
+                """;
+        writeConfigFile(new File(tempDir, "config.yml"), customYaml);
+
+        config.load(tempDir, null);
+
+        // Lists must contain ONLY the customized items
+        assertThat(config.getAffectedCrops()).containsExactly(Material.WHEAT);
+        assertThat(config.getAllowedGlassMaterials()).containsExactly(Material.GLASS);
+        assertThat(config.getAllowedHeatSources()).containsExactly(Material.TORCH);
+    }
+
+    @Test
+    @DisplayName("Setting affected-crops to empty list in config clears all affected crops without retaining defaults")
+    void shouldAllowEmptyAffectedCropsList(@TempDir File tempDir) throws IOException {
+        SeasonsConfig config = new SeasonsConfig(null);
+        assertThat(config.getAffectedCrops()).isNotEmpty();
+
+        String emptyListYaml = """
+                crops:
+                  affected-crops: []
+                """;
+        writeConfigFile(new File(tempDir, "config.yml"), emptyListYaml);
+
+        config.load(tempDir, null);
+
+        assertThat(config.getAffectedCrops()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Hot reload changing days-per-season immediately updates date calculations")
+    void shouldAdaptDateCalculationsWhenDaysPerSeasonChanges(@TempDir File tempDir) throws IOException {
+        SeasonsConfig config = new SeasonsConfig(null);
+        config.setDaysPerSeason(7);
+
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+        UUID uid = UUID.randomUUID();
+        // Day 10 in 7 days/season is Summer Day 4 (7 days Spring + 3 days Summer)
+        AtomicLong fullTime = new AtomicLong(10 * 24000L);
+        World world = createMockWorld("world", uid, fullTime);
+
+        CalendarDate date7 = manager.getDate(world);
+        assertThat(date7.season()).isEqualTo(Season.SUMMER);
+        assertThat(date7.dayOfSeason()).isEqualTo(4);
+
+        // Admin changes days-per-season to 14 in config.yml and reloads
+        String reloadYaml = """
+                calendar:
+                  days-per-season: 14
+                """;
+        writeConfigFile(new File(tempDir, "config.yml"), reloadYaml);
+        config.load(tempDir, null);
+
+        // In 14 days/season, Day 10 is still SPRING (Day 11 of 14)!
+        CalendarDate date14 = manager.getDate(world);
+        assertThat(date14.season()).isEqualTo(Season.SPRING);
+        assertThat(date14.dayOfSeason()).isEqualTo(11);
+        assertThat(date14.totalDaysPerSeason()).isEqualTo(14);
+    }
+
+    @Test
+    @DisplayName("saveData performs atomic file write and leaves no stranded temp files")
+    void shouldPerformAtomicSaveWithoutStrandedTempFiles(@TempDir File tempDir) {
+        SeasonsConfig config = new SeasonsConfig(null);
+        WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+
+        UUID uid = UUID.randomUUID();
+        World world = createMockWorld("world", uid, new AtomicLong(0L));
+        manager.setSeason(world, Season.AUTUMN);
+
+        File dataFile = new File(tempDir, "calendar_data.yml");
+        File tempFile = new File(tempDir, "calendar_data.yml.tmp");
+
+        assertThat(dataFile).exists();
+        assertThat(dataFile.length()).isGreaterThan(0);
+        assertThat(tempFile).doesNotExist(); // Temp file moved atomically!
+
+        // Reload fresh instance to verify persisted content
+        WorldCalendarManager freshManager = new WorldCalendarManager(config, tempDir, null);
+        assertThat(freshManager.getSeason(world)).isEqualTo(Season.AUTUMN);
+    }
+
+    @Test
+    @DisplayName("Corrupt or invalid calendar_data.yml recovers gracefully without throwing unhandled exceptions")
+    void shouldHandleCorruptStorageGracefully(@TempDir File tempDir) throws IOException {
+        SeasonsConfig config = new SeasonsConfig(null);
+        File dataFile = new File(tempDir, "calendar_data.yml");
+        writeConfigFile(dataFile, ":- this is completely invalid yaml ::: {[[[[");
+
+        assertThatCode(() -> {
+            WorldCalendarManager manager = new WorldCalendarManager(config, tempDir, null);
+            UUID uid = UUID.randomUUID();
+            World world = createMockWorld("world", uid, new AtomicLong(0L));
+            assertThat(manager.getSeason(world)).isEqualTo(Season.SPRING);
+        }).doesNotThrowAnyException();
+    }
+}

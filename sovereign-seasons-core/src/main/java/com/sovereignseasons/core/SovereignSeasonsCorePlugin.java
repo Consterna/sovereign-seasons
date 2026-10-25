@@ -48,7 +48,7 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
         getServer().getServicesManager().register(GreenhouseService.class, this.greenhouseDetector, this, ServicePriority.Normal);
 
         // 4. Register Listeners
-        getServer().getPluginManager().registerEvents(new CalendarListener(this.calendarManager), this);
+        getServer().getPluginManager().registerEvents(new CalendarListener(this.calendarManager, this.foliaLib), this);
         getServer().getPluginManager().registerEvents(new CropGrowthListener(this.config, this.calendarManager, this.greenhouseDetector), this);
 
         // 5. Register Commands

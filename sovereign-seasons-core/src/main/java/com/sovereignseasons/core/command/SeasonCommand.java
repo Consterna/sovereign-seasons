@@ -52,7 +52,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args
     ) {
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
-            handleInfo(sender);
+            handleInfo(sender, args);
             return true;
         }
 
@@ -70,8 +70,23 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private void handleInfo(CommandSender sender) {
-        World world = resolveWorld(sender);
+    private void handleInfo(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("sovereignseasons.command.info")) {
+            sendMsg(sender, "<red>No tienes permiso para consultar el calendario de estaciones.</red>");
+            return;
+        }
+
+        World world;
+        if (args.length >= 2 && !args[1].isBlank()) {
+            world = org.bukkit.Bukkit.getWorld(args[1]);
+            if (world == null) {
+                sendMsg(sender, "<red>El mundo <white>" + args[1] + "</white> no existe o no está cargado.</red>");
+                return;
+            }
+        } else {
+            world = resolveWorld(sender);
+        }
+
         if (world == null) {
             sendMsg(sender, "<red>No se pudo determinar el mundo actual.</red>");
             return;
@@ -87,7 +102,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         String progressBar = buildProgressBar(date.getSeasonProgressPercent(), 16);
 
-        sendMsg(sender, "<gray>━━━━━ </gray><gold><b>Calendario de Estaciones</b></gold><gray> ━━━━━</gray>");
+        sendMsg(sender, "<gray>━━━━━ </gray><gold><b>Calendario de Estaciones</b></gold> <gray>(" + world.getName() + ")</gray><gray> ━━━━━</gray>");
         sendMsg(sender, "<dark_gray>•</dark_gray> <gray>Estación actual:</gray> " + season.getMiniMessageTag() + " <gray>(" + date.subSeason().getSpanishName() + ")</gray>");
         sendMsg(sender, "<dark_gray>•</dark_gray> <gray>Día de la estación:</gray> <white>" + date.dayOfSeason() + "</white><gray>/</gray><white>" + date.totalDaysPerSeason() + "</white> <gray>(" + date.getRemainingDaysInSeason() + " días restantes)</gray>");
         sendMsg(sender, "<dark_gray>•</dark_gray> <gray>Progreso:</gray> " + progressBar + " <gray>(" + String.format(Locale.ROOT, "%.1f", date.getSeasonProgressPercent()) + "%)</gray>");
@@ -104,6 +119,11 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleGreenhouse(CommandSender sender) {
+        if (!sender.hasPermission("sovereignseasons.command.greenhouse")) {
+            sendMsg(sender, "<red>No tienes permiso para inspeccionar el estado de invernadero.</red>");
+            return;
+        }
+
         if (!(sender instanceof Player player)) {
             sendMsg(sender, "<red>Este comando solo puede ser ejecutado por un jugador en el juego.</red>");
             return;
@@ -149,7 +169,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sendMsg(sender, "<red>Uso: <yellow>/season set <spring|summer|autumn|winter></yellow></red>");
+            sendMsg(sender, "<red>Uso: <yellow>/season set <spring|summer|autumn|winter> [mundo]</yellow></red>");
             return;
         }
 
@@ -159,7 +179,17 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        World world = resolveWorld(sender);
+        World world;
+        if (args.length >= 3 && !args[2].isBlank()) {
+            world = org.bukkit.Bukkit.getWorld(args[2]);
+            if (world == null) {
+                sendMsg(sender, "<red>El mundo <white>" + args[2] + "</white> no existe o no está cargado.</red>");
+                return;
+            }
+        } else {
+            world = resolveWorld(sender);
+        }
+
         if (world == null) {
             sendMsg(sender, "<red>No se encontró un mundo válido.</red>");
             return;
@@ -176,7 +206,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sendMsg(sender, "<red>Uso: <yellow>/season setday <número></yellow></red>");
+            sendMsg(sender, "<red>Uso: <yellow>/season setday <número> [mundo]</yellow></red>");
             return;
         }
 
@@ -188,7 +218,22 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        World world = resolveWorld(sender);
+        if (day < 1 || day > config.getDaysPerSeason()) {
+            sendMsg(sender, "<red>El día debe estar entre 1 y " + config.getDaysPerSeason() + ".</red>");
+            return;
+        }
+
+        World world;
+        if (args.length >= 3 && !args[2].isBlank()) {
+            world = org.bukkit.Bukkit.getWorld(args[2]);
+            if (world == null) {
+                sendMsg(sender, "<red>El mundo <white>" + args[2] + "</white> no existe o no está cargado.</red>");
+                return;
+            }
+        } else {
+            world = resolveWorld(sender);
+        }
+
         if (world == null) {
             sendMsg(sender, "<red>No se encontró un mundo válido.</red>");
             return;
@@ -246,6 +291,11 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return filterPrefix(subcommands, args[0]);
         }
 
+        if (args.length == 2 && args[0].equalsIgnoreCase("info")) {
+            List<String> worlds = org.bukkit.Bukkit.getWorlds().stream().map(World::getName).toList();
+            return filterPrefix(worlds, args[1]);
+        }
+
         if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             if (sender.hasPermission("sovereignseasons.admin")) {
                 return filterPrefix(List.of("spring", "summer", "autumn", "winter", "primavera", "verano", "otoño", "invierno"), args[1]);
@@ -259,6 +309,13 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
                     days.add(String.valueOf(i));
                 }
                 return filterPrefix(days, args[1]);
+            }
+        }
+
+        if (args.length == 3 && (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setday"))) {
+            if (sender.hasPermission("sovereignseasons.admin")) {
+                List<String> worlds = org.bukkit.Bukkit.getWorlds().stream().map(World::getName).toList();
+                return filterPrefix(worlds, args[2]);
             }
         }
 

@@ -27,17 +27,18 @@ En **Invierno (`WINTER`)**:
 2. **Marchitamiento (5–10%):** Al intentar avanzar su etapa de crecimiento sin protección, tienen una probabilidad configurable (por defecto `8%`, rango `5–10%`) de marchitarse y convertirse en arbustos secos (`DEAD_BUSH`).
 3. **Invernadero Funcional (Greenhouse):**
    - **Techo de cristal vertical:** Búsqueda directa hacia arriba (hasta `16` bloques) sin obstrucciones sólidas interpuestas, detectando cristal estándar, tintado o paneles.
-   - **Fuente de calor encendida:** Búsqueda en radio cúbico (`4` bloques) de fogatas activas, hornos encendidos, antorchas, lava, faroles o bloques de magma.
-   - **Caché Espacial LRU de Alto Rendimiento:** Las evaluaciones de posición se almacenan en una caché LRU Guava con tiempo de vida (TTL de `30s`) e invalidación reactiva ante rotura o colocación de bloques de cristal/calor, evitando lag por escaneos redundantes en granjas masivas.
+   - **Fuente de calor encendida:** Búsqueda en radio cúbico (`4` bloques) de fogatas activas (no anegadas por agua), hornos encendidos, antorchas, lava, faroles o bloques de magma.
+   - **Protección contra hielo y nieve:** El agua dentro de un invernadero funcional no se congela en hielo ni acumula capas de nieve durante el invierno (`prevent-freeze-and-snow: true`).
+   - **Caché Espacial LRU de Alto Rendimiento:** Las evaluaciones de posición se almacenan en una caché LRU Guava con tiempo de vida (TTL de `30s`) e invalidación reactiva ante rotura o colocación de bloques de cristal/calor, apagado/encendido de fogatas y descarte al descargar mundos (`WorldUnloadEvent`), evitando fugas de memoria y lag por escaneos redundantes.
 
 ---
 
 ## 🕹️ Comandos
 
-- `/season` o `/season info`: Muestra la estación actual, día de la estación, barra de progreso porcentual, año y si el jugador está protegido en un invernadero.
-- `/season greenhouse`: Diagnóstico exhaustivo del bloque actual (validez del techo de cristal, distancia, fuente de calor y estado de la caché).
-- `/season set <spring|summer|autumn|winter>`: Cambia inmediatamente la estación del mundo (permiso `sovereignseasons.admin`).
-- `/season setday <número>`: Modifica el día de la estación actual (permiso `sovereignseasons.admin`).
+- `/season` o `/season info [mundo]`: Muestra la estación actual, día de la estación, barra de progreso porcentual, año y si el jugador está protegido en un invernadero (permiso `sovereignseasons.command.info`).
+- `/season greenhouse`: Diagnóstico exhaustivo del bloque actual (validez del techo de cristal, distancia, fuente de calor y estado de la caché; permiso `sovereignseasons.command.greenhouse`).
+- `/season set <spring|summer|autumn|winter> [mundo]`: Cambia inmediatamente la estación del mundo (permiso `sovereignseasons.admin`).
+- `/season setday <día> [mundo]`: Modifica el día de la estación actual validando el rango `1..daysPerSeason` (permiso `sovereignseasons.admin`).
 - `/season stats`: Muestra estadísticas en vivo de la caché espacial (hits, misses, tamaño y tasa de acierto).
 - `/season reload`: Recarga la configuración `config.yml` y vacía la caché de invernaderos.
 
@@ -48,7 +49,7 @@ En **Invierno (`WINTER`)**:
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (42 tests automatizados)
+# Ejecutar todas las pruebas unitarias (86 tests automatizados)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas

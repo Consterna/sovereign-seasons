@@ -14,7 +14,7 @@ java {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.tcoded:FoliaLib:0.4.4")
+    implementation("com.tcoded:FoliaLib:0.4.4")
 
     testImplementation("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     testImplementation("com.tcoded:FoliaLib:0.4.4")

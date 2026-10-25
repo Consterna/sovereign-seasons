@@ -195,6 +195,14 @@ public class GreenhouseDetector implements GreenhouseService {
 
     private boolean isHeatSourceActive(Block block) {
         BlockData data = block.getBlockData();
+        if (data == null) {
+            return true;
+        }
+        try {
+            if (data instanceof org.bukkit.block.data.Waterlogged waterlogged && waterlogged.isWaterlogged()) {
+                return false;
+            }
+        } catch (Throwable ignored) {}
         if (data instanceof Campfire campfire) {
             return campfire.isLit();
         }
@@ -203,6 +211,14 @@ public class GreenhouseDetector implements GreenhouseService {
         }
         // Always active: Lava, Magma Block, Fire, etc.
         return true;
+    }
+
+    /**
+     * Purges all cached greenhouse positions belonging to an unloaded world to prevent world memory leaks.
+     */
+    public void invalidateWorld(java.util.UUID worldUid) {
+        if (worldUid == null || cache == null) return;
+        cache.asMap().keySet().removeIf(pos -> pos.worldUid().equals(worldUid));
     }
 
     @Override

@@ -15,15 +15,24 @@ import java.util.Objects;
  */
 public class CalendarListener implements Listener {
     private final WorldCalendarManager calendarManager;
+    private final com.tcoded.folialib.FoliaLib foliaLib;
 
     public CalendarListener(WorldCalendarManager calendarManager) {
+        this(calendarManager, null);
+    }
+
+    public CalendarListener(WorldCalendarManager calendarManager, com.tcoded.folialib.FoliaLib foliaLib) {
         this.calendarManager = Objects.requireNonNull(calendarManager, "calendarManager cannot be null");
+        this.foliaLib = foliaLib;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTimeSkip(TimeSkipEvent event) {
         World world = event.getWorld();
         calendarManager.tickWorld(world);
+        if (foliaLib != null) {
+            foliaLib.getImpl().runNextTick(task -> calendarManager.tickWorld(world));
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
