@@ -1,0 +1,110 @@
+# ==============================================================================
+#                      SOVEREIGN SEASONS - CONFIGURATION
+# ==============================================================================
+
+calendar:
+  # Duración de cada estación en días de juego de Minecraft (1 día = 24.000 ticks).
+  # 7 días por estación equivale a un año completo de 28 días de juego.
+  days-per-season: 7
+
+  # Ticks por día (Vanilla Minecraft usa 24000). Modificar solo en servidores personalizados.
+  ticks-per-day: 24000
+
+  # Lista de mundos donde el calendario de estaciones está activo.
+  # Si la lista está vacía, se aplica a todos los mundos de tipo NORMAL (Overworld).
+  enabled-worlds:
+    - world
+
+crops:
+  # Si está activado, los cultivos fuera de un invernadero se pausan en Invierno (no crecen).
+  winter-growth-paused: true
+
+  # Probabilidad de que un cultivo se marchite al intentar crecer en invierno sin invernadero.
+  # Valor entre 0.0 y 1.0 (0.08 = 8% de probabilidad, rango recomendado 5% - 10%).
+  winter-wither-chance: 0.08
+
+  # Material en el que se convierte un cultivo marchito.
+  wither-material: DEAD_BUSH
+
+  # Reproducir efectos visuales y sonoros sutiles cuando un cultivo se marchita.
+  play-wither-effects: true
+
+  # Tipos de cultivos afectados por la congelación invernal.
+  affected-crops:
+    - WHEAT
+    - CARROTS
+    - POTATOES
+    - BEETROOTS
+    - NETHER_WART
+    - COCOA
+    - SWEET_BERRY_BUSH
+    - MELON_STEM
+    - PUMPKIN_STEM
+    - TORCHFLOWER_CROP
+    - PITCHER_CROP
+
+greenhouse:
+  # Habilitar el sistema de detección de invernaderos.
+  enabled: true
+
+  # Exigir un techo de cristal vertical directamente sobre el cultivo.
+  require-glass-ceiling: true
+
+  # Altura máxima hacia arriba para buscar el techo de cristal.
+  max-ceiling-height: 16
+
+  # Materiales considerados cristal válido para el techo del invernadero.
+  allowed-glass-materials:
+    - GLASS
+    - TINTED_GLASS
+    - WHITE_STAINED_GLASS
+    - ORANGE_STAINED_GLASS
+    - MAGENTA_STAINED_GLASS
+    - LIGHT_BLUE_STAINED_GLASS
+    - YELLOW_STAINED_GLASS
+    - LIME_STAINED_GLASS
+    - PINK_STAINED_GLASS
+    - GRAY_STAINED_GLASS
+    - LIGHT_GRAY_STAINED_GLASS
+    - CYAN_STAINED_GLASS
+    - PURPLE_STAINED_GLASS
+    - BLUE_STAINED_GLASS
+    - BROWN_STAINED_GLASS
+    - GREEN_STAINED_GLASS
+    - RED_STAINED_GLASS
+    - BLACK_STAINED_GLASS
+    - GLASS_PANE
+
+  # Exigir una fuente de calor cercana para mantener la temperatura del invernadero.
+  require-heat-source: true
+
+  # Radio cúbico alrededor del cultivo para buscar fuentes de calor.
+  heat-radius: 4
+
+  # Materiales considerados fuentes de calor válidas (las fogatas y hornos deben estar encendidos).
+  allowed-heat-sources:
+    - CAMPFIRE
+    - SOUL_CAMPFIRE
+    - FIRE
+    - SOUL_FIRE
+    - LAVA
+    - LAVA_CAULDRON
+    - MAGMA_BLOCK
+    - TORCH
+    - WALL_TORCH
+    - SOUL_TORCH
+    - SOUL_WALL_TORCH
+    - LANTERN
+    - SOUL_LANTERN
+    - FURNACE
+    - BLAST_FURNACE
+    - SMOKER
+
+  # Tiempo de vida (en segundos) de las evaluaciones en la caché espacial LRU.
+  cache-ttl-seconds: 30
+
+  # Cantidad máxima de bloques almacenados en la caché LRU para evitar uso excesivo de memoria.
+  cache-max-size: 10000
+
+messages:
+  prefix: "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> "

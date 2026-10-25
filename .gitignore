@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!libs/*.jar
+
+# IDE & Editor
+.idea/
+*.iml
+.vscode/
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Minecraft server run directories
+run/
+cache/
+.paper/
+logs/
+crash-reports/
+world/
+world_nether/
+world_the_end/
+*.hprof

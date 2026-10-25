@@ -1,0 +1,27 @@
+name: SovereignSeasons-Core
+version: '${version}'
+main: com.sovereignseasons.core.SovereignSeasonsCorePlugin
+api-version: '1.20'
+folia-supported: true
+description: Sistema avanzado de estaciones modulares basado en dias de juego de Minecraft.
+
+commands:
+  season:
+    description: Consulta y gestion del calendario de estaciones e invernaderos.
+    aliases:
+      - seasons
+    usage: /season [info|greenhouse|set|setday|stats|reload]
+
+permissions:
+  sovereignseasons.command.info:
+    description: Permite consultar el calendario de estaciones actual.
+    default: true
+  sovereignseasons.command.greenhouse:
+    description: Permite inspeccionar el estado de invernadero del bloque actual.
+    default: true
+  sovereignseasons.admin:
+    description: Permite modificar estaciones, dias, recargar el plugin y ver estadisticas de cache.
+    default: op
+    children:
+      sovereignseasons.command.info: true
+      sovereignseasons.command.greenhouse: true
