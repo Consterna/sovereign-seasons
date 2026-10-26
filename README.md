@@ -4,7 +4,7 @@ Ecosistema modular de estaciones climáticas para servidores Minecraft Paper/Fol
 
 El ciclo de estaciones opera estrictamente en **días de juego de Minecraft (in-game days)** a partir de los ticks mundiales (`24.000` ticks = 1 día), desacoplado del tiempo real para garantizar una experiencia orgánica donde el paso de los días y el sueño de los jugadores influyen en el calendario del mundo.
 
-Para un desglose detallado de versiones y cambios, consulta el [CHANGELOG.md](file:///C:/dev/proyectos/sovereign-seasons/CHANGELOG.md).
+Para un desglose detallado de versiones y cambios, consulta el [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -14,11 +14,11 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
-| [**`sovereign-seasons-core`**](file:///C:/dev/proyectos/sovereign-seasons/sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos y API pública. | **Completado (137 tests / 100%)** |
-| [**`sovereign-seasons-pantry`**](file:///C:/dev/proyectos/sovereign-seasons/sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías y métodos de curado/conserva. | Esqueleto inicial |
-| [**`sovereign-seasons-logistics`**](file:///C:/dev/proyectos/sovereign-seasons/sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
-| [**`sovereign-seasons-commerce`**](file:///C:/dev/proyectos/sovereign-seasons/sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
-| [**`sovereign-seasons-resourcepack`**](file:///C:/dev/proyectos/sovereign-seasons/sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
+| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos y API pública. | **Completado (137 tests / 100%)** |
+| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías y métodos de curado/conserva. | Esqueleto inicial |
+| [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
+| [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
+| [**`sovereign-seasons-resourcepack`**](sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
 
 ---
 
