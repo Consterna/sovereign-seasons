@@ -18,7 +18,11 @@ public record BlockPos(UUID worldUid, int x, int y, int z) {
     public static BlockPos from(Location location) {
         Objects.requireNonNull(location, "location cannot be null");
         World world = Objects.requireNonNull(location.getWorld(), "location world cannot be null");
-        return new BlockPos(world.getUID(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        UUID uid = world.getUID();
+        if (uid == null) {
+            uid = new UUID(0L, 0L);
+        }
+        return new BlockPos(uid, location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     public boolean isInWorld(World world) {

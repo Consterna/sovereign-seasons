@@ -20,21 +20,23 @@ import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import com.sovereignseasons.core.greenhouse.GreenhouseDetector;
-import com.sovereignseasons.core.calendar.WorldCalendarManager;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -94,7 +96,8 @@ public class CropGrowthListener implements Listener {
                 callEventSafely(witherEvent);
 
                 if (!witherEvent.isCancelled()) {
-                    block.setType(witherEvent.getReplacementMaterial(), false);
+                    Material rep = witherEvent.getReplacementMaterial();
+                    block.setType((rep != null && rep.isBlock()) ? rep : Material.DEAD_BUSH, false);
                     playWitherEffects(world, block.getLocation());
                 }
             }
@@ -191,6 +194,9 @@ public class CropGrowthListener implements Listener {
         }
 
         Location loc = event.getLocation();
+        if (loc == null) {
+            return;
+        }
         World world = loc.getWorld();
 
         if (world == null || !seasonService.isEnabledInWorld(world) || !seasonService.isWinter(world)) {
@@ -286,14 +292,33 @@ public class CropGrowthListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCauldronLevelChange(CauldronLevelChangeEvent event) {
+        Block block = event.getBlock();
+        if (block == null) return;
+        Material oldType = block.getType();
+        Material newType = event.getNewState() != null ? event.getNewState().getType() : Material.AIR;
+        if (config.getAllowedHeatSources().contains(oldType) || config.getAllowedHeatSources().contains(newType)) {
+            greenhouseService.invalidateRadius(block.getLocation(), config.getHeatRadius() + 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        handleBlockModification(event.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {
+        handleBlockModification(event.getBlock());
+        handleBlockModification(event.getToBlock());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldUnload(WorldUnloadEvent event) {
         if (event.isCancelled()) return;
         World world = event.getWorld();
         if (greenhouseService instanceof GreenhouseDetector gd) {
             gd.invalidateWorld(world.getUID());
-        }
-        if (seasonService instanceof WorldCalendarManager wcm) {
-            wcm.unloadWorld(world.getUID());
         }
     }
 
@@ -322,7 +347,7 @@ public class CropGrowthListener implements Listener {
     private boolean isSapling(Material material) {
         if (material == null) return false;
         String name = material.name();
-        return name.endsWith("_SAPLING") || name.endsWith("_PROPAGULE");
+        return name.endsWith("_SAPLING") || name.endsWith("_PROPAGULE") || name.equals("AZALEA") || name.equals("FLOWERING_AZALEA");
     }
 
     private void playWitherEffects(World world, Location location) {

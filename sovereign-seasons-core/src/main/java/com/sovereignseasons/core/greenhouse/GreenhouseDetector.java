@@ -249,7 +249,12 @@ public class GreenhouseDetector implements GreenhouseService {
     }
 
     private boolean isHeatSourceActive(Block block) {
-        BlockData data = block.getBlockData();
+        BlockData data;
+        try {
+            data = block.getBlockData();
+        } catch (Throwable ignored) {
+            return true;
+        }
         if (data == null) {
             return true;
         }
@@ -286,14 +291,18 @@ public class GreenhouseDetector implements GreenhouseService {
     public void invalidateRadius(Location location, int radius) {
         if (location == null || location.getWorld() == null) return;
         World world = location.getWorld();
+        java.util.UUID uid = world.getUID();
+        if (uid == null) return;
+
+        int safeRadius = Math.max(0, Math.min(32, radius));
         int bx = location.getBlockX();
         int by = location.getBlockY();
         int bz = location.getBlockZ();
 
-        for (int x = bx - radius; x <= bx + radius; x++) {
-            for (int y = by - radius; y <= by + radius; y++) {
-                for (int z = bz - radius; z <= bz + radius; z++) {
-                    cache.invalidate(new BlockPos(world.getUID(), x, y, z));
+        for (int x = bx - safeRadius; x <= bx + safeRadius; x++) {
+            for (int y = by - safeRadius; y <= by + safeRadius; y++) {
+                for (int z = bz - safeRadius; z <= bz + safeRadius; z++) {
+                    cache.invalidate(new BlockPos(uid, x, y, z));
                 }
             }
         }

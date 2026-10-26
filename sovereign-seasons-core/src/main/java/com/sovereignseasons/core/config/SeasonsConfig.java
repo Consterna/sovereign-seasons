@@ -107,6 +107,9 @@ public class SeasonsConfig {
     }
 
     public void load(File dataFolder, InputStream defaultResource) {
+        if (dataFolder == null) {
+            dataFolder = new File(".");
+        }
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
@@ -185,7 +188,7 @@ public class SeasonsConfig {
     public void setDaysPerSeason(int days) { this.daysPerSeason = Math.max(1, days); }
 
     public long getTicksPerDay() { return ticksPerDay; }
-    public void setTicksPerDay(long ticks) { this.ticksPerDay = ticks; }
+    public void setTicksPerDay(long ticks) { this.ticksPerDay = Math.max(100L, ticks); }
 
     public Set<String> getEnabledWorlds() { return Collections.unmodifiableSet(enabledWorlds); }
     public void setEnabledWorlds(Set<String> worlds) { this.enabledWorlds = new HashSet<>(worlds); }

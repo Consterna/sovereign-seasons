@@ -99,6 +99,10 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         }
 
         CalendarDate date = seasonService.getDate(world);
+        if (date == null) {
+            sendMsg(sender, "<red>No se pudo calcular la fecha del calendario para este mundo.</red>");
+            return;
+        }
         Season season = date.season();
 
         String progressBar = buildProgressBar(date.getSeasonProgressPercent(), 16);

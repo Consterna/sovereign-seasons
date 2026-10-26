@@ -91,8 +91,12 @@ public class WorldCalendarManager implements SeasonService {
                 );
             }
         } catch (IOException e) {
-            if (logger != null) {
-                logger.severe("Could not save calendar_data.yml: " + e.getMessage());
+            try {
+                yaml.save(storageFile);
+            } catch (IOException ex) {
+                if (logger != null) {
+                    logger.severe("Could not save calendar_data.yml: " + ex.getMessage());
+                }
             }
         } finally {
             if (tempFile.exists()) {
@@ -144,7 +148,7 @@ public class WorldCalendarManager implements SeasonService {
     }
 
     public CalendarDate calculateDate(int effectiveDay, long timeOfDay) {
-        int daysPerSeason = config.getDaysPerSeason();
+        int daysPerSeason = Math.max(1, config.getDaysPerSeason());
         int daysPerYear = daysPerSeason * 4;
 
         int safeDay = Math.max(0, effectiveDay);
@@ -173,7 +177,7 @@ public class WorldCalendarManager implements SeasonService {
         if (world == null) return null;
 
         long fullTime = world.getFullTime();
-        long ticksPerDay = config.getTicksPerDay();
+        long ticksPerDay = Math.max(100L, config.getTicksPerDay());
         int rawInGameDay = (int) (fullTime / ticksPerDay);
 
         int offset = getNormalizedOffset(world.getUID(), rawInGameDay);
@@ -221,11 +225,12 @@ public class WorldCalendarManager implements SeasonService {
             finalSeason = event.getNewSeason() != null ? event.getNewSeason() : targetSeason;
         }
 
-        int daysPerSeason = config.getDaysPerSeason();
+        int daysPerSeason = Math.max(1, config.getDaysPerSeason());
         int daysPerYear = daysPerSeason * 4;
 
         long fullTime = world.getFullTime();
-        int rawInGameDay = (int) (fullTime / config.getTicksPerDay());
+        long ticksPerDay = Math.max(100L, config.getTicksPerDay());
+        int rawInGameDay = (int) (fullTime / ticksPerDay);
 
         int targetYearBaseDay = (currentYear - 1) * daysPerYear;
         int targetDayInYear = finalSeason.ordinal() * daysPerSeason; // day 1 of target season
@@ -254,12 +259,13 @@ public class WorldCalendarManager implements SeasonService {
         CalendarDate current = getDate(world);
         if (current == null) return;
 
-        int daysPerSeason = config.getDaysPerSeason();
+        int daysPerSeason = Math.max(1, config.getDaysPerSeason());
         int clampedDay = Math.max(1, Math.min(daysPerSeason, targetDayOfSeason));
 
         int daysPerYear = daysPerSeason * 4;
         long fullTime = world.getFullTime();
-        int rawInGameDay = (int) (fullTime / config.getTicksPerDay());
+        long ticksPerDay = Math.max(100L, config.getTicksPerDay());
+        int rawInGameDay = (int) (fullTime / ticksPerDay);
 
         int currentYear = current.year();
         int yearBaseDay = (currentYear - 1) * daysPerYear;

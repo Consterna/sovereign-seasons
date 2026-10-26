@@ -22,7 +22,8 @@ public class CropWinterWitherEvent extends BlockEvent implements Cancellable {
     public CropWinterWitherEvent(@NotNull Block theBlock, @NotNull Material replacementMaterial) {
         super(theBlock);
         this.originalMaterial = theBlock.getType();
-        this.replacementMaterial = Objects.requireNonNull(replacementMaterial, "replacementMaterial cannot be null");
+        Objects.requireNonNull(replacementMaterial, "replacementMaterial cannot be null");
+        this.replacementMaterial = replacementMaterial.isBlock() ? replacementMaterial : Material.DEAD_BUSH;
     }
 
     @NotNull
@@ -36,7 +37,11 @@ public class CropWinterWitherEvent extends BlockEvent implements Cancellable {
     }
 
     public void setReplacementMaterial(@NotNull Material replacementMaterial) {
-        this.replacementMaterial = Objects.requireNonNull(replacementMaterial, "replacementMaterial cannot be null");
+        Objects.requireNonNull(replacementMaterial, "replacementMaterial cannot be null");
+        if (!replacementMaterial.isBlock()) {
+            throw new IllegalArgumentException("replacementMaterial must be a block, but got: " + replacementMaterial);
+        }
+        this.replacementMaterial = replacementMaterial;
     }
 
     @Override
