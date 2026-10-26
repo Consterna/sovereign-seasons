@@ -14,6 +14,30 @@ publishing {
             groupId = "com.sovereignseasons"
             artifactId = "sovereign-seasons-core"
             version = "1.0.0"
+
+            pom {
+                name.set("Sovereign Seasons Core")
+                description.set("Advanced Minecraft seasonal mechanics plugin for Paper/Folia")
+                url.set("https://github.com/Consterna/sovereign-seasons")
+                licenses {
+                    license {
+                        name.set("GNU General Public License v3.0")
+                        url.set("https://www.gnu.org/licenses/gpl-3.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("Consterna")
+                        name.set("Cristian")
+                        email.set("cristianguerrero1958@outlook.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/Consterna/sovereign-seasons.git")
+                    developerConnection.set("scm:git:ssh://github.com:Consterna/sovereign-seasons.git")
+                    url.set("https://github.com/Consterna/sovereign-seasons")
+                }
+            }
         }
     }
     repositories {

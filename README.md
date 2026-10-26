@@ -2,6 +2,7 @@
 
 [![CI Pipeline](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml)
 [![CodeQL Analysis](https://github.com/Consterna/sovereign-seasons/actions/workflows/codeql.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/codeql.yml)
+[![Secret Scanning](https://github.com/Consterna/sovereign-seasons/actions/workflows/secret-scanning.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/secret-scanning.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Consterna/sovereign-seasons?label=Release&color=blue)](https://github.com/Consterna/sovereign-seasons/releases)
 [![Packages](https://img.shields.io/badge/Packages-GHCR%20%7C%20Maven-blue.svg)](https://github.com/Consterna/sovereign-seasons/pkgs/container/sovereign-seasons)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)

@@ -62,8 +62,9 @@ Para evaluar y reproducir el vector de ataque eficazmente, por favor incluye:
 
 Para garantizar un código blindado antes de cada despliegue, este repositorio implementa controles automatizados de seguridad:
 - **GitHub CodeQL SAST:** Análisis semántico estático continuo en cada push y PR para detectar vulnerabilidades en código Java (CWEs, deserialización insegura, inyecciones de ruta, etc.).
-- **Dependency Review & Dependabot:** Escaneo semanal de dependencias de Gradle, GitHub Actions y contenedores Docker para neutralizar CVEs de forma preventiva.
-- **Secret Scanning:** Detección automática para prevenir la filtración accidental de tokens o credenciales.
+- **Dependency Review & Dependabot:** Escaneo semanal de dependencias de Gradle, GitHub Actions y contenedores Docker para neutralizar CVEs de forma preventiva, con envío automatizado del grafo de dependencias de Gradle (`dependency-submission`).
+- **Secret Scanning (Gitleaks):** Detección continua en cada commit y pull request para prevenir la filtración accidental de tokens, certificados o credenciales.
+- **Validación Criptográfica de Gradle Wrapper:** Verificación automática de la suma de comprobación (SHA-256) del ejecutable de Gradle para prevenir ataques de intermediario a la cadena de suministro.
 
 ---
 
