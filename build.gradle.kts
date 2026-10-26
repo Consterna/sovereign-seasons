@@ -1,3 +1,5 @@
+import java.io.File
+
 plugins {
     `java-library`
 }
@@ -7,11 +9,14 @@ allprojects {
     version = "1.0.0-SNAPSHOT"
 
     repositories {
-        val localM2 = file("C:/dev/tools/m2-repo")
-        if (localM2.exists()) {
-            maven {
-                name = "local-tools-m2"
-                url = localM2.toURI()
+        val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
+        if (isWindows) {
+            val localM2 = File("C:/dev/tools/m2-repo")
+            if (localM2.isDirectory) {
+                maven {
+                    name = "local-tools-m2"
+                    url = localM2.toURI()
+                }
             }
         }
         mavenCentral()

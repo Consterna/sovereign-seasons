@@ -26,7 +26,7 @@ LABEL org.opencontainers.image.title="Sovereign Seasons Paper Server" \
       org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core" \
       org.opencontainers.image.authors="Cristian <cristianguerrero1958@outlook.com>" \
       org.opencontainers.image.source="https://github.com/Consterna/sovereign-seasons" \
-      org.opencontainers.image.licenses="MIT"
+      org.opencontainers.image.licenses="GPL-3.0"
 
 # Instalar utilidades para descarga automatizada de PaperMC
 RUN apt-get update && apt-get install -y --no-install-recommends \
