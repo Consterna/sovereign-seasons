@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Compilación de artefactos con JDK 21 Temurin
-FROM eclipse-temurin:21-jdk-jammy AS builder
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
 WORKDIR /build
 
@@ -20,7 +20,7 @@ COPY sovereign-seasons-core/src/ ./sovereign-seasons-core/src/
 RUN chmod +x ./gradlew && ./gradlew :sovereign-seasons-core:shadowJar --no-daemon
 
 # Stage 2: Servidor Paper 1.21.x containerizado
-FROM eclipse-temurin:21-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 
 LABEL org.opencontainers.image.title="Sovereign Seasons Paper Server" \
       org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core" \
