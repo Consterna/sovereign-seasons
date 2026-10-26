@@ -21,7 +21,7 @@ dependencies {
     testImplementation(project(":sovereign-seasons-core"))
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:3.25.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
 }
 
 tasks {
