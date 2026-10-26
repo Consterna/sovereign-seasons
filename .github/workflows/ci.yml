@@ -29,7 +29,7 @@ jobs:
           cache: 'gradle'
 
       - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v4
+        uses: gradle/actions/wrapper-validation@v6
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew shadowJar --no-daemon
 
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sovereign-seasons-core-binaries
           path: sovereign-seasons-core/build/libs/sovereign-seasons-core-*.jar
