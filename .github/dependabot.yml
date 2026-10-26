@@ -16,6 +16,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.junit:junit-bom"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "org.apache.logging.log4j:*"
+      - dependency-name: "org.codehaus.plexus:*"
 
   - package-ecosystem: "github-actions"
     directory: "/"

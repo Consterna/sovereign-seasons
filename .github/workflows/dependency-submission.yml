@@ -33,3 +33,5 @@ jobs:
 
       - name: Generate and Submit Dependency Graph
         uses: gradle/actions/dependency-submission@v6
+        with:
+          dependency-graph-exclude-configurations: '^classpath$|.*[Tt]est.*'

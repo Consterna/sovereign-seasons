@@ -1,5 +1,19 @@
 import java.io.File
 
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        constraints {
+            classpath("org.apache.logging.log4j:log4j-core:2.25.3")
+            classpath("org.apache.logging.log4j:log4j-api:2.25.3")
+            classpath("org.codehaus.plexus:plexus-utils:4.0.3")
+        }
+    }
+}
+
 plugins {
     `java-library`
 }
@@ -31,6 +45,16 @@ allprojects {
         maven {
             name = "jitpack"
             url = uri("https://jitpack.io")
+        }
+    }
+}
+
+subprojects {
+    plugins.withType<JavaPlugin> {
+        dependencies {
+            constraints {
+                add("implementation", "org.apache.commons:commons-lang3:3.18.0")
+            }
         }
     }
 }
