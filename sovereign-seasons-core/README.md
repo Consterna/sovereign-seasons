@@ -27,7 +27,7 @@ Un bloque se considera protegido dentro de un invernadero si cumple dos condicio
 2. **Fuente de calor encendida:** Búsqueda en un radio cúbico de `4` bloques de calor activo: fogatas encendidas (no anegadas por agua), fuegos normales o de almas, hornos/ahumadores, antorchas, faroles, bloques de magma o calderos con lava.
 - **Caché Espacial LRU de Alto Rendimiento:**
   - Capacidad máxima de 10.000 posiciones con tiempo de expiración (TTL de 30 segundos).
-  - Invalidación reactiva e instantánea ante rotura/colocación de cristal o fuentes térmicas, explosiones, movimiento de pistones, trasvase de cubos y vaciado de calderos de lava.
+  - Invalidación reactiva e instantánea ante rotura/colocación de cristal o fuentes térmicas, explosiones, movimiento de pistones, trasvase de cubos, combustión en hornos y vaciado de calderos de lava.
   - Purga automática por mundo en `WorldUnloadEvent` para evitar fugas de memoria.
 
 ---
@@ -114,7 +114,7 @@ greenhouse:
 
 ## 🧪 Pruebas Unitarias y Calidad
 
-El módulo cuenta con una suite integral de **137 pruebas unitarias y de estrés automatizadas** en 22 clases de prueba con **100% de aprobación**:
+El módulo cuenta con una suite integral de **142 pruebas unitarias y de estrés automatizadas** en 22 clases de prueba con **100% de aprobación**:
 
 ```bash
 # Ejecutar todas las pruebas unitarias

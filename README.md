@@ -14,7 +14,7 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
-| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos y API pública. | **Completado (137 tests / 100%)** |
+| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos y API pública. | **Completado (142 tests / 100%)** |
 | [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías y métodos de curado/conserva. | Esqueleto inicial |
 | [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
 | [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
@@ -32,7 +32,7 @@ En **Invierno (`WINTER`)**:
    - **Techo de cristal vertical:** Búsqueda directa hacia arriba (hasta `16` bloques) sin obstrucciones sólidas interpuestas (incluyendo losas, escaleras o muros), detectando cristal estándar, tintado o paneles.
    - **Fuente de calor encendida:** Búsqueda en radio cúbico (`4` bloques) de fogatas activas (no anegadas por agua), hornos encendidos, antorchas, lava, faroles o bloques de magma.
    - **Protección contra hielo y nieve:** El agua dentro de un invernadero funcional no se congela en hielo ni acumula capas de nieve durante el invierno (`prevent-freeze-and-snow: true`).
-   - **Caché Espacial LRU de Alto Rendimiento:** Las evaluaciones de posición se almacenan en una caché LRU Guava con tiempo de vida (TTL de `30s`) e invalidación reactiva ante rotura o colocación de bloques de cristal/calor, explosiones, pistones, cubos, calderos de lava, y descarte al descargar mundos (`WorldUnloadEvent`), evitando fugas de memoria y lag por escaneos redundantes.
+   - **Caché Espacial LRU de Alto Rendimiento:** Las evaluaciones de posición se almacenan en una caché LRU Guava con tiempo de vida (TTL de `30s`) e invalidación reactiva ante rotura o colocación de bloques de cristal/calor, explosiones, pistones, cubos, calderos de lava, combustión en hornos, y descarte al descargar mundos (`WorldUnloadEvent`), evitando fugas de memoria y lag por escaneos redundantes.
 
 ---
 
@@ -52,7 +52,7 @@ En **Invierno (`WINTER`)**:
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (137 tests automatizados en 22 suites)
+# Ejecutar todas las pruebas unitarias (142 tests automatizados en 22 suites)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas

@@ -34,7 +34,7 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
     - `/season reload`: recarga de configuración `config.yml` y vaciado de la caché (`sovereignseasons.admin`).
   - Compatibilidad de arquitectura Paper y Folia multi-hilo mediante integración con `FoliaLib`.
   - Persistencia segura y atómica del estado del calendario por mundo mediante `calendar_data.yml` con reemplazo atómico de archivo (`AtomicMove`).
-  - Suite de 137 pruebas unitarias y de estrés automatizadas en 22 clases de prueba (100% aprobadas).
+  - Suite de 142 pruebas unitarias y de estrés automatizadas en 22 clases de prueba (100% aprobadas).
 - **Estructura base modular de la suite Sovereign Seasons**:
   - `sovereign-seasons-pantry`: Descomposición de alimentos según temperatura/estación y bodegas subterráneas.
   - `sovereign-seasons-logistics`: Fardos y cajas para transporte a granel de cosechas y silos de grano.
@@ -46,4 +46,8 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
 - Normalización defensiva de desfases temporales ante retrocesos en la hora del mundo (`/time set 0`).
 - Saneamiento y validación defensiva en la entrada de comandos (`trim()`, prefijos positivos `+4`, detección de desbordamiento numérico).
 - Validación de límites verticales (-64 a 320) y verificación segura de chunks cargados en consultas espaciales.
-- Invalidación de caché ante flujos de fluidos y vaciado/llenado de calderos de lava.
+- Invalidación de caché ante flujos de fluidos, vaciado/llenado de calderos de lava y combustión automática en hornos (`FurnaceBurnEvent`).
+- Protección contra división por cero en cancelaciones de `SeasonChangeEvent` en `WorldCalendarManager`.
+- Prevención de desbordamiento de enteros (overflow) en cálculos del año acotando `days-per-season` a un rango seguro (1 a 100.000).
+- Optimización de memoria en el autocompletado de `/season setday` acotando sugerencias a un máximo de 100 días.
+- Formateo consistente de dígitos ASCII en `CalendarDate.toFormattedComponent` mediante `Locale.ROOT`.

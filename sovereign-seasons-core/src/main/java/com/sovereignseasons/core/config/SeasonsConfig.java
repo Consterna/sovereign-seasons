@@ -129,8 +129,8 @@ public class SeasonsConfig {
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         // Calendar
-        this.daysPerSeason = Math.max(1, config.getInt("calendar.days-per-season", 7));
-        this.ticksPerDay = Math.max(100L, config.getLong("calendar.ticks-per-day", 24000L));
+        this.daysPerSeason = Math.max(1, Math.min(100_000, config.getInt("calendar.days-per-season", 7)));
+        this.ticksPerDay = Math.max(100L, Math.min(1_000_000L, config.getLong("calendar.ticks-per-day", 24000L)));
         List<String> worldsList = config.getStringList("calendar.enabled-worlds");
         this.enabledWorlds = new HashSet<>(worldsList);
 
@@ -185,10 +185,10 @@ public class SeasonsConfig {
 
     // Getters and Setters for testing and runtime modification
     public int getDaysPerSeason() { return daysPerSeason; }
-    public void setDaysPerSeason(int days) { this.daysPerSeason = Math.max(1, days); }
+    public void setDaysPerSeason(int days) { this.daysPerSeason = Math.max(1, Math.min(100_000, days)); }
 
     public long getTicksPerDay() { return ticksPerDay; }
-    public void setTicksPerDay(long ticks) { this.ticksPerDay = Math.max(100L, ticks); }
+    public void setTicksPerDay(long ticks) { this.ticksPerDay = Math.max(100L, Math.min(1_000_000L, ticks)); }
 
     public Set<String> getEnabledWorlds() { return Collections.unmodifiableSet(enabledWorlds); }
     public void setEnabledWorlds(Set<String> worlds) { this.enabledWorlds = new HashSet<>(worlds); }

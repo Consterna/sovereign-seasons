@@ -33,6 +33,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -298,6 +299,14 @@ public class CropGrowthListener implements Listener {
         Material oldType = block.getType();
         Material newType = event.getNewState() != null ? event.getNewState().getType() : Material.AIR;
         if (config.getAllowedHeatSources().contains(oldType) || config.getAllowedHeatSources().contains(newType)) {
+            greenhouseService.invalidateRadius(block.getLocation(), config.getHeatRadius() + 1);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFurnaceBurn(FurnaceBurnEvent event) {
+        Block block = event.getBlock();
+        if (block != null && config.getAllowedHeatSources().contains(block.getType())) {
             greenhouseService.invalidateRadius(block.getLocation(), config.getHeatRadius() + 1);
         }
     }

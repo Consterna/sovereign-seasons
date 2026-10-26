@@ -12,6 +12,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -213,5 +215,22 @@ class CauldronAndFluidGreenhouseLifecycleTest {
         assertThat(invalidatedRadiiLocations).hasSize(1);
         assertThat(invalidatedRadiiLocations.get(0).getBlockX()).isEqualTo(10);
         assertThat(invalidatedRadiiLocations.get(0).getBlockY()).isEqualTo(65);
+    }
+
+    @Test
+    @DisplayName("FurnaceBurnEvent on furnace/smoker/blast furnace invalidates greenhouse heat radius")
+    void shouldInvalidateRadiusWhenFurnaceBurnsFuel() {
+        CropGrowthListener listener = new CropGrowthListener(config, mockSeasonService, mockGreenhouseService);
+
+        Block furnaceBlock = createMockBlock(Material.FURNACE, 30, 64, 30);
+        ItemStack coal = new ItemStack(Material.COAL);
+        FurnaceBurnEvent event = new FurnaceBurnEvent(furnaceBlock, coal, 1600);
+
+        listener.onFurnaceBurn(event);
+
+        assertThat(invalidatedRadiiLocations).hasSize(1);
+        assertThat(invalidatedRadiiLocations.get(0).getBlockX()).isEqualTo(30);
+        assertThat(invalidatedRadiiLocations.get(0).getBlockY()).isEqualTo(64);
+        assertThat(invalidatedRadiiLocations.get(0).getBlockZ()).isEqualTo(30);
     }
 }

@@ -327,7 +327,7 @@ public class WorldCalendarManager implements SeasonService {
 
                 if (seasonEvent.isCancelled()) {
                     // Revert effective day to the last day of lastSeason
-                    int daysPerSeason = config.getDaysPerSeason();
+                    int daysPerSeason = Math.max(1, config.getDaysPerSeason());
                     int daysPerYear = daysPerSeason * 4;
                     int previousSeasonYear = (lastSeason == Season.WINTER && currentSeason == Season.SPRING)
                             ? current.year() - 1
@@ -336,7 +336,8 @@ public class WorldCalendarManager implements SeasonService {
                     int rollbackEffectiveDay = yearBaseDay + (lastSeason.ordinal() * daysPerSeason) + (daysPerSeason - 1);
 
                     long fullTime = world.getFullTime();
-                    int rawInGameDay = (int) (fullTime / config.getTicksPerDay());
+                    long ticksPerDay = Math.max(100L, config.getTicksPerDay());
+                    int rawInGameDay = (int) (fullTime / ticksPerDay);
                     int newOffset = rollbackEffectiveDay - rawInGameDay;
                     dayOffsets.put(uid, newOffset);
                     saveData();

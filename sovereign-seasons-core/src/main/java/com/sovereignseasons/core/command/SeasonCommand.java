@@ -337,10 +337,15 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2 && args[0].equalsIgnoreCase("setday")) {
             if (sender.hasPermission("sovereignseasons.admin")) {
                 List<String> days = new ArrayList<>();
-                for (int i = 1; i <= config.getDaysPerSeason(); i++) {
-                    days.add(String.valueOf(i));
+                int maxDays = Math.min(config.getDaysPerSeason(), 100);
+                String prefix = args[1].toLowerCase(Locale.ROOT);
+                for (int i = 1; i <= maxDays; i++) {
+                    String str = String.valueOf(i);
+                    if (str.startsWith(prefix)) {
+                        days.add(str);
+                    }
                 }
-                return filterPrefix(days, args[1]);
+                return days;
             }
         }
 

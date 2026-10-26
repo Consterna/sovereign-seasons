@@ -3,6 +3,7 @@ package com.sovereignseasons.api;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -45,6 +46,7 @@ public record CalendarDate(
      */
     public Component toFormattedComponent() {
         String template = String.format(
+                Locale.ROOT,
                 "%s <gray>(Día <white>%d</white>/<white>%d</white>, Año <white>%d</white>)</gray>",
                 season.getMiniMessageTag(),
                 dayOfSeason,
