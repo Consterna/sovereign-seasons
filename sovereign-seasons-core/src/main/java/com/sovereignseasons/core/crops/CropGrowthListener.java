@@ -285,8 +285,9 @@ public class CropGrowthListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldUnload(WorldUnloadEvent event) {
+        if (event.isCancelled()) return;
         World world = event.getWorld();
         if (greenhouseService instanceof GreenhouseDetector gd) {
             gd.invalidateWorld(world.getUID());

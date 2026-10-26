@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.TimeSkipEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.Objects;
 
@@ -28,6 +29,7 @@ public class CalendarListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTimeSkip(TimeSkipEvent event) {
+        if (event.isCancelled()) return;
         World world = event.getWorld();
         calendarManager.tickWorld(world);
         if (foliaLib != null) {
@@ -39,5 +41,13 @@ public class CalendarListener implements Listener {
     public void onWorldLoad(WorldLoadEvent event) {
         World world = event.getWorld();
         calendarManager.tickWorld(world);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldUnload(WorldUnloadEvent event) {
+        if (event.isCancelled()) return;
+        World world = event.getWorld();
+        calendarManager.saveData();
+        calendarManager.unloadWorld(world.getUID());
     }
 }

@@ -99,8 +99,9 @@ public class SeasonsConfig {
     }
 
     private void addIfPresent(Set<Material> set, String name) {
-        Material mat = Material.matchMaterial(name);
-        if (mat != null) {
+        if (name == null || name.isBlank()) return;
+        Material mat = Material.matchMaterial(name.trim());
+        if (mat != null && mat.isBlock()) {
             set.add(mat);
         }
     }
@@ -133,10 +134,14 @@ public class SeasonsConfig {
         // Crops
         this.winterGrowthPaused = config.getBoolean("crops.winter-growth-paused", true);
         double witherChance = config.getDouble("crops.winter-wither-chance", 0.08);
+        if (!Double.isFinite(witherChance) || Double.isNaN(witherChance)) {
+            witherChance = 0.08;
+        }
         this.winterWitherChance = Math.max(0.0, Math.min(1.0, witherChance));
+
         String witherMatName = config.getString("crops.wither-material", "DEAD_BUSH");
-        Material matchMat = Material.matchMaterial(witherMatName);
-        this.witherMaterial = matchMat != null ? matchMat : Material.DEAD_BUSH;
+        Material matchMat = witherMatName != null ? Material.matchMaterial(witherMatName.trim()) : null;
+        this.witherMaterial = (matchMat != null && matchMat.isBlock()) ? matchMat : Material.DEAD_BUSH;
         this.playWitherEffects = config.getBoolean("crops.play-wither-effects", true);
 
         if (config.contains("crops.affected-crops")) {
@@ -149,11 +154,11 @@ public class SeasonsConfig {
         // Greenhouse
         this.greenhouseEnabled = config.getBoolean("greenhouse.enabled", true);
         this.requireGlassCeiling = config.getBoolean("greenhouse.require-glass-ceiling", true);
-        this.maxCeilingHeight = Math.max(1, config.getInt("greenhouse.max-ceiling-height", 16));
+        this.maxCeilingHeight = Math.max(1, Math.min(384, config.getInt("greenhouse.max-ceiling-height", 16)));
         this.requireHeatSource = config.getBoolean("greenhouse.require-heat-source", true);
-        this.heatRadius = Math.max(1, config.getInt("greenhouse.heat-radius", 4));
-        this.cacheTtlSeconds = Math.max(1, config.getInt("greenhouse.cache-ttl-seconds", 30));
-        this.cacheMaxSize = Math.max(100, config.getInt("greenhouse.cache-max-size", 10000));
+        this.heatRadius = Math.max(1, Math.min(32, config.getInt("greenhouse.heat-radius", 4)));
+        this.cacheTtlSeconds = Math.max(1, Math.min(86400, config.getInt("greenhouse.cache-ttl-seconds", 30)));
+        this.cacheMaxSize = Math.max(100, Math.min(1_000_000, config.getInt("greenhouse.cache-max-size", 10000)));
         this.preventFreezeAndSnow = config.getBoolean("greenhouse.prevent-freeze-and-snow", true);
 
         if (config.contains("greenhouse.allowed-glass-materials")) {
@@ -171,7 +176,8 @@ public class SeasonsConfig {
         }
 
         // Messages
-        this.prefix = config.getString("messages.prefix", "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ");
+        String configuredPrefix = config.getString("messages.prefix", "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ");
+        this.prefix = configuredPrefix != null ? configuredPrefix : "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ";
     }
 
     // Getters and Setters for testing and runtime modification
@@ -188,10 +194,17 @@ public class SeasonsConfig {
     public void setWinterGrowthPaused(boolean paused) { this.winterGrowthPaused = paused; }
 
     public double getWinterWitherChance() { return winterWitherChance; }
-    public void setWinterWitherChance(double chance) { this.winterWitherChance = Math.max(0.0, Math.min(1.0, chance)); }
+    public void setWinterWitherChance(double chance) {
+        if (!Double.isFinite(chance) || Double.isNaN(chance)) {
+            chance = 0.08;
+        }
+        this.winterWitherChance = Math.max(0.0, Math.min(1.0, chance));
+    }
 
     public Material getWitherMaterial() { return witherMaterial; }
-    public void setWitherMaterial(Material mat) { this.witherMaterial = mat; }
+    public void setWitherMaterial(Material mat) {
+        this.witherMaterial = (mat != null && mat.isBlock()) ? mat : Material.DEAD_BUSH;
+    }
 
     public boolean isPlayWitherEffects() { return playWitherEffects; }
     public void setPlayWitherEffects(boolean play) { this.playWitherEffects = play; }
@@ -205,19 +218,19 @@ public class SeasonsConfig {
     public void setRequireGlassCeiling(boolean req) { this.requireGlassCeiling = req; }
 
     public int getMaxCeilingHeight() { return maxCeilingHeight; }
-    public void setMaxCeilingHeight(int height) { this.maxCeilingHeight = height; }
+    public void setMaxCeilingHeight(int height) { this.maxCeilingHeight = Math.max(1, Math.min(384, height)); }
 
     public boolean isRequireHeatSource() { return requireHeatSource; }
     public void setRequireHeatSource(boolean req) { this.requireHeatSource = req; }
 
     public int getHeatRadius() { return heatRadius; }
-    public void setHeatRadius(int radius) { this.heatRadius = radius; }
+    public void setHeatRadius(int radius) { this.heatRadius = Math.max(1, Math.min(32, radius)); }
 
     public int getCacheTtlSeconds() { return cacheTtlSeconds; }
-    public void setCacheTtlSeconds(int ttl) { this.cacheTtlSeconds = ttl; }
+    public void setCacheTtlSeconds(int ttl) { this.cacheTtlSeconds = Math.max(1, Math.min(86400, ttl)); }
 
     public int getCacheMaxSize() { return cacheMaxSize; }
-    public void setCacheMaxSize(int size) { this.cacheMaxSize = size; }
+    public void setCacheMaxSize(int size) { this.cacheMaxSize = Math.max(100, Math.min(1_000_000, size)); }
 
     public boolean isPreventFreezeAndSnow() { return preventFreezeAndSnow; }
     public void setPreventFreezeAndSnow(boolean prevent) { this.preventFreezeAndSnow = prevent; }

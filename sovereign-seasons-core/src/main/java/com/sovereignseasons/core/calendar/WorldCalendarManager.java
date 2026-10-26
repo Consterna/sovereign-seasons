@@ -115,6 +115,8 @@ public class WorldCalendarManager implements SeasonService {
                         lastObservedEffectiveDay.put(world.getUID(), current.totalDaysElapsed());
                         lastObservedSeason.put(world.getUID(), current.season());
                     }
+                } else {
+                    unloadWorld(world.getUID());
                 }
             }
         }
@@ -123,7 +125,7 @@ public class WorldCalendarManager implements SeasonService {
     /**
      * Cleans up tracking state when a world is unloaded to prevent world leaks.
      */
-    public void unloadWorld(UUID worldUid) {
+    public synchronized void unloadWorld(UUID worldUid) {
         if (worldUid == null) return;
         lastObservedEffectiveDay.remove(worldUid);
         lastObservedSeason.remove(worldUid);
@@ -174,13 +176,7 @@ public class WorldCalendarManager implements SeasonService {
         long ticksPerDay = config.getTicksPerDay();
         int rawInGameDay = (int) (fullTime / ticksPerDay);
 
-        int offset = dayOffsets.getOrDefault(world.getUID(), 0);
-        if (rawInGameDay + offset < 0) {
-            // When world time was reset backwards, normalize offset so calendar does not freeze
-            offset = -rawInGameDay;
-            dayOffsets.put(world.getUID(), offset);
-            saveData();
-        }
+        int offset = getNormalizedOffset(world.getUID(), rawInGameDay);
         int effectiveDay = Math.max(0, rawInGameDay + offset);
 
         long timeOfDay = world.getTime();
@@ -189,12 +185,23 @@ public class WorldCalendarManager implements SeasonService {
         return calculateDate(effectiveDay, safeTimeOfDay);
     }
 
+    private synchronized int getNormalizedOffset(UUID worldUid, int rawInGameDay) {
+        int offset = dayOffsets.getOrDefault(worldUid, 0);
+        if (rawInGameDay + offset < 0) {
+            // When world time was reset backwards, normalize offset so calendar does not freeze
+            offset = -rawInGameDay;
+            dayOffsets.put(worldUid, offset);
+            saveData();
+        }
+        return offset;
+    }
+
     @Override
     public void setSeason(World world, Season targetSeason) {
         applySeason(world, targetSeason, true);
     }
 
-    private void applySeason(World world, Season targetSeason, boolean fireEvent) {
+    private synchronized void applySeason(World world, Season targetSeason, boolean fireEvent) {
         if (world == null || targetSeason == null) return;
 
         CalendarDate current = getDate(world);
@@ -241,7 +248,7 @@ public class WorldCalendarManager implements SeasonService {
     }
 
     @Override
-    public void setDayOfSeason(World world, int targetDayOfSeason) {
+    public synchronized void setDayOfSeason(World world, int targetDayOfSeason) {
         if (world == null) return;
 
         CalendarDate current = getDate(world);

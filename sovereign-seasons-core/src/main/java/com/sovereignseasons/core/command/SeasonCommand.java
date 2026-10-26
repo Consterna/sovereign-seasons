@@ -51,12 +51,12 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             @NotNull String label,
             @NotNull String[] args
     ) {
-        if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
+        if (args.length == 0 || args[0].isBlank() || args[0].trim().equalsIgnoreCase("info")) {
             handleInfo(sender, args);
             return true;
         }
 
-        String sub = args[0].toLowerCase(Locale.ROOT);
+        String sub = args[0].toLowerCase(Locale.ROOT).trim();
         switch (sub) {
             case "greenhouse", "invernadero" -> handleGreenhouse(sender);
             case "set" -> handleSet(sender, args);
@@ -78,9 +78,10 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         World world;
         if (args.length >= 2 && !args[1].isBlank()) {
-            world = org.bukkit.Bukkit.getWorld(args[1]);
+            String worldName = args[1].trim();
+            world = org.bukkit.Bukkit.getWorld(worldName);
             if (world == null) {
-                sendMsg(sender, "<red>El mundo <white>" + args[1] + "</white> no existe o no está cargado.</red>");
+                sendMsg(sender, "<red>El mundo <white>" + worldName + "</white> no existe o no está cargado.</red>");
                 return;
             }
         } else {
@@ -173,7 +174,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        Season target = Season.fromString(args[1]);
+        Season target = Season.fromString(args[1].trim());
         if (target == null) {
             sendMsg(sender, "<red>Estación inválida. Usa: <yellow>spring, summer, autumn, winter</yellow></red>");
             return;
@@ -181,9 +182,10 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         World world;
         if (args.length >= 3 && !args[2].isBlank()) {
-            world = org.bukkit.Bukkit.getWorld(args[2]);
+            String worldName = args[2].trim();
+            world = org.bukkit.Bukkit.getWorld(worldName);
             if (world == null) {
-                sendMsg(sender, "<red>El mundo <white>" + args[2] + "</white> no existe o no está cargado.</red>");
+                sendMsg(sender, "<red>El mundo <white>" + worldName + "</white> no existe o no está cargado.</red>");
                 return;
             }
         } else {
@@ -217,7 +219,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         int day;
         try {
-            day = Integer.parseInt(args[1]);
+            day = Integer.parseInt(args[1].trim());
         } catch (NumberFormatException e) {
             sendMsg(sender, "<red>Día inválido. Debe ser un número entero entre 1 y " + config.getDaysPerSeason() + ".</red>");
             return;
@@ -230,9 +232,10 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
 
         World world;
         if (args.length >= 3 && !args[2].isBlank()) {
-            world = org.bukkit.Bukkit.getWorld(args[2]);
+            String worldName = args[2].trim();
+            world = org.bukkit.Bukkit.getWorld(worldName);
             if (world == null) {
-                sendMsg(sender, "<red>El mundo <white>" + args[2] + "</white> no existe o no está cargado.</red>");
+                sendMsg(sender, "<red>El mundo <white>" + worldName + "</white> no existe o no está cargado.</red>");
                 return;
             }
         } else {
@@ -279,14 +282,17 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        InputStream defaultStream = getClass().getClassLoader().getResourceAsStream("config.yml");
-        config.load(dataFolder, defaultStream);
-        greenhouseService.clearCache();
-        if (seasonService instanceof com.sovereignseasons.core.calendar.WorldCalendarManager wcm) {
-            wcm.reload();
+        try {
+            InputStream defaultStream = getClass().getClassLoader().getResourceAsStream("config.yml");
+            config.load(dataFolder, defaultStream);
+            greenhouseService.clearCache();
+            if (seasonService instanceof com.sovereignseasons.core.calendar.WorldCalendarManager wcm) {
+                wcm.reload();
+            }
+            sendMsg(sender, "<green>Configuración recargada y caché de invernadero limpiada exitosamente.</green>");
+        } catch (Exception e) {
+            sendMsg(sender, "<red>Error al recargar la configuración: <white>" + e.getMessage() + "</white></red>");
         }
-
-        sendMsg(sender, "<green>Configuración recargada y caché de invernadero limpiada exitosamente.</green>");
     }
 
     @Override
