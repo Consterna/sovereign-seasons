@@ -1,5 +1,12 @@
 # 🌾 Sovereign Seasons
 
+[![CI Pipeline](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Consterna/sovereign-seasons?label=Release&color=blue)](https://github.com/Consterna/sovereign-seasons/releases)
+[![Packages](https://img.shields.io/badge/Packages-GHCR%20%7C%20Maven-blue.svg)](https://github.com/Consterna/sovereign-seasons/pkgs/container/sovereign-seasons)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-21%20Temurin-orange.svg)](https://adoptium.net/)
+[![Platform](https://img.shields.io/badge/Minecraft-Paper%20%7C%20Folia%201.21.x-brightgreen.svg)](https://papermc.io)
+
 Ecosistema modular de estaciones climáticas para servidores Minecraft Paper/Folia (1.20.4–1.21.x+), diseñado para comunidades de supervivencia inmersiva y geopolítica con economías vivas y agricultura realista.
 
 El ciclo de estaciones opera estrictamente en **días de juego de Minecraft (in-game days)** a partir de los ticks mundiales (`24.000` ticks = 1 día), desacoplado del tiempo real para garantizar una experiencia orgánica donde el paso de los días y el sueño de los jugadores influyen en el calendario del mundo.
@@ -61,3 +68,71 @@ El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 El artefacto compilado se generará en:
 `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar`
+
+---
+
+## 🐳 Despliegue y Pruebas con Docker (Paper 1.21.x)
+
+El repositorio incluye soporte completo para desplegar un servidor Paper 1.21.x containerizado con el plugin `sovereign-seasons-core` preinstalado y configurado con las banderas de JVM optimizadas de Aikar:
+
+### Inicio Rápido (Multi-Stage Dockerfile)
+
+```bash
+# Construir la imagen y levantar el servidor Paper en segundo plano
+docker compose up -d
+
+# Seguir los registros de la consola del servidor
+docker compose logs -f
+
+# Acceder a la consola interactiva del servidor Minecraft
+docker attach sovereign-seasons-paper
+# (Para salir de la consola sin detener el servidor: presionar Ctrl + P, luego Ctrl + Q)
+
+# Detener el servidor de forma segura
+docker compose down
+```
+
+### Imagen Precompilada desde GitHub Container Registry (GHCR)
+
+También puedes ejecutar el servidor directamente con la imagen oficial publicada en GitHub Packages sin compilar localmente:
+
+```bash
+# Descargar y ejecutar la imagen pública del contenedor
+docker run -d --name sovereign-seasons-paper \
+  -p 25565:25565 \
+  -e EULA=true \
+  -v ./docker/data:/server/data \
+  ghcr.io/consterna/sovereign-seasons:1.0.0
+```
+
+### Perfil Alternativo con Imagen Comunitaria (`itzg/minecraft-server`)
+
+Si prefieres utilizar la imagen comunitaria `itzg/minecraft-server:java21` montando el binario JAR local previamente compilado:
+
+```bash
+# Compilar previamente el JAR sombreado
+./gradlew shadowJar
+
+# Levantar el servidor con el perfil itzg
+docker compose --profile itzg up -d
+```
+
+### Variables de Entorno Configurables
+
+| Variable | Por Defecto | Descripción |
+|---|---|---|
+| `EULA` | `true` (en compose) | Aceptación del Contrato de Licencia de Usuario Final (EULA) de Mojang. |
+| `MEMORY` | `2G` | Memoria RAM asignada a la JVM (`-Xms` y `-Xmx`). |
+| `MINECRAFT_VERSION` | `1.21.4` | Versión de Paper a descargar y ejecutar automáticamente. |
+| `SERVER_PORT` | `25565` | Puerto expuesto del servidor Minecraft. |
+
+Los datos de mundos, configuraciones del plugin y logs persisten localmente en el directorio `./docker/data`.
+
+---
+
+## 📜 Gobernanza y Comunidad
+
+- **Licencia:** Distribuido bajo la Licencia MIT. Consulta [LICENSE](LICENSE) para más detalles.
+- **Guía de Contribución:** Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para detalles sobre estándares de código, pruebas y flujo de trabajo.
+- **Seguridad:** Consulta [SECURITY.md](SECURITY.md) para conocer la política de versiones y divulgación responsable de vulnerabilidades.
+- **Código de Conducta:** Consulta [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) para conocer las normas de convivencia de la comunidad.

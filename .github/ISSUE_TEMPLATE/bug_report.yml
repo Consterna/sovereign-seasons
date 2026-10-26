@@ -1,0 +1,90 @@
+name: "🐛 Reporte de Error (Bug Report)"
+description: "Crea un reporte de error para ayudarnos a identificar y resolver un fallo en Sovereign Seasons."
+title: "[BUG]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por reportar un problema! Por favor verifica antes en los issues existentes si este error ya fue reportado.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Módulo afectado
+      description: Selecciona el módulo de Sovereign Seasons donde ocurre el fallo.
+      options:
+        - sovereign-seasons-core
+        - sovereign-seasons-pantry
+        - sovereign-seasons-logistics
+        - sovereign-seasons-commerce
+        - sovereign-seasons-resourcepack
+        - No estoy seguro / Múltiples módulos
+    validations:
+      required: true
+  - type: input
+    id: mc-version
+    attributes:
+      label: Versión de Minecraft
+      description: "Ejemplo: 1.21.4, 1.21.1, 1.20.4"
+      placeholder: "1.21.4"
+    validations:
+      required: true
+  - type: dropdown
+    id: server-software
+    attributes:
+      label: Plataforma de servidor
+      description: Selecciona el tipo de servidor que estás ejecutando.
+      options:
+        - Paper
+        - Folia
+        - Purpur
+        - Spigot
+        - Otro
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Versión del plugin
+      description: "Versión de Sovereign Seasons (ej: v1.0.0)"
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción del problema
+      description: Explica de forma clara y concisa en qué consiste el error.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Pasos para reproducir
+      description: Indica los pasos detallados para replicar el problema.
+      placeholder: |
+        1. Configurar un mundo con estación de invierno.
+        2. Plantar trigo en un bloque de cultivo al aire libre.
+        3. Intentar fertilizar con harina de hueso.
+        4. Observar el comportamiento.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Comportamiento esperado
+      description: ¿Qué debería haber ocurrido en condiciones normales?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs del servidor y trazas de error
+      description: Pega aquí los registros relevantes de la consola (`latest.log`) o los stack traces.
+      render: text
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuración relevante (`config.yml`)
+      description: Si el problema está relacionado con la configuración, incluye los fragmentos pertinentes.
+      render: yaml

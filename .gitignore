@@ -26,3 +26,7 @@ world/
 world_nether/
 world_the_end/
 *.hprof
+
+# Docker runtime data
+docker/data/
+docker/data-itzg/

@@ -1,0 +1,14 @@
+.git
+.github
+.gradle
+build
+*/build
+docker/data
+docker/data-itzg
+*.log
+*.tmp
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws

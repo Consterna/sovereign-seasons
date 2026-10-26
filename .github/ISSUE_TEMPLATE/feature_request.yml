@@ -1,0 +1,47 @@
+name: "💡 Propuesta de Mejora (Feature Request)"
+description: "Propón una nueva funcionalidad, mecánica estacional o mejora arquitectónica para Sovereign Seasons."
+title: "[FEATURE]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por sugerir una nueva idea! Las propuestas deben mantener el enfoque inmersivo, modular y de alto rendimiento de Sovereign Seasons.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Módulo objetivo
+      description: Selecciona el módulo principal para esta característica.
+      options:
+        - sovereign-seasons-core (Calendario, Invernaderos, Estaciones base)
+        - sovereign-seasons-pantry (Descomposición de alimentos, Bodegas)
+        - sovereign-seasons-logistics (Transporte, Fardos, Silos)
+        - sovereign-seasons-commerce (Economía, Contratos, Precios)
+        - sovereign-seasons-resourcepack (Texturas, Modelos, Glifos)
+        - Ecosistema completo / Múltiples módulos
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: ¿Qué problema o limitación resuelve esta propuesta?
+      description: Explica el escenario o caso de uso que no está cubierto actualmente.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Descripción de la solución propuesta
+      description: Detalla cómo imaginas que debería funcionar la característica (comandos, eventos, configuraciones, mecánicas de juego).
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas o soluciones secundarias consideradas
+      description: ¿Has evaluado otros enfoques o plugins complementarios?
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto adicional
+      description: Enlaces, capturas de pantalla, referencias de otros juegos o detalles de compatibilidad.

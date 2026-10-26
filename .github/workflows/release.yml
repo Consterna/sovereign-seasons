@@ -1,0 +1,62 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish-release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build production shadow JAR
+        run: ./gradlew shadowJar --no-daemon
+
+      - name: Publish Maven Package to GitHub Packages
+        run: ./gradlew :sovereign-seasons-core:publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Release Notes from CHANGELOG
+        run: |
+          python3 -c "
+          import os, re, pathlib
+          tag = os.environ.get('GITHUB_REF_NAME', '').lstrip('v')
+          text = pathlib.Path('CHANGELOG.md').read_text(encoding='utf-8')
+          pattern = rf'## \[{re.escape(tag)}\][^\n]*\n(.*?)(?=\n## \[|\Z)'
+          m = re.search(pattern, text, re.DOTALL)
+          if m:
+              pathlib.Path('RELEASE_NOTES.md').write_text(m.group(1).strip(), encoding='utf-8')
+          else:
+              pathlib.Path('RELEASE_NOTES.md').write_text('Release ' + tag, encoding='utf-8')
+          "
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: sovereign-seasons-core/build/libs/sovereign-seasons-core-*.jar
+          generate_release_notes: true

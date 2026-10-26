@@ -1,10 +1,32 @@
 plugins {
     `java-library`
+    `maven-publish`
     id("com.gradleup.shadow") version "8.3.6"
 }
 
 group = "com.sovereignseasons"
 version = "1.0.0"
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            groupId = "com.sovereignseasons"
+            artifactId = "sovereign-seasons-core"
+            version = "1.0.0"
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Consterna/sovereign-seasons")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: ""
+            }
+        }
+    }
+}
 
 java {
     toolchain {

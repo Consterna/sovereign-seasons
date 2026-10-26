@@ -1,5 +1,10 @@
 * text=auto eol=lf
 *.bat text eol=crlf
 *.cmd text eol=crlf
+*.sh text eol=lf
+Dockerfile text eol=lf
+compose.yml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
 *.jar binary
 *.png binary

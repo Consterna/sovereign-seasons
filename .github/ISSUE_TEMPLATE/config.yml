@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 Debates y Soporte Comunitario"
+    url: "https://github.com/Consterna/sovereign-seasons/discussions"
+    about: "Preguntas de configuración, intercambio de ideas o discusiones generales sobre el diseño del plugin."
+  - name: "🛡️ Reporte de Vulnerabilidades"
+    url: "https://github.com/Consterna/sovereign-seasons/security/advisories/new"
+    about: "Reporte privado de problemas de seguridad o vulnerabilidades críticas."
