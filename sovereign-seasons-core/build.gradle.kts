@@ -60,10 +60,10 @@ java {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    implementation("com.tcoded:FoliaLib:0.4.4")
+    implementation("com.github.TechnicallyCoded:FoliaLib:0.4.4")
 
     testImplementation("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    testImplementation("com.tcoded:FoliaLib:0.4.4")
+    testImplementation("com.github.TechnicallyCoded:FoliaLib:0.4.4")
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.27.7")

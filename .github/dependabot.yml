@@ -32,6 +32,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "eclipse-temurin"
         versions: [">= 22"]

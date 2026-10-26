@@ -14,7 +14,7 @@ java {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.tcoded:FoliaLib:0.4.4")
+    compileOnly("com.github.TechnicallyCoded:FoliaLib:0.4.4")
     compileOnly(project(":sovereign-seasons-core"))
 
     testImplementation("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
