@@ -3,6 +3,8 @@ version: '${version}'
 main: com.sovereignseasons.core.SovereignSeasonsCorePlugin
 api-version: '1.20'
 folia-supported: true
+author: Cristian
+website: https://github.com/Consterna/sovereign-seasons
 description: Sistema avanzado de estaciones modulares basado en dias de juego de Minecraft.
 
 commands:

@@ -13,6 +13,8 @@
 5. [Estándares de Código](#-estándares-de-código)
 6. [Pruebas Automatizadas](#-pruebas-automatizadas)
 7. [Proceso de Pull Request](#-proceso-de-pull-request)
+8. [Licenciamiento y Certificado de Origen (DCO)](#-licenciamiento-y-certificado-de-origen-dco)
+9. [Política de Marcas, Forks y Re-branding](#-política-de-marcas-forks-y-re-branding)
 
 ---
 
@@ -108,3 +110,25 @@ Antes de enviar cualquier cambio, ejecuta la suite de pruebas automatizadas:
 3. Abre un Pull Request utilizando la plantilla predeterminada ([`PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)).
 4. Asegúrate de describir claramente la motivación, los módulos afectados y las pruebas realizadas.
 5. El pipeline de CI validará automáticamente la compilación y la suite de pruebas en Ubuntu con Java 21 Temurin.
+
+---
+
+## ⚖️ Licenciamiento y Certificado de Origen (DCO)
+
+Al enviar un Pull Request o contribuir código a Sovereign Seasons, aceptas formalmente que:
+1. Toda contribución se licencia bajo la **GNU General Public License v3.0 (GPL-3.0)** o cualquier versión posterior.
+2. Certificas la autoría de tu código bajo el **Developer Certificate of Origin 1.1 (DCO)** de la Linux Foundation:
+   - Declaras que la contribución fue creada en su totalidad o en parte por ti, y que tienes el derecho legal de enviarla bajo la licencia GPL-3.0.
+   - Declaras que la contribución no infringe derechos de autor, patentes ni acuerdos de confidencialidad de terceros.
+   - Entiendes que la contribución y el registro histórico de autoría son públicos y permanentes.
+
+---
+
+## 🏷️ Política de Marcas, Forks y Re-branding
+
+Valoramos el ecosistema de código abierto y respaldamos el derecho a bifurcar (fork) el proyecto bajo los términos de la GPL-3.0. No obstante, para proteger la reputación del proyecto original y evitar confusiones en la comunidad de Minecraft:
+- **Nombre y Marcas Registradas:** El nombre "Sovereign Seasons", los logotipos, iconos y texturas en `sovereign-seasons-resourcepack` son propiedad exclusiva del autor (Cristian / @Consterna).
+- **Re-branding en Versiones Derivadas:** Si distribuyes una versión modificada o un fork público, **debes cambiar el nombre del plugin** (por ejemplo, *MiPluginSeasons* en lugar de *Sovereign Seasons*) y no utilizar los logotipos oficiales.
+- **Atribución Transparente:** Debes conservar los créditos originales de autoría en el archivo `NOTICE`, `LICENSE` y documentación, enlazando al repositorio upstream: `https://github.com/Consterna/sovereign-seasons`.
+- **Código Abierto Garantizado:** Bajo la licencia GPL-3.0, queda terminantemente prohibido cerrar el código fuente o vender versiones derivadas propietarias sin publicar el código fuente completo.
+

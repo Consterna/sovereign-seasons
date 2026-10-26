@@ -8,3 +8,11 @@ compose.yml text eol=lf
 *.yaml text eol=lf
 *.jar binary
 *.png binary
+
+# Git archive / GitHub release tarball export ignore
+/.github export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.dockerignore export-ignore
+/docker export-ignore
+/compose.yml export-ignore

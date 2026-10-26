@@ -1,0 +1,74 @@
+# Sovereign Seasons
+Copyright (C) 2026 Cristian (GitHub: @Consterna)
+Contacto: cristianguerrero1958@outlook.com
+Repositorio Oficial: https://github.com/Consterna/sovereign-seasons
+
+===============================================================================
+LICENCIA DE CÓDIGO FUENTE (GNU GENERAL PUBLIC LICENSE v3.0)
+===============================================================================
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo bajo los
+términos de la Licencia Pública General GNU (GNU General Public License v3.0)
+publicada por la Free Software Foundation, bien de la versión 3 de dicha Licencia,
+o (a su elección) cualquier versión posterior.
+
+Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA
+GARANTÍA; ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA
+UN PROPÓSITO PARTICULAR. Consulte la Licencia Pública General GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General GNU junto con este
+programa (archivo LICENSE). Si no es así, consulte <https://www.gnu.org/licenses/>.
+
+===============================================================================
+PROTECCIÓN DE PROPIEDAD INTELECTUAL, MARCA Y POLÍTICA ANTI-PLAGIO
+===============================================================================
+
+De conformidad con la Sección 7(e) de la GNU General Public License v3.0:
+
+1. **Titularidad Exclusiva de Autor:**
+   Todo el código fuente original, diseño arquitectónico, fórmulas de cálculo
+   estacional, algoritmos de detección espacial de invernaderos y documentación
+   contenida en este repositorio han sido desarrollados por Cristian (@Consterna).
+
+2. **Reserva de Derechos de Marca e Identidad:**
+   La licencia de software libre (GPLv3) otorga derechos sobre el código fuente,
+   pero **NO transfiere ni concede derechos sobre la marca comercial, nombre del
+   proyecto ni activos visuales**. El nombre "Sovereign Seasons", la abreviatura
+   "sovereign-seasons", los logotipos, iconos, glifos y texturas incluidos en
+   `sovereign-seasons-resourcepack` son propiedad intelectual del autor.
+
+3. **Política Obligatoria para Forks y Versiones Derivadas (Anti-Plagio):**
+   Cualquier persona, colectivo o empresa que bifurque (fork), modifique o
+   redistribuya este proyecto tiene la obligación legal de:
+   - **Publicar el código fuente completo:** La licencia GPL-3.0 prohíbe cerrar
+     el código o privatizar versiones modificadas. Toda redistribución debe incluir
+     el código fuente íntegro bajo la misma licencia GPL-3.0.
+   - **Re-branding obligatorio:** Si distribuye una versión modificada, DEBE
+     cambiar el nombre del plugin, remover los logotipos oficiales y no utilizar
+     el nombre "Sovereign Seasons" como reclamo publicitario o de afiliación, de modo
+     que los usuarios finales distingan con total claridad que no se trata de una
+     compilación oficial mantenida por Cristian.
+   - **Preservación inalterable de avisos de autor:** Se debe mantener de forma
+     visible y destacada la atribución de autoría original a Cristian, junto con el
+     enlace al repositorio oficial: `https://github.com/Consterna/sovereign-seasons`.
+
+===============================================================================
+AVISO DE MARCAS DE TERCEROS (DESCARGO DE RESPONSABILIDAD DE MOJANG)
+===============================================================================
+
+- "Minecraft" es una marca registrada de Mojang AB y Microsoft Corporation.
+- **Sovereign Seasons** es un ecosistema independiente de software para servidores
+  y **NO es un producto oficial de Minecraft ni está aprobado ni asociado con
+  Mojang AB o Microsoft Corporation.**
+- Este proyecto se adhiere y respeta los Lineamientos Comerciales y de Marca de Mojang:
+  <https://account.mojang.com/terms#brand>
+
+===============================================================================
+COMPONENTES Y LIBRERÍAS DE TERCEROS
+===============================================================================
+
+Este proyecto integra y enlaza con las siguientes herramientas de código abierto:
+- **PaperMC API**: Copyright (C) PaperMC Contributors (Licenciado bajo GPL-3.0 / MIT).
+- **FoliaLib**: Copyright (C) 2023-2024 tcoded (Licenciado bajo Licencia MIT).
+- **Guava (Google Core Libraries)**: Copyright (C) The Guava Authors (Apache License 2.0).
+- **JUnit 5 & AssertJ**: Eclipse Public License 2.0 / Apache License 2.0.

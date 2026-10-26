@@ -1,9 +1,11 @@
 # 🌾 Sovereign Seasons
 
 [![CI Pipeline](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/ci.yml)
+[![CodeQL Analysis](https://github.com/Consterna/sovereign-seasons/actions/workflows/codeql.yml/badge.svg)](https://github.com/Consterna/sovereign-seasons/actions/workflows/codeql.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Consterna/sovereign-seasons?label=Release&color=blue)](https://github.com/Consterna/sovereign-seasons/releases)
 [![Packages](https://img.shields.io/badge/Packages-GHCR%20%7C%20Maven-blue.svg)](https://github.com/Consterna/sovereign-seasons/pkgs/container/sovereign-seasons)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](SECURITY.md)
 [![Java](https://img.shields.io/badge/Java-21%20Temurin-orange.svg)](https://adoptium.net/)
 [![Platform](https://img.shields.io/badge/Minecraft-Paper%20%7C%20Folia%201.21.x-brightgreen.svg)](https://papermc.io)
 
@@ -130,9 +132,10 @@ Los datos de mundos, configuraciones del plugin y logs persisten localmente en e
 
 ---
 
-## 📜 Gobernanza y Comunidad
+## 📜 Gobernanza, Propiedad Intelectual y Seguridad
 
-- **Licencia:** Distribuido bajo la Licencia MIT. Consulta [LICENSE](LICENSE) para más detalles.
-- **Guía de Contribución:** Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para detalles sobre estándares de código, pruebas y flujo de trabajo.
-- **Seguridad:** Consulta [SECURITY.md](SECURITY.md) para conocer la política de versiones y divulgación responsable de vulnerabilidades.
+- **Licencia:** Distribuido bajo la **GNU General Public License v3.0 (GPL-3.0)**. Consulta [LICENSE](LICENSE) para más detalles.
+- **Aviso Legal y Derechos de Autor:** Consulta [NOTICE](NOTICE) y [COPYRIGHT](COPYRIGHT) para detalles sobre titularidad de autor, política de marcas, requerimientos anti-plagio y descargo de marcas de Mojang AB.
+- **Guía de Contribución:** Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para detalles sobre estándares de código, pruebas, DCO (Developer Certificate of Origin) y política de forks/re-branding.
+- **Seguridad y Análisis SAST:** Consulta [SECURITY.md](SECURITY.md) para conocer la política de divulgación coordinada de vulnerabilidades y la integración de análisis continuo con CodeQL.
 - **Código de Conducta:** Consulta [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) para conocer las normas de convivencia de la comunidad.
