@@ -22,6 +22,7 @@ package com.sovereignseasons.api;
 
 import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
+import com.sovereignseasons.api.temperature.TemperatureService;
 
 import java.util.Objects;
 
@@ -34,6 +35,8 @@ public interface SovereignSeasonsApi {
     SeasonService getSeasonService();
 
     GreenhouseService getGreenhouseService();
+
+    TemperatureService getTemperatureService();
 
     // Singleton holder
     final class Holder {

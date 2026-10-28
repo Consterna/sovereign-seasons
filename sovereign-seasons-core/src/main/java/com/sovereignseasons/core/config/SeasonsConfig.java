@@ -20,6 +20,7 @@
 
 package com.sovereignseasons.core.config;
 
+import com.sovereignseasons.api.Season;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -62,6 +63,16 @@ public class SeasonsConfig {
     private boolean preventFreezeAndSnow = true;
     private final Set<Material> allowedGlassMaterials = EnumSet.noneOf(Material.class);
     private final Set<Material> allowedHeatSources = EnumSet.noneOf(Material.class);
+
+    // Temperature
+    private boolean temperatureEnabled = true;
+    private double biomeTemperatureScale = 25.0;
+    private double biomeTemperatureOffset = -5.0;
+    private final Map<Season, Double> seasonTemperatureOffsets = new EnumMap<>(Season.class);
+    private double freezingBelow = 0.0;
+    private double coldBelow = 10.0;
+    private double mildBelow = 20.0;
+    private double warmBelow = 30.0;
 
     // Messages
     private String prefix = "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ";
@@ -116,6 +127,12 @@ public class SeasonsConfig {
         addIfPresent(allowedHeatSources, "FURNACE");
         addIfPresent(allowedHeatSources, "BLAST_FURNACE");
         addIfPresent(allowedHeatSources, "SMOKER");
+
+        // Default seasonal temperature offsets (Celsius)
+        seasonTemperatureOffsets.put(Season.SPRING, 0.0);
+        seasonTemperatureOffsets.put(Season.SUMMER, 8.0);
+        seasonTemperatureOffsets.put(Season.AUTUMN, -2.0);
+        seasonTemperatureOffsets.put(Season.WINTER, -12.0);
     }
 
     private void addIfPresent(Set<Material> set, String name) {
@@ -198,6 +215,21 @@ public class SeasonsConfig {
             }
         }
 
+        // Temperature
+        this.temperatureEnabled = config.getBoolean("temperature.enabled", true);
+        setBiomeTemperatureScale(config.getDouble("temperature.biome-scale", 25.0));
+        setBiomeTemperatureOffset(config.getDouble("temperature.biome-offset", -5.0));
+        for (Season season : Season.values()) {
+            double fallback = seasonTemperatureOffsets.getOrDefault(season, 0.0);
+            setSeasonTemperatureOffset(season, config.getDouble("temperature.season-offsets." + season.getIdentifier(), fallback));
+        }
+        setBandThresholds(
+                config.getDouble("temperature.bands.freezing-below", 0.0),
+                config.getDouble("temperature.bands.cold-below", 10.0),
+                config.getDouble("temperature.bands.mild-below", 20.0),
+                config.getDouble("temperature.bands.warm-below", 30.0)
+        );
+
         // Messages
         String configuredPrefix = config.getString("messages.prefix", "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ");
         this.prefix = configuredPrefix != null ? configuredPrefix : "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> ";
@@ -260,6 +292,62 @@ public class SeasonsConfig {
 
     public Set<Material> getAllowedGlassMaterials() { return Collections.unmodifiableSet(allowedGlassMaterials); }
     public Set<Material> getAllowedHeatSources() { return Collections.unmodifiableSet(allowedHeatSources); }
+
+    public boolean isTemperatureEnabled() { return temperatureEnabled; }
+    public void setTemperatureEnabled(boolean enabled) { this.temperatureEnabled = enabled; }
+
+    public double getBiomeTemperatureScale() { return biomeTemperatureScale; }
+    public void setBiomeTemperatureScale(double scale) { this.biomeTemperatureScale = clampTemperature(scale, 25.0); }
+
+    public double getBiomeTemperatureOffset() { return biomeTemperatureOffset; }
+    public void setBiomeTemperatureOffset(double offset) { this.biomeTemperatureOffset = clampTemperature(offset, -5.0); }
+
+    public double getSeasonTemperatureOffset(Season season) {
+        if (season == null) return 0.0;
+        return seasonTemperatureOffsets.getOrDefault(season, 0.0);
+    }
+    public void setSeasonTemperatureOffset(Season season, double offset) {
+        if (season == null) return;
+        seasonTemperatureOffsets.put(season, clampTemperature(offset, 0.0));
+    }
+
+    public double getFreezingBelow() { return freezingBelow; }
+    public double getColdBelow() { return coldBelow; }
+    public double getMildBelow() { return mildBelow; }
+    public double getWarmBelow() { return warmBelow; }
+
+    /**
+     * Sets the temperature band thresholds. Thresholds must be finite, within [-100, 100] and strictly ascending;
+     * otherwise the defaults (0, 10, 20, 30) are restored to keep classification consistent.
+     */
+    public void setBandThresholds(double freezing, double cold, double mild, double warm) {
+        boolean inRange = isValidTemperature(freezing) && isValidTemperature(cold)
+                && isValidTemperature(mild) && isValidTemperature(warm);
+        if (!inRange || !(freezing < cold && cold < mild && mild < warm)) {
+            if (logger != null) {
+                logger.warning("Invalid temperature band thresholds; restoring defaults (0, 10, 20, 30).");
+            }
+            freezing = 0.0;
+            cold = 10.0;
+            mild = 20.0;
+            warm = 30.0;
+        }
+        this.freezingBelow = freezing;
+        this.coldBelow = cold;
+        this.mildBelow = mild;
+        this.warmBelow = warm;
+    }
+
+    private static boolean isValidTemperature(double value) {
+        return Double.isFinite(value) && value >= -100.0 && value <= 100.0;
+    }
+
+    private static double clampTemperature(double value, double fallback) {
+        if (!Double.isFinite(value)) {
+            return fallback;
+        }
+        return Math.max(-100.0, Math.min(100.0, value));
+    }
 
     public String getPrefix() { return prefix; }
 }

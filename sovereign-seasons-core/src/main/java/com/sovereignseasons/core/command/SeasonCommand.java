@@ -23,6 +23,8 @@ package com.sovereignseasons.core.command;
 import com.sovereignseasons.api.CalendarDate;
 import com.sovereignseasons.api.Season;
 import com.sovereignseasons.api.calendar.SeasonService;
+import com.sovereignseasons.api.temperature.TemperatureBand;
+import com.sovereignseasons.api.temperature.TemperatureService;
 import com.sovereignseasons.api.greenhouse.GreenhouseReport;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
 import com.sovereignseasons.core.config.SeasonsConfig;
@@ -49,6 +51,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
     private final SeasonsConfig config;
     private final SeasonService seasonService;
     private final GreenhouseService greenhouseService;
+    private final TemperatureService temperatureService;
     private final File dataFolder;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -58,9 +61,20 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             GreenhouseService greenhouseService,
             File dataFolder
     ) {
+        this(config, seasonService, greenhouseService, null, dataFolder);
+    }
+
+    public SeasonCommand(
+            SeasonsConfig config,
+            SeasonService seasonService,
+            GreenhouseService greenhouseService,
+            TemperatureService temperatureService,
+            File dataFolder
+    ) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.seasonService = Objects.requireNonNull(seasonService, "seasonService cannot be null");
         this.greenhouseService = Objects.requireNonNull(greenhouseService, "greenhouseService cannot be null");
+        this.temperatureService = temperatureService;
         this.dataFolder = dataFolder;
     }
 
@@ -139,6 +153,12 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
                     ? "<green>✔ En Invernadero (Cultivos Protegidos)</green>"
                     : (season.isWinter() ? "<aqua>❄ Expuesto al Frío Invernal (Pausado)</aqua>" : "<gray>Expuesto al aire libre</gray>");
             sendMsg(sender, "<dark_gray>•</dark_gray> <gray>Tu ubicación:</gray> " + ghStatus);
+            if (temperatureService != null) {
+                double celsius = temperatureService.getTemperature(player.getLocation());
+                TemperatureBand band = temperatureService.classify(celsius);
+                sendMsg(sender, "<dark_gray>•</dark_gray> <gray>Temperatura:</gray> " + band.getColorTag()
+                        + String.format(Locale.ROOT, "%.1f", celsius) + "°C (" + band.getDisplayName() + ")");
+            }
         }
         sendMsg(sender, "<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>");
     }

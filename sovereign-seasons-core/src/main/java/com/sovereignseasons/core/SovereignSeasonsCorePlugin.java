@@ -23,12 +23,14 @@ package com.sovereignseasons.core;
 import com.sovereignseasons.api.SovereignSeasonsApi;
 import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
+import com.sovereignseasons.api.temperature.TemperatureService;
 import com.sovereignseasons.core.calendar.CalendarListener;
 import com.sovereignseasons.core.calendar.WorldCalendarManager;
 import com.sovereignseasons.core.command.SeasonCommand;
 import com.sovereignseasons.core.config.SeasonsConfig;
 import com.sovereignseasons.core.crops.CropGrowthListener;
 import com.sovereignseasons.core.greenhouse.GreenhouseDetector;
+import com.sovereignseasons.core.temperature.TemperatureManager;
 import com.tcoded.folialib.FoliaLib;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -46,6 +48,7 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
     private SeasonsConfig config;
     private WorldCalendarManager calendarManager;
     private GreenhouseDetector greenhouseDetector;
+    private TemperatureManager temperatureManager;
     private FoliaLib foliaLib;
 
     @Override
@@ -60,19 +63,21 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
         // 2. Initialize subsystems
         this.greenhouseDetector = new GreenhouseDetector(this.config);
         this.calendarManager = new WorldCalendarManager(this.config, getDataFolder(), getLogger());
+        this.temperatureManager = new TemperatureManager(this.config, this.calendarManager);
 
         // 3. Register Public API
         SovereignSeasonsApi.Holder.set(this);
         getServer().getServicesManager().register(SovereignSeasonsApi.class, this, this, ServicePriority.Normal);
         getServer().getServicesManager().register(SeasonService.class, this.calendarManager, this, ServicePriority.Normal);
         getServer().getServicesManager().register(GreenhouseService.class, this.greenhouseDetector, this, ServicePriority.Normal);
+        getServer().getServicesManager().register(TemperatureService.class, this.temperatureManager, this, ServicePriority.Normal);
 
         // 4. Register Listeners
         getServer().getPluginManager().registerEvents(new CalendarListener(this.calendarManager, this.foliaLib), this);
         getServer().getPluginManager().registerEvents(new CropGrowthListener(this.config, this.calendarManager, this.greenhouseDetector), this);
 
         // 5. Register Commands
-        SeasonCommand seasonCmd = new SeasonCommand(this.config, this.calendarManager, this.greenhouseDetector, getDataFolder());
+        SeasonCommand seasonCmd = new SeasonCommand(this.config, this.calendarManager, this.greenhouseDetector, this.temperatureManager, getDataFolder());
         PluginCommand cmd = getCommand("season");
         if (cmd != null) {
             cmd.setExecutor(seasonCmd);
@@ -92,6 +97,7 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
         getLogger().info(" - Minecraft In-Game Days Calendar: ACTIVE");
         getLogger().info(" - Winter Crop Pause & Withering: ACTIVE");
         getLogger().info(" - Spatial LRU Greenhouse Detection: ACTIVE");
+        getLogger().info(" - Seasonal Temperature Service: ACTIVE");
         getLogger().info("=================================================");
     }
 
@@ -127,6 +133,11 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
     @Override
     public GreenhouseService getGreenhouseService() {
         return greenhouseDetector;
+    }
+
+    @Override
+    public TemperatureService getTemperatureService() {
+        return temperatureManager;
     }
 
     public SeasonsConfig getPluginConfig() {
