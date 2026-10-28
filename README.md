@@ -24,8 +24,8 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
-| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos y API pública. | **Completado (142 tests / 100%)** |
-| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías y métodos de curado/conserva. | Esqueleto inicial |
+| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos, temperatura estacional y API pública. | **Completado (152 tests / 100%)** |
+| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías, neveras de hielo y ahumado. | **Completado v1.0 (39 tests / 100%)** |
 | [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
 | [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
 | [**`sovereign-seasons-resourcepack`**](sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
@@ -46,6 +46,16 @@ En **Invierno (`WINTER`)**:
 
 ---
 
+## 🍲 Conservación de Alimentos (`pantry`)
+
+- **Descomposición estacional:** Los alimentos perecederos tienen una vida útil en días de juego que se acelera con el calor (Verano, desiertos, Nether) y se frena con el frío.
+- **Bodegas y neveras:** Los contenedores subterráneos sin luz del cielo y los rodeados de hielo conservan mucho mejor la comida.
+- **Ahumado:** Lo que sale de un ahumador queda `Ahumado` y dura cuatro veces más.
+- **Podredumbre:** La comida en mal estado da *Hambre* y, al pudrirse por completo, se convierte en carne podrida.
+- Consulta [sovereign-seasons-pantry/README.md](sovereign-seasons-pantry/README.md) para conocer las mecánicas, los comandos (`/pantry`) y la configuración.
+
+---
+
 ## 🕹️ Comandos
 
 - `/season` o `/season info [mundo]`: Muestra la estación actual, día de la estación, barra de progreso porcentual, año y si el jugador está protegido en un invernadero (permiso `sovereignseasons.command.info`).
@@ -62,21 +72,22 @@ En **Invierno (`WINTER`)**:
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (142 tests automatizados en 22 suites)
+# Ejecutar todas las pruebas unitarias (191 tests automatizados: 152 core + 39 pantry)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas
 ./gradlew shadowJar
 ```
 
-El artefacto compilado se generará en:
-`sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar`
+Los artefactos compilados se generarán en:
+- `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar`
+- `sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-1.0.0.jar`
 
 ---
 
 ## 🐳 Despliegue y Pruebas con Docker (Paper 1.21.x)
 
-El repositorio incluye soporte completo para desplegar un servidor Paper 1.21.x containerizado con el plugin `sovereign-seasons-core` preinstalado y configurado con las banderas de JVM optimizadas de Aikar:
+El repositorio incluye soporte completo para desplegar un servidor Paper 1.21.x containerizado con los plugins `sovereign-seasons-core` y `sovereign-seasons-pantry` preinstalados y configurado con las banderas de JVM optimizadas de Aikar:
 
 ### Inicio Rápido (Multi-Stage Dockerfile)
 
