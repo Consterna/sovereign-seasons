@@ -127,5 +127,31 @@ greenhouse:
   # Evitar que el agua se congele en hielo y que la nieve cubra los cultivos dentro de un invernadero.
   prevent-freeze-and-snow: true
 
+temperature:
+  # Habilitar el desfase estacional de temperatura (si es false solo se usa la temperatura del bioma).
+  # Este servicio lo consumen otros módulos (p. ej. Pantry para la descomposición de alimentos).
+  enabled: true
+
+  # Conversión de la temperatura vanilla del bioma a grados Celsius: celsius = bioma * scale + offset.
+  # Con los valores por defecto: Llanuras (0.8) = 15 °C, Desierto (2.0) = 45 °C, Taiga nevada (-0.5) = -17.5 °C.
+  biome-scale: 25.0
+  biome-offset: -5.0
+
+  # Desfase en °C que aplica cada estación. Se interpola suavemente entre estaciones
+  # (fases Temprana y Tardía) para evitar saltos bruscos al cambiar de estación.
+  season-offsets:
+    spring: 0.0
+    summer: 8.0
+    autumn: -2.0
+    winter: -12.0
+
+  # Umbrales (°C, estrictamente ascendentes) de las bandas de temperatura.
+  # Helado < freezing-below <= Frío < cold-below <= Templado < mild-below <= Cálido < warm-below <= Caluroso
+  bands:
+    freezing-below: 0.0
+    cold-below: 10.0
+    mild-below: 20.0
+    warm-below: 30.0
+
 messages:
   prefix: "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> "
