@@ -14,7 +14,8 @@ java {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.github.TechnicallyCoded:FoliaLib:0.4.4")
+    // Core relocates its own FoliaLib copy, so Pantry must shade and relocate a separate one
+    implementation("com.github.TechnicallyCoded:FoliaLib:0.4.4")
     compileOnly(project(":sovereign-seasons-core"))
 
     testImplementation("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
@@ -30,7 +31,28 @@ tasks {
         options.release.set(21)
     }
 
+    compileTestJava {
+        options.encoding = "UTF-8"
+        options.release.set(21)
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+        relocate("com.tcoded.folialib", "com.sovereignseasons.pantry.libs.folialib")
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
+
     test {
         useJUnitPlatform()
+    }
+
+    processResources {
+        filteringCharset = "UTF-8"
+        filesMatching("plugin.yml") {
+            expand("version" to project.version)
+        }
     }
 }
