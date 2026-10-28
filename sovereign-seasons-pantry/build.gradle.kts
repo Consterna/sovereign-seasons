@@ -47,6 +47,8 @@ tasks {
 
     test {
         useJUnitPlatform()
+        // Core's shadow JAR overwrites its plain JAR (empty classifier), which is on this test classpath
+        mustRunAfter(":sovereign-seasons-core:shadowJar")
     }
 
     processResources {

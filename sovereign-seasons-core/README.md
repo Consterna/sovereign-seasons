@@ -30,6 +30,12 @@ Un bloque se considera protegido dentro de un invernadero si cumple dos condicio
   - Invalidación reactiva e instantánea ante rotura/colocación de cristal o fuentes térmicas, explosiones, movimiento de pistones, trasvase de cubos, combustión en hornos y vaciado de calderos de lava.
   - Purga automática por mundo en `WorldUnloadEvent` para evitar fugas de memoria.
 
+### 4. Temperatura Estacional (`TemperatureService`)
+- **Temperatura en °C por ubicación:** Toma la temperatura vanilla del bioma (ya ajustada por altitud), la convierte a grados Celsius (`bioma × 25 − 5`; Llanuras = 15 °C) y le suma el desfase de la estación (Primavera `0`, Verano `+8`, Otoño `−2`, Invierno `−12`).
+- **Transiciones suaves:** En las fases Temprana y Tardía, el desfase se interpola hacia el punto medio con la estación vecina. Así la temperatura nunca da saltos al cambiar de estación.
+- **Bandas cualitativas:** `FREEZING`, `COLD`, `MILD`, `WARM` y `HOT`, con umbrales configurables y estrictamente ascendentes.
+- `/season info` muestra la temperatura en la posición del jugador.
+
 ---
 
 ## 🕹️ Comandos y Permisos
@@ -55,6 +61,8 @@ import com.sovereignseasons.api.CalendarDate;
 import com.sovereignseasons.api.Season;
 import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
+import com.sovereignseasons.api.temperature.TemperatureBand;
+import com.sovereignseasons.api.temperature.TemperatureService;
 
 // Obtener la instancia pública
 SovereignSeasonsApi api = SovereignSeasonsApi.get();
@@ -69,6 +77,11 @@ double progress = date.getSeasonProgressPercent();
 // Verificar si una ubicación está dentro de un invernadero funcional
 GreenhouseService greenhouseService = api.getGreenhouseService();
 boolean isProtected = greenhouseService.isGreenhouse(location);
+
+// Consultar la temperatura estacional de una ubicación
+TemperatureService temperatureService = api.getTemperatureService();
+double celsius = temperatureService.getTemperature(location);
+TemperatureBand band = temperatureService.getBand(location);
 ```
 
 ### Eventos Bukkit Personalizados
@@ -108,13 +121,20 @@ greenhouse:
   cache-ttl-seconds: 30
   cache-max-size: 10000
   prevent-freeze-and-snow: true
+
+temperature:
+  enabled: true
+  biome-scale: 25.0     # celsius = bioma * scale + offset
+  biome-offset: -5.0
+  season-offsets: { spring: 0.0, summer: 8.0, autumn: -2.0, winter: -12.0 }
+  bands: { freezing-below: 0.0, cold-below: 10.0, mild-below: 20.0, warm-below: 30.0 }
 ```
 
 ---
 
 ## 🧪 Pruebas Unitarias y Calidad
 
-El módulo cuenta con una suite integral de **142 pruebas unitarias y de estrés automatizadas** en 22 clases de prueba con **100% de aprobación**:
+El módulo cuenta con una suite integral de **152 pruebas unitarias y de estrés automatizadas** en 23 clases de prueba con **100% de aprobación**:
 
 ```bash
 # Ejecutar todas las pruebas unitarias

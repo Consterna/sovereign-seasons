@@ -13,17 +13,18 @@ COPY sovereign-seasons-pantry/build.gradle.kts ./sovereign-seasons-pantry/
 COPY sovereign-seasons-logistics/build.gradle.kts ./sovereign-seasons-logistics/
 COPY sovereign-seasons-commerce/build.gradle.kts ./sovereign-seasons-commerce/
 
-# Copiar código fuente del módulo core
+# Copiar código fuente de los módulos implementados
 COPY sovereign-seasons-core/src/ ./sovereign-seasons-core/src/
+COPY sovereign-seasons-pantry/src/ ./sovereign-seasons-pantry/src/
 
-# Compilar JAR sombreado con dependencias relocalizadas
-RUN chmod +x ./gradlew && ./gradlew :sovereign-seasons-core:shadowJar --no-daemon
+# Compilar JARs sombreados con dependencias relocalizadas
+RUN chmod +x ./gradlew && ./gradlew :sovereign-seasons-core:shadowJar :sovereign-seasons-pantry:shadowJar --no-daemon
 
 # Stage 2: Servidor Paper 1.21.x containerizado
 FROM eclipse-temurin:21-jre-jammy AS runtime
 
 LABEL org.opencontainers.image.title="Sovereign Seasons Paper Server" \
-      org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core" \
+      org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core y Pantry" \
       org.opencontainers.image.authors="Cristian <cristianguerrero1958@outlook.com>" \
       org.opencontainers.image.source="https://github.com/Consterna/sovereign-seasons" \
       org.opencontainers.image.licenses="GPL-3.0"
@@ -45,6 +46,7 @@ WORKDIR /server
 # Directorios de datos y despliegue del plugin
 RUN mkdir -p /server/data /opt/plugins
 COPY --from=builder /build/sovereign-seasons-core/build/libs/sovereign-seasons-core-*.jar /opt/plugins/sovereign-seasons-core.jar
+COPY --from=builder /build/sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*.jar /opt/plugins/sovereign-seasons-pantry.jar
 
 # Script de inicio
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh

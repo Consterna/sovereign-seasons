@@ -29,10 +29,12 @@ fi
 
 # Ensure plugins directory exists and synchronize plugin jar
 mkdir -p "${PLUGINS_DIR}"
-if [[ -f "/opt/plugins/sovereign-seasons-core.jar" ]]; then
-    cp -u /opt/plugins/sovereign-seasons-core.jar "${PLUGINS_DIR}/sovereign-seasons-core.jar" 2>/dev/null || cp /opt/plugins/sovereign-seasons-core.jar "${PLUGINS_DIR}/sovereign-seasons-core.jar"
-    echo "[INFO] Sovereign Seasons Core plugin deployed to ${PLUGINS_DIR}/sovereign-seasons-core.jar"
-fi
+for plugin_jar in /opt/plugins/*.jar; do
+    [[ -f "${plugin_jar}" ]] || continue
+    plugin_name="$(basename "${plugin_jar}")"
+    cp -u "${plugin_jar}" "${PLUGINS_DIR}/${plugin_name}" 2>/dev/null || cp "${plugin_jar}" "${PLUGINS_DIR}/${plugin_name}"
+    echo "[INFO] Sovereign Seasons plugin deployed to ${PLUGINS_DIR}/${plugin_name}"
+done
 
 # Download Paper jar if not present
 if [[ ! -f "${PAPER_JAR}" ]]; then

@@ -5,6 +5,26 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Añadido
+- **`sovereign-seasons-core` — Servicio de temperatura estacional**:
+  - Nueva API `TemperatureService` y enum `TemperatureBand` (`FREEZING`, `COLD`, `MILD`, `WARM`, `HOT`) en `com.sovereignseasons.api.temperature`, accesible mediante `SovereignSeasonsApi#getTemperatureService()` y el `ServicesManager` de Bukkit.
+  - Temperatura en °C a partir de la temperatura del bioma (ajustada por altitud) más un desfase estacional interpolado de forma continua entre estaciones.
+  - Sección `temperature` en `config.yml` con escala de bioma, desfases por estación y umbrales de banda validados (finitos, en el rango `[-100, 100]` y ascendentes).
+  - `/season info` muestra la temperatura del jugador.
+  - 10 pruebas nuevas (152 en total).
+- **Módulo `sovereign-seasons-pantry` v1.0.0 (Conservación de alimentos)**:
+  - Descomposición de alimentos perecederos según vida útil en días de juego (configurable por material) y ritmo por banda de temperatura.
+  - Etapas `Fresco`, `Rancio` y `Pudriéndose` en el lore. Al pudrirse por completo, la pila se convierte en carne podrida conservando la cantidad.
+  - Bodegas subterráneas frías (sin luz del cielo y con techo sólido o profundidad) y neveras de hielo, con caché espacial LRU e invalidación reactiva.
+  - Ahumado: los alimentos que salen de un ahumador quedan conservados (ritmo ×0,25), sin bloquear la salida del horno.
+  - Penalización de *Hambre* al comer alimentos rancios o en descomposición.
+  - Evaluación diferida al abrir contenedores y periódica en el inventario de los jugadores, compatible con Folia. La caducidad se redondea para preservar el apilamiento.
+  - Comando `/pantry` (`inspect`, `cellar`, `stats`, `reload`, `setfresh`) con permisos `sovereignseasons.pantry.*`.
+  - Suite de 39 pruebas unitarias.
+- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen el JAR de Pantry.
+
 ## [1.0.0] - 2026-10-26
 
 ### Añadido
