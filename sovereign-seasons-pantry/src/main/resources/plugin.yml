@@ -1,0 +1,31 @@
+name: SovereignSeasons-Pantry
+version: '${version}'
+main: com.sovereignseasons.pantry.SovereignSeasonsPantryPlugin
+api-version: '1.20'
+folia-supported: true
+author: Cristian
+website: https://github.com/Consterna/sovereign-seasons
+description: Descomposicion estacional de alimentos, bodegas frias y ahumado para Sovereign Seasons.
+depend:
+  - SovereignSeasons-Core
+
+commands:
+  pantry:
+    description: Diagnostico de frescura de alimentos y bodegas.
+    aliases:
+      - despensa
+    usage: /pantry [inspect|cellar|stats|reload|setfresh]
+
+permissions:
+  sovereignseasons.pantry.inspect:
+    description: Permite inspeccionar la frescura del alimento en la mano.
+    default: true
+  sovereignseasons.pantry.cellar:
+    description: Permite diagnosticar si un bloque esta en una bodega fria.
+    default: true
+  sovereignseasons.pantry.admin:
+    description: Permite recargar Pantry, ver estadisticas y modificar la frescura de alimentos.
+    default: op
+    children:
+      sovereignseasons.pantry.inspect: true
+      sovereignseasons.pantry.cellar: true
