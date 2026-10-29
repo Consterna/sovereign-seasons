@@ -1,0 +1,30 @@
+name: SovereignSeasons-Commerce
+version: '${version}'
+main: com.sovereignseasons.commerce.SovereignSeasonsCommercePlugin
+api-version: '1.20'
+folia-supported: true
+author: Cristian
+website: https://github.com/Consterna/sovereign-seasons
+description: Precios estacionales de los aldeanos, ferias de temporada y venta a granel para Sovereign Seasons.
+depend:
+  - SovereignSeasons-Core
+softdepend:
+  - SovereignSeasons-Pantry
+  - SovereignSeasons-Logistics
+
+commands:
+  commerce:
+    description: Precios del mercado en la estacion actual y diagnostico de comercio.
+    aliases:
+      - mercado
+    usage: /commerce [prices [estacion]|stats|reload]
+
+permissions:
+  sovereignseasons.commerce.prices:
+    description: Permite consultar los precios estacionales del mercado.
+    default: true
+  sovereignseasons.commerce.admin:
+    description: Permite recargar Commerce y ver estadisticas.
+    default: op
+    children:
+      sovereignseasons.commerce.prices: true

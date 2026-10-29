@@ -1,0 +1,121 @@
+# ==========================================================================
+#  Sovereign Seasons - Commerce
+#  Economía estacional vanilla+: esmeraldas y aldeanos, sin plugins de economía.
+# ==========================================================================
+
+# --------------------------------------------------------------------------
+# Precios estacionales de aldeanos y vendedores ambulantes
+# --------------------------------------------------------------------------
+# Cada producto tiene un "valor" por estación (1.0 = precio vanilla).
+#  - Valor > 1 (escaso): el aldeano pide MENOS unidades cuando te lo compra y MÁS esmeraldas cuando te lo vende.
+#  - Valor < 1 (abundante): al revés.
+# Vanilla solo deja ajustar el primer ingrediente de cada trato, así que un trato de "1 esmeralda -> 6 panes"
+# apenas cambia (no puede bajar de 1 esmeralda); el efecto principal está en lo que los aldeanos pagan por
+# tus cosechas, pescado, carne, lana o carbón.
+# El ajuste se aplica al abrir el comercio y desaparece al cerrarlo: nunca se guarda en el aldeano.
+seasonal-prices:
+  enabled: true
+  # Mostrar "Precios de <estación>" en la barra de acción al abrir un comercio con precios ajustados.
+  show-notice: true
+  # Límites de cualquier valor (0.1 a 1.0 para el mínimo, 1.0 a 10.0 para el máximo).
+  min-value: 0.5
+  max-value: 2.0
+
+  # Cultivos: abundantes en sus estaciones de cosecha, escasos en invierno.
+  crops:
+    in-season: 0.8    # En temporada hay mucha oferta: se paga menos por cada unidad
+    off-season: 1.0   # Fuera de temporada (pero no en invierno): precio normal
+    winter: 1.4       # En invierno no crece nada al aire libre: se paga mucho mejor
+    # Producto: estaciones de cosecha (coinciden con la fertilidad estacional del core).
+    products:
+      WHEAT: [spring, summer, autumn]
+      BREAD: [spring, summer, autumn]
+      COOKIE: [spring, summer, autumn]
+      CAKE: [spring, summer, autumn]
+      CARROT: [spring, autumn]
+      GOLDEN_CARROT: [spring, autumn]
+      POTATO: [spring, autumn]
+      BAKED_POTATO: [spring, autumn]
+      BEETROOT: [spring, autumn]
+      PUMPKIN: [summer, autumn]
+      PUMPKIN_PIE: [summer, autumn]
+      MELON: [summer]
+      MELON_SLICE: [summer]
+      GLISTERING_MELON_SLICE: [summer]
+      APPLE: [autumn]
+      SWEET_BERRIES: [summer, autumn]
+      SUGAR_CANE: [spring, summer]
+      COCOA_BEANS: [spring, summer]
+
+  # Otros productos con un valor fijo por estación (las estaciones que falten valen 1.0).
+  # Admite comodines con *, por ejemplo "*_WOOL" para la lana de todos los colores.
+  goods:
+    "*_WOOL": { summer: 0.85, winter: 1.25 }
+    LEATHER: { winter: 1.25 }
+    COAL: { summer: 0.85, winter: 1.3 }
+    COD: { winter: 1.3 }
+    SALMON: { winter: 1.3 }
+    COOKED_COD: { winter: 1.3 }
+    COOKED_SALMON: { winter: 1.3 }
+    TROPICAL_FISH: { winter: 1.3 }
+    PUFFERFISH: { winter: 1.3 }
+    CHICKEN: { autumn: 0.85, winter: 1.15 }
+    PORKCHOP: { autumn: 0.85, winter: 1.15 }
+    BEEF: { autumn: 0.85, winter: 1.15 }
+    MUTTON: { autumn: 0.85, winter: 1.15 }
+    RABBIT: { autumn: 0.85, winter: 1.15 }
+    COOKED_CHICKEN: { autumn: 0.85, winter: 1.15 }
+    COOKED_PORKCHOP: { autumn: 0.85, winter: 1.15 }
+    COOKED_BEEF: { autumn: 0.85, winter: 1.15 }
+    COOKED_MUTTON: { autumn: 0.85, winter: 1.15 }
+    COOKED_RABBIT: { autumn: 0.85, winter: 1.15 }
+
+# --------------------------------------------------------------------------
+# Frescura en el mostrador (requiere SovereignSeasons-Pantry)
+# --------------------------------------------------------------------------
+freshness:
+  # Los aldeanos rechazan la comida en la etapa "Pudriéndose" de Pantry (el trato se cancela sin perder nada).
+  refuse-spoiling-food: true
+
+# --------------------------------------------------------------------------
+# Venta a granel de cajas (requiere SovereignSeasons-Logistics)
+# --------------------------------------------------------------------------
+# Agáchate y haz clic derecho sobre un aldeano con cajas en la mano: te las compra al precio de su propio trato
+# por ese cultivo, con el valor de la estación y un plus por venderlas empaquetadas.
+bulk-sales:
+  enabled: true
+  # Plus por vender en cajas (1.15 = un 15 % más que suelto). Entre 1.0 y 3.0.
+  bonus: 1.15
+  # Cajas que compra cada aldeano por día de juego (evita imprimir esmeraldas con granjas infinitas).
+  max-crates-per-villager-per-day: 8
+
+# --------------------------------------------------------------------------
+# Ferias de temporada (vendedor ambulante)
+# --------------------------------------------------------------------------
+# El vendedor ambulante añade ofertas de la estación a las suyas la primera vez que comercias con él
+# (y las cambia si la estación cambia mientras sigue en el mundo).
+# Formato: { item: MATERIAL, amount: unidades, price: esmeraldas, max-uses: usos antes de agotarse }
+# Cada estación que aparezca aquí sustituye sus ofertas; para dejar una estación sin feria, usa: winter: []
+fairs:
+  enabled: true
+  offers:
+    spring:   # Siembra tras el invierno
+      - { item: WHEAT_SEEDS, amount: 8, price: 1, max-uses: 4 }
+      - { item: BEETROOT_SEEDS, amount: 8, price: 1, max-uses: 4 }
+      - { item: PUMPKIN_SEEDS, amount: 4, price: 1, max-uses: 4 }
+      - { item: MELON_SEEDS, amount: 4, price: 1, max-uses: 4 }
+    summer:   # Hielo para enfriar las bodegas de Pantry
+      - { item: ICE, amount: 8, price: 2, max-uses: 4 }
+      - { item: PACKED_ICE, amount: 4, price: 3, max-uses: 4 }
+      - { item: BLUE_ICE, amount: 1, price: 4, max-uses: 2 }
+    autumn:   # Preparación del invierno: el cuero protege de la nieve en Logistics
+      - { item: LEATHER_BOOTS, amount: 1, price: 3, max-uses: 2 }
+      - { item: LEATHER_HORSE_ARMOR, amount: 1, price: 4, max-uses: 2 }
+      - { item: HAY_BLOCK, amount: 2, price: 1, max-uses: 4 }
+    winter:   # Fogatas y cristal para los invernaderos del core
+      - { item: CAMPFIRE, amount: 1, price: 2, max-uses: 4 }
+      - { item: GLASS, amount: 8, price: 2, max-uses: 4 }
+      - { item: COAL, amount: 8, price: 1, max-uses: 4 }
+
+messages:
+  prefix: "<gold><b>Commerce</b></gold> <gray>»</gray> "
