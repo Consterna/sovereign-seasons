@@ -29,7 +29,7 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
-| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: calendario de días de juego, invierno e invernaderos, temperatura estacional, cultivos con clima ideal, lluvia y fauna estacional, frío/calor suave, HUD y API pública. | **v1.1.0 (172 tests / 100%)** |
+| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: calendario de días de juego, invierno e invernaderos, temperatura estacional, cultivos con clima ideal, lluvia y fauna estacional, frío/calor suave, HUD y API pública. | **v1.1.0 (173 tests / 100%)** |
 | [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas frías, neveras, barriles, ahumado, compost de comida podrida y avisos. | **v1.0.0 (41 tests / 100%)** |
 | [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
 | [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
@@ -99,10 +99,10 @@ En **Invierno (`WINTER`)**:
 
 | Requisito | Detalle |
 |---|---|
-| Software | **Paper 1.20.4 – 1.21.11** o **Folia**. Probado en servidor real con Paper 1.21.11. Paper 26.x no se ha probado: requiere Java 25. |
-| Java | 21 o superior |
+| Software | **Paper 1.20.4 – 26.3** o **Folia**. Verificado en servidor real: Paper **1.21.11** y **26.1.2** (todas las pruebas de juego) y **26.3** (prueba de humo). |
+| Java | 21 o superior para Paper 1.21.x; **25** para Paper 26.x (exigencia de Paper, no del plugin). |
 | Plugins | `sovereign-seasons-core-1.1.0.jar` (obligatorio). `sovereign-seasons-pantry-1.0.0.jar` (opcional; requiere Core 1.1.0+ por el servicio de temperatura). |
-| Opcional | [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) 2.10+ para `%sovereignseasons_season%`, `_subseason`, `_day`, `_days_per_season`, `_year`, `_progress`, `_temperature` y `_band`. |
+| Opcional | [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) 2.10+ (verificado con 2.12.3) para `%sovereignseasons_season%`, `_subseason`, `_day`, `_days_per_season`, `_year`, `_progress`, `_temperature` y `_band`. |
 
 1. Copia los JAR en la carpeta `plugins/` del servidor y reinícialo (no uses `/reload`).
 2. Edita `plugins/SovereignSeasons-Core/config.yml`: añade tus mundos en `calendar.enabled-worlds` y ajusta la duración de las estaciones.
@@ -118,14 +118,14 @@ No hacen falta otras dependencias: FoliaLib va incluido y relocalizado dentro de
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (213 tests automatizados: 172 core + 41 pantry)
+# Ejecutar todas las pruebas unitarias (214 tests automatizados: 173 core + 41 pantry)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas
 ./gradlew shadowJar
 ```
 
-Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker. Consulta [tools/e2e/README.md](tools/e2e/README.md).
+Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker: 38 comprobaciones (incluidas lluvia natural y aparición de mobs) verificadas en Paper 1.21.11 y 26.1.2. Consulta [tools/e2e/README.md](tools/e2e/README.md) y, para revisar lo visual con tu cliente, [tools/e2e/MANUAL_CHECKS.md](tools/e2e/MANUAL_CHECKS.md).
 
 Los artefactos compilados se generarán en:
 - `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar`

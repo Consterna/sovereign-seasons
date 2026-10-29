@@ -17,7 +17,7 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Perfil climático por cultivo (`crops.seasonal-growth.profiles`): estaciones fértiles y bandas de temperatura ideales.
     - Fuera de temporada o de su clima, cada intento de crecer tiene menos probabilidad de prosperar, pero el cultivo nunca muere por ello.
     - El invernadero ignora estación y clima; bajo tierra se ignora la estación. La verruga del Nether está exenta.
-  - Lluvia estacional (`weather.rain-chance`): veranos más secos. Solo se filtra la lluvia natural (`WeatherChangeEvent.Cause.NATURAL`).
+  - Lluvia estacional (`weather.rain-chance`): veranos más secos. Solo se filtra la lluvia natural (causas `NATURAL` y `UNKNOWN`); `/weather`, dormir y otros plugins no se tocan. Con `weather.debug` se registra cada decisión en consola.
   - Fauna estacional (`fauna`): gemelos al criar en primavera, *Strays* en inviernos fríos y *Husks* en veranos calurosos.
 - **`sovereign-seasons-core` 1.1.0 — Frío y calor suaves (`comfort`)**:
   - **Frío:** en zona Helada a la intemperie, escarcha visual y Lentitud, sin daño por defecto. Protegen una pieza de cuero (como con la nieve polvo) o tener fuego o luz cerca.
@@ -28,7 +28,7 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - El reloj muestra fecha y temperatura.
   - `/season hud` muestra una BossBar persistente por jugador (permiso `sovereignseasons.command.hud`).
   - Integración opcional con PlaceholderAPI (`softdepend`).
-- Pruebas: 172 en core (+30 respecto a 1.0.0).
+- Pruebas: 173 en core (+31 respecto a 1.0.0).
 - **Módulo `sovereign-seasons-pantry` v1.0.0 (Conservación de alimentos)**:
   - Descomposición de alimentos perecederos según vida útil en días de juego (configurable por material) y ritmo por banda de temperatura.
   - Etapas `Fresco`, `Rancio` y `Pudriéndose` en el lore. Al pudrirse por completo, la pila se convierte en carne podrida conservando la cantidad.
@@ -42,7 +42,11 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Aviso al jugador cuando la comida de su inventario se pudre o está a punto.
   - Suite de 41 pruebas unitarias.
 - Imagen Docker, `compose.yml` y workflows de CI/Release incluyen el JAR de Pantry. La versión de Paper por defecto pasa a 1.21.11.
-- Pruebas de juego end-to-end (`tools/e2e`): un servidor Paper 1.21.11 local y un bot Mineflayer verifican 32 escenarios reales sin Docker.
+- Pruebas de juego end-to-end (`tools/e2e`): servidor Paper local + bot Mineflayer, sin Docker.
+  - Suite principal de 33 comprobaciones y suite de naturaleza de 5 (lluvia natural, Strays y Husks), con `/tick sprint`.
+  - `run-local.sh` automatiza el ciclo completo sobre un mundo limpio.
+  - Guía de revisión visual con el cliente propio (`MANUAL_CHECKS.md`).
+- Compatibilidad verificada en servidor real: Paper 1.21.11 (Java 21) y 26.1.2 (Java 25) con todas las pruebas, Paper 26.3 con prueba de humo y PlaceholderAPI 2.12.3.
 - Guía de instalación para servidores y sección de filosofía de diseño en el README.
 
 ### Corregido
