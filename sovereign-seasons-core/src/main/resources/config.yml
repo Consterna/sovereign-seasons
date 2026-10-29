@@ -183,6 +183,8 @@ weather:
   # Probabilidad de aceptar que empiece a llover de forma natural en cada estación (1.0 = vanilla).
   # Los cambios de clima por comando (/weather) u otros plugins nunca se bloquean.
   enabled: true
+  # Registrar en consola cada inicio de lluvia con su causa y la decisión tomada (diagnóstico).
+  debug: false
   rain-chance:
     spring: 1.0
     summer: 0.5

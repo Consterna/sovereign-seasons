@@ -42,6 +42,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.DoubleSupplier;
+import java.util.logging.Logger;
 
 /**
  * Seasonal weather and fauna: drier summers, spring twins, and the vanilla cold/hot mob variants
@@ -52,16 +53,18 @@ public class SeasonalNatureListener implements Listener {
     private final SeasonService seasonService;
     private final TemperatureService temperatureService;
     private final DoubleSupplier random;
+    private final Logger logger;
 
-    public SeasonalNatureListener(SeasonsConfig config, SeasonService seasonService, TemperatureService temperatureService) {
-        this(config, seasonService, temperatureService, () -> ThreadLocalRandom.current().nextDouble());
+    public SeasonalNatureListener(SeasonsConfig config, SeasonService seasonService, TemperatureService temperatureService, Logger logger) {
+        this(config, seasonService, temperatureService, () -> ThreadLocalRandom.current().nextDouble(), logger);
     }
 
-    public SeasonalNatureListener(SeasonsConfig config, SeasonService seasonService, TemperatureService temperatureService, DoubleSupplier random) {
+    public SeasonalNatureListener(SeasonsConfig config, SeasonService seasonService, TemperatureService temperatureService, DoubleSupplier random, Logger logger) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.seasonService = Objects.requireNonNull(seasonService, "seasonService cannot be null");
         this.temperatureService = Objects.requireNonNull(temperatureService, "temperatureService cannot be null");
         this.random = Objects.requireNonNull(random, "random cannot be null");
+        this.logger = logger;
     }
 
     // ---------------------------------------------------------------- weather
@@ -69,17 +72,25 @@ public class SeasonalNatureListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onWeatherChange(WeatherChangeEvent event) {
         if (!config.isSeasonalWeatherEnabled() || !event.toWeatherState()) {
-            return; // only natural rain starts are filtered; clearing is never blocked
-        }
-        if (event.getCause() != WeatherChangeEvent.Cause.NATURAL) {
-            return; // /weather and other plugins keep full control
+            return; // only rain starts are filtered; clearing is never blocked
         }
         World world = event.getWorld();
-        if (!seasonService.isEnabledInWorld(world)) {
-            return;
+        WeatherChangeEvent.Cause cause = event.getCause();
+        if (!SeasonalRules.isFilteredRainCause(cause) || !seasonService.isEnabledInWorld(world)) {
+            debugWeather(world, cause, "ignored");
+            return; // /weather, sleeping and other plugins keep full control
         }
-        if (!SeasonalRules.rainAllowed(config, seasonService.getSeason(world), random.getAsDouble())) {
+        boolean allowed = SeasonalRules.rainAllowed(config, seasonService.getSeason(world), random.getAsDouble());
+        if (!allowed) {
             event.setCancelled(true);
+        }
+        debugWeather(world, cause, allowed ? "allowed" : "blocked");
+    }
+
+    private void debugWeather(World world, WeatherChangeEvent.Cause cause, String decision) {
+        if (config.isWeatherDebug() && logger != null) {
+            logger.info("[weather] rain start in " + world.getName() + " (cause " + cause + ", season "
+                    + seasonService.getSeason(world) + "): " + decision);
         }
     }
 

@@ -24,12 +24,23 @@ import com.sovereignseasons.api.Season;
 import com.sovereignseasons.api.temperature.TemperatureBand;
 import com.sovereignseasons.core.config.SeasonsConfig;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.weather.WeatherChangeEvent;
 
 /**
  * Pure decision rules for seasonal weather and fauna. {@code roll} is a uniform random number in [0, 1).
  */
 public final class SeasonalRules {
     private SeasonalRules() {}
+
+    /**
+     * Whether a rain start with this cause is subject to the seasonal filter. The vanilla weather cycle
+     * reports NATURAL; UNKNOWN is treated the same so no natural start slips through. Commands, plugins and
+     * sleeping are never filtered.
+     */
+    public static boolean isFilteredRainCause(WeatherChangeEvent.Cause cause) {
+        return cause == WeatherChangeEvent.Cause.NATURAL
+                || cause == WeatherChangeEvent.Cause.UNKNOWN;
+    }
 
     public static boolean rainAllowed(SeasonsConfig config, Season season, double roll) {
         return roll < config.getRainChance(season);

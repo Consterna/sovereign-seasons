@@ -81,7 +81,7 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
         // 4. Register Listeners
         getServer().getPluginManager().registerEvents(new CalendarListener(this.calendarManager, this.foliaLib), this);
         getServer().getPluginManager().registerEvents(new CropGrowthListener(this.config, this.calendarManager, this.greenhouseDetector, this.temperatureManager), this);
-        getServer().getPluginManager().registerEvents(new SeasonalNatureListener(this.config, this.calendarManager, this.temperatureManager), this);
+        getServer().getPluginManager().registerEvents(new SeasonalNatureListener(this.config, this.calendarManager, this.temperatureManager, getLogger()), this);
         ComfortService comfortService = new ComfortService(this.config, this.calendarManager, this.temperatureManager);
         getServer().getPluginManager().registerEvents(comfortService, this);
         this.seasonInterface = new SeasonInterface(this, this.config, this.calendarManager, this.temperatureManager, this.foliaLib);
