@@ -11,7 +11,7 @@ services:
     environment:
       - EULA=true
       - MEMORY=2G
-      - MINECRAFT_VERSION=1.21.4
+      - MINECRAFT_VERSION=1.21.11
     volumes:
       - ./docker/data:/server/data
     stdin_open: true
@@ -27,12 +27,12 @@ services:
     environment:
       EULA: "TRUE"
       TYPE: "PAPER"
-      VERSION: "1.21.4"
+      VERSION: "1.21.11"
       MEMORY: "2G"
       ENABLE_AUTOPAUSE: "FALSE"
     volumes:
       - ./docker/data-itzg:/data
-      - ./sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar:/plugins/sovereign-seasons-core.jar:ro
+      - ./sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar:/plugins/sovereign-seasons-core.jar:ro
       - ./sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-1.0.0.jar:/plugins/sovereign-seasons-pantry.jar:ro
     profiles:
       - itzg

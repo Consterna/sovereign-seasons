@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV EULA=false \
     MEMORY=2G \
-    MINECRAFT_VERSION=1.21.4 \
+    MINECRAFT_VERSION=1.21.11 \
     SERVER_PORT=25565
 
 WORKDIR /server

@@ -4,7 +4,7 @@ set -euo pipefail
 DATA_DIR="/server/data"
 PLUGINS_DIR="${DATA_DIR}/plugins"
 PAPER_JAR="${DATA_DIR}/paper.jar"
-MINECRAFT_VERSION="${MINECRAFT_VERSION:-1.21.4}"
+MINECRAFT_VERSION="${MINECRAFT_VERSION:-1.21.11}"
 MEMORY="${MEMORY:-2G}"
 EULA="${EULA:-false}"
 

@@ -13,7 +13,22 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Temperatura en °C a partir de la temperatura del bioma (ajustada por altitud) más un desfase estacional interpolado de forma continua entre estaciones.
   - Sección `temperature` en `config.yml` con escala de bioma, desfases por estación y umbrales de banda validados (finitos, en el rango `[-100, 100]` y ascendentes).
   - `/season info` muestra la temperatura del jugador.
-  - 10 pruebas nuevas (152 en total).
+- **`sovereign-seasons-core` 1.1.0 — Naturaleza estacional (filosofía *vanilla+*)**:
+  - Perfil climático por cultivo (`crops.seasonal-growth.profiles`): estaciones fértiles y bandas de temperatura ideales.
+    - Fuera de temporada o de su clima, cada intento de crecer tiene menos probabilidad de prosperar, pero el cultivo nunca muere por ello.
+    - El invernadero ignora estación y clima; bajo tierra se ignora la estación. La verruga del Nether está exenta.
+  - Lluvia estacional (`weather.rain-chance`): veranos más secos. Solo se filtra la lluvia natural (`WeatherChangeEvent.Cause.NATURAL`).
+  - Fauna estacional (`fauna`): gemelos al criar en primavera, *Strays* en inviernos fríos y *Husks* en veranos calurosos.
+- **`sovereign-seasons-core` 1.1.0 — Frío y calor suaves (`comfort`)**:
+  - **Frío:** en zona Helada a la intemperie, escarcha visual y Lentitud, sin daño por defecto. Protegen una pieza de cuero (como con la nieve polvo) o tener fuego o luz cerca.
+  - **Calor:** en zona Calurosa, de día y al sol, un poco más de cansancio. Protegen la sombra, el agua o la Resistencia al fuego.
+  - Aviso en la barra de acción con enfriamiento por tipo de exposición. Todo es configurable y desactivable.
+- **`sovereign-seasons-core` 1.1.0 — Interfaz**:
+  - Título y sonido al cambiar de estación.
+  - El reloj muestra fecha y temperatura.
+  - `/season hud` muestra una BossBar persistente por jugador (permiso `sovereignseasons.command.hud`).
+  - Integración opcional con PlaceholderAPI (`softdepend`).
+- Pruebas: 172 en core (+30 respecto a 1.0.0).
 - **Módulo `sovereign-seasons-pantry` v1.0.0 (Conservación de alimentos)**:
   - Descomposición de alimentos perecederos según vida útil en días de juego (configurable por material) y ritmo por banda de temperatura.
   - Etapas `Fresco`, `Rancio` y `Pudriéndose` en el lore. Al pudrirse por completo, la pila se convierte en carne podrida conservando la cantidad.
@@ -22,8 +37,17 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Penalización de *Hambre* al comer alimentos rancios o en descomposición.
   - Evaluación diferida al abrir contenedores y periódica en el inventario de los jugadores, compatible con Folia. La caducidad se redondea para preservar el apilamiento.
   - Comando `/pantry` (`inspect`, `cellar`, `stats`, `reload`, `setfresh`) con permisos `sovereignseasons.pantry.*`.
-  - Suite de 39 pruebas unitarias.
-- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen el JAR de Pantry.
+  - Multiplicador por tipo de contenedor: los barriles conservan mejor (×0,75).
+  - La carne podrida se puede echar al compostador.
+  - Aviso al jugador cuando la comida de su inventario se pudre o está a punto.
+  - Suite de 41 pruebas unitarias.
+- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen el JAR de Pantry. La versión de Paper por defecto pasa a 1.21.11.
+- Pruebas de juego end-to-end (`tools/e2e`): un servidor Paper 1.21.11 local y un bot Mineflayer verifican 32 escenarios reales sin Docker.
+- Guía de instalación para servidores y sección de filosofía de diseño en el README.
+
+### Corregido
+- `SovereignSeasonsApi.Holder` publica la instancia de forma segura entre hilos (`volatile`), algo necesario en Folia.
+- La Lentitud por frío se resuelve por clave de registro (`minecraft:slowness`), porque el campo Java cambió de nombre en 1.20.5.
 
 ## [1.0.0] - 2026-10-26
 
