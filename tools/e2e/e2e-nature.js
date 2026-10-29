@@ -90,6 +90,13 @@ async function main() {
     await rcon.command('gamerule advance_time false');
     await rcon.command('gamerule advance_weather true');
     await rcon.command('gamerule spawn_mobs false');
+    // Other suites may have changed biomes nearby (deserts stay HOT even in winter): move to untouched plains
+    const here = bot.entity.position.floored();
+    const fresh = { x: here.x + 1000, y: here.y, z: here.z };
+    await rcon.command(`tp ${BOT} ${fresh.x + 0.5} ${fresh.y} ${fresh.z + 0.5}`);
+    for (let i = 0; i < 60 && bot.entity.position.distanceTo({ x: fresh.x + 0.5, y: fresh.y, z: fresh.z + 0.5 }) > 2; i++) await sleep(500);
+    for (let i = 0; i < 60 && !bot.blockAt(bot.entity.position.offset(0, -1, 0)); i++) await sleep(500);
+    await sleep(2000);
     await rcon.command('kill @e[type=!player]');
 
     // ---------------------------------------------------------------- natural rain
