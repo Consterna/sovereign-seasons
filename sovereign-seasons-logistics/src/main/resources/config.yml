@@ -1,0 +1,130 @@
+# ==============================================================================
+#                SOVEREIGN SEASONS LOGISTICS - CONFIGURATION
+# ==============================================================================
+# Niveles de efecto: 0 = ninguno, 1 = Lentitud/Velocidad I (≈15-20 %), 2 = nivel II...
+
+mobility:
+  # Movilidad estacional: nieve, barro, caminos y ventiscas.
+  enabled: true
+  # Frecuencia de evaluación por jugador (requiere reiniciar el servidor).
+  interval-ticks: 10
+  # Duración de cada efecto aplicado; se renueva mientras sigas en el terreno.
+  effect-duration-ticks: 30
+  # Monturas afectadas (y beneficiadas por los caminos).
+  mounts:
+    - HORSE
+    - DONKEY
+    - MULE
+    - LLAMA
+    - TRADER_LLAMA
+    - CAMEL
+    - SKELETON_HORSE
+    - ZOMBIE_HORSE
+
+  snow:
+    enabled: true
+    # Lentitud sobre 1-2 capas de nieve.
+    slowness: 1
+    # Lentitud sobre nieve profunda (capas >= deep-layers, bloques de nieve o nieve polvo).
+    deep-slowness: 2
+    deep-layers: 3
+    # Unas botas de cuero dejan andar por la nieve sin penalización, como en la nieve polvo vanilla.
+    leather-boots-protect: true
+    # Un caballo con armadura de caballo de cuero tampoco se hunde en la nieve.
+    leather-horse-armor-protect: true
+
+  mud:
+    enabled: true
+    slowness: 1
+    # El barro aparece cuando llueve (no cuando nieva) sobre estos bloques en estas estaciones.
+    # El bloque de barro (MUD) ralentiza siempre.
+    seasons:
+      - spring
+      - autumn
+    materials:
+      - GRASS_BLOCK
+      - DIRT
+      - COARSE_DIRT
+      - FARMLAND
+      - PODZOL
+      - ROOTED_DIRT
+      - MYCELIUM
+      - MUD
+
+  roads:
+    # Los caminos anulan la nieve fina y el barro. Construir caminos tiene premio.
+    enabled: true
+    # Velocidad para las monturas sobre un camino.
+    mount-speed: 1
+    # Velocidad para jugadores a pie sobre un camino (0 = solo inmunidad).
+    player-speed: 0
+    # Hasta cuántas capas de nieve sobre un camino siguen sin importar (más hay que despejarlo).
+    max-snow-layers: 2
+    # Se añaden automáticamente todos los tablones (*_PLANKS) y hormigones (*_CONCRETE).
+    # Si defines esta lista, reemplaza a la lista por defecto.
+    # materials:
+    #   - DIRT_PATH
+    #   - GRAVEL
+
+  blizzard:
+    # Ventisca: nevando en invierno en zona Helada y a cielo abierto. Resguardarse la anula.
+    enabled: true
+    extra-slowness: 1
+
+weight:
+  # Peso de carga (desactivado por defecto). Solo cuenta lo que lleva el jugador:
+  # mulas, llamas, caballos con cofre, vagonetas, cofres y el cofre de Ender no pesan.
+  enabled: false
+  capacity: 1000
+  # Fracción de la capacidad a partir de la cual la carga es Pesada (Lentitud I) o Sobrecargada (Lentitud II).
+  heavy-threshold: 0.6
+  overloaded-threshold: 0.85
+  # Contenido de cajas de shulker y bundles: cuenta este factor de su peso.
+  container-contents-factor: 0.5
+  # Las cajas de Logistics pesan este factor de su contenido suelto.
+  crate-factor: 0.6
+  # Peso de cualquier ítem sin regla.
+  default-weight: 0.5
+  # Reglas: expresión regular sobre el nombre completo del material y peso por unidad. Gana la primera que coincide.
+  rules:
+    - pattern: "NETHERITE_BLOCK|IRON_BLOCK|GOLD_BLOCK|COPPER_BLOCK|RAW_IRON_BLOCK|RAW_GOLD_BLOCK|RAW_COPPER_BLOCK|ANVIL|CHIPPED_ANVIL|DAMAGED_ANVIL"
+      weight: 9.0
+    - pattern: ".*_ORE|STONE|COBBLESTONE|DEEPSLATE|COBBLED_DEEPSLATE|.*STONE_BRICKS|ANDESITE|DIORITE|GRANITE|TUFF|BLACKSTONE|OBSIDIAN|SANDSTONE|.*_TERRACOTTA|BRICKS"
+      weight: 1.0
+    - pattern: ".*_(HELMET|CHESTPLATE|LEGGINGS|BOOTS|SWORD|PICKAXE|AXE|SHOVEL|HOE)"
+      weight: 2.0
+    - pattern: "CARROT|POTATO|BEETROOT|APPLE|WHEAT|.*_SEEDS|SWEET_BERRIES|GLOW_BERRIES|MELON_SLICE|COCOA_BEANS|SUGAR_CANE|BREAD|COOKED_.*|BAKED_POTATO|COOKIE"
+      weight: 0.25
+
+crates:
+  # Cajas a granel: agáchate y haz clic derecho al aire con al menos N unidades en la mano para empaquetar;
+  # clic derecho con una caja para desempaquetar. El trigo ya tiene el fardo de heno vanilla.
+  enabled: true
+  items-per-crate: 9
+  # Con Sovereign Seasons Pantry instalado, la comida dentro de una caja se estropea a este ritmo relativo.
+  packed-decay-rate: 0.5
+  packable:
+    - CARROT
+    - POTATO
+    - BEETROOT
+    - APPLE
+    - SWEET_BERRIES
+    - GLOW_BERRIES
+    - MELON_SLICE
+    - COCOA_BEANS
+    - SUGAR_CANE
+
+ice:
+  # Lagos helados: en invierno, en zona Helada, el agua quieta superficial cerca de los jugadores se congela poco
+  # a poco y vuelve a ser agua al terminar el invierno. Solo se derrite el hielo que puso el plugin.
+  enabled: true
+  # Frecuencia del muestreo (requiere reiniciar el servidor).
+  interval-ticks: 40
+  # Columnas muestreadas por jugador en cada pasada y radio del muestreo.
+  samples-per-player: 8
+  radius: 48
+  # Máximo de bloques derretidos por chunk en cada pasada.
+  max-thaw-per-chunk: 64
+
+messages:
+  prefix: "<gold><b>Logistics</b></gold> <gray>»</gray> "
