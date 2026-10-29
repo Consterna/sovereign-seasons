@@ -55,16 +55,31 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - La comida que caduca dentro de una caja respeta la opción `spoil-to-rotten-flesh` de Pantry (`PantryApi#spoilsToRottenFlesh`).
   - El peso del inventario se calcula cada 20 ticks y se reutiliza entre pasadas.
   - Suite de 26 pruebas unitarias y 25 pruebas de juego (`tools/e2e/e2e-logistics.js`).
-- **`sovereign-seasons-pantry`**: nueva API pública `PantryApi` en el `ServicesManager` (caducidad, reloj de descomposición, perecederos), usada por las cajas de Logistics. 43 pruebas.
-- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry y Logistics. La versión de Paper por defecto pasa a 1.21.11.
+- **`sovereign-seasons-pantry`**: nueva API pública `PantryApi` en el `ServicesManager` (caducidad, reloj de descomposición, perecederos, `getFreshness` e `isSpoiling` con la conservación incluida), usada por Logistics y Commerce. 44 pruebas.
+- **Módulo `sovereign-seasons-commerce` v1.0.0 (Economía estacional)**:
+  - Sin plugins de economía: esmeraldas y aldeanos. `depend` Core; Pantry y Logistics opcionales.
+  - **Precios estacionales:** cada producto tiene un valor por estación. Los cultivos son abundantes en su temporada (×0,8) y escasos en invierno (×1,4); la lana, el carbón, el pescado y la carne tienen valores fijos por estación (comodines como `*_WOOL`).
+    - El ajuste se aplica al primer ingrediente del trato al abrir el comercio, con el precio original tachado, y desaparece al cerrarlo.
+    - Vanilla reinicia los ajustes del aldeano al cerrar (`resetSpecialPrices`); al vendedor ambulante, que no lo hace, se le fija y se le borra.
+  - **Ferias del vendedor ambulante:** ofertas por estación (semillas, hielo para las bodegas, cuero contra la nieve, fogatas y cristal para los invernaderos), sustituidas al cambiar de estación.
+  - **Frescura en el mostrador (Pantry):** los aldeanos rechazan la comida en la etapa «Pudriéndose»; el trato se cancela sin perder nada.
+  - **Venta a granel (Logistics):** agachado y con cajas en la mano, el aldeano las compra a precio de su propio trato, con el valor de la estación y un plus del 15 %. Límite diario por aldeano y rechazo de cajas de comida podrida.
+  - Comando `/commerce` (`prices [estación]`, `stats`, `reload`; alias `/mercado`) con permisos `sovereignseasons.commerce.*`.
+  - Compatible con 1.20.4–26.x: no usa `Villager.Profession` ni `InventoryView`, que cambiaron de tipo en 1.21.
+  - 20 pruebas unitarias y 24 pruebas de juego (`tools/e2e/e2e-commerce.js`), verificadas en Paper 1.21.11 y 26.1.2.
+- **`sovereign-seasons-logistics`**: nueva API pública `LogisticsApi` en el `ServicesManager` (`readCrate`, `previewContents`) y desempaquetado compartido (`CrateUnpacker`). 29 pruebas.
+- **`sovereign-seasons-pantry`**: `PantryApi#expiryGranularity`.
+- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry, Logistics y Commerce. La versión de Paper por defecto pasa a 1.21.11.
 - Pruebas de juego end-to-end (`tools/e2e`): servidor Paper local + bot Mineflayer, sin Docker.
   - Suite principal de 33 comprobaciones y suite de naturaleza de 5 (lluvia natural, Strays y Husks), con `/tick sprint`.
-  - `run-local.sh` automatiza el ciclo completo sobre un mundo limpio.
+  - `run-local.sh` automatiza el ciclo completo sobre un mundo limpio y se niega a probar un JAR de plugin más antiguo que su código.
   - Guía de revisión visual con el cliente propio (`MANUAL_CHECKS.md`).
 - Compatibilidad verificada en servidor real: Paper 1.21.11 (Java 21) y 26.1.2 (Java 25) con todas las pruebas, Paper 26.3 con prueba de humo y PlaceholderAPI 2.12.3.
 - Guía de instalación para servidores y sección de filosofía de diseño en el README.
 
 ### Corregido
+- **Cajas de Logistics:** el valor de la caja se redondeaba al más cercano al empaquetar y otra vez al desempaquetar; en un empate cada ciclo sumaba hasta un paso de granularidad (1000 ticks) y repetirlo refrescaba la comida. Ahora se redondea siempre hacia abajo.
+- **`PantryApi#getFreshness` e `isSpoiling`** respetan `decay.enabled: false`: con la descomposición desactivada nada cuenta como podrido.
 - El JAR normal (`jar`) y el JAR del plugin (`shadowJar`) de cada módulo escribían en el mismo archivo. Un módulo dependiente podía regenerar el normal y dejar un plugin sin FoliaLib (`ClassNotFoundException` al arrancar). El JAR normal pasa a llevar el clasificador `-plain`, y la publicación Maven del core publica el JAR del plugin (`components["shadow"]`).
 - `SovereignSeasonsApi.Holder` publica la instancia de forma segura entre hilos (`volatile`), algo necesario en Folia.
 - La Lentitud por frío se resuelve por clave de registro (`minecraft:slowness`), porque el campo Java cambió de nombre en 1.20.5.
