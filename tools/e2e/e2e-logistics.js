@@ -148,6 +148,12 @@ async function main() {
     await cmd(`fill ${base.x - 2} ${y - 1} ${base.z - 2} ${base.x + 2} ${y - 1} ${base.z + 2} minecraft:dirt_path`);
     await sleep(2500);
     check('A dirt path keeps the player out of the mud', await effectLevel(BOT, 'slowness') === 0);
+    // It never rains in savannas (vanilla: no precipitation), so a storm there makes no mud
+    const dry = base.offset(30, 0, 0);
+    await teleport(dry);
+    await fillBiome(dry, 12, 'minecraft:savanna');
+    await sleep(2500);
+    check('A storm makes no mud where it never rains (savanna)', await effectLevel(BOT, 'slowness') === 0);
     await cmd('weather clear');
 
     // ---------------------------------------------------------------- mounts and roads
@@ -273,6 +279,38 @@ async function main() {
     const above = bot.blockAt(ground.position.offset(0, 1, 0));
     check('A crate is never placed as a barrel block', above && above.name !== 'barrel', above ? above.name : 'unloaded');
 
+    // Holding a crate must not stop the player from opening a chest
+    await cmd(`clear ${BOT}`);
+    await cmd(`give ${BOT} minecraft:carrot 9`);
+    await holdItem('carrot');
+    await bot.look(bot.entity.yaw, 0, true);
+    bot.setControlState('sneak', true);
+    await sleep(500);
+    bot.activateItem();
+    await sleep(800);
+    bot.setControlState('sneak', false);
+    await sleep(500);
+    const chestPos = bot.entity.position.floored().offset(-2, 0, 0);
+    await cmd(`setblock ${chestPos.x} ${chestPos.y} ${chestPos.z} minecraft:chest`);
+    let chestBlock = null;
+    for (let i = 0; i < 40 && !(chestBlock && chestBlock.name === 'chest'); i++) {
+      await sleep(250);
+      chestBlock = bot.blockAt(chestPos);
+    }
+    await holdItem('barrel');
+    let opened = false;
+    bot.once('windowOpen', () => { opened = true; });
+    await bot.lookAt(chestPos.offset(0.5, 0.5, 0.5));
+    try {
+      await bot.activateBlock(chestBlock);
+    } catch (e) {
+      // no block update is expected when the chest just opens
+    }
+    await sleep(1200);
+    if (bot.currentWindow) bot.closeWindow(bot.currentWindow);
+    check('Right-clicking a chest with a crate opens the chest instead of unpacking', opened && count('barrel') === 1,
+      `opened=${opened} crates=${count('barrel')}`);
+
     // ---------------------------------------------------------------- crates keep Pantry freshness
     const hasPantry = /SovereignSeasons-Pantry/.test(plugins);
     if (hasPantry) {
@@ -296,6 +334,22 @@ async function main() {
       // Only meaningful if the carrots really went through a crate
       check('Packed carrots keep their freshness (~30%)', packed && count('barrel') === 0 && pct >= 28 && pct <= 32,
         `packed=${packed} freshness=${pct}%`);
+
+      // Food that expires inside a crate comes out as rotten flesh (Pantry converts spoiled food by default)
+      await playerCommand('/pantry setfresh 1');
+      await bot.look(bot.entity.yaw, 0, true);
+      bot.setControlState('sneak', true);
+      await sleep(500);
+      bot.activateItem();
+      await sleep(800);
+      bot.setControlState('sneak', false);
+      const packedAgain = count('barrel') === 1;
+      await cmd('time add 48000'); // two days: one day of decay at the packed rate (x0.5)
+      await holdItem('barrel');
+      bot.activateItem();
+      await sleep(1000);
+      check('Food that expired inside a crate comes out as rotten flesh', packedAgain && count('rotten_flesh') === 9 && count('carrot') === 0,
+        `packed=${packedAgain} rotten=${count('rotten_flesh')} carrots=${count('carrot')}`);
     }
   } catch (e) {
     check('Unexpected exception during scenario', false, e.stack);

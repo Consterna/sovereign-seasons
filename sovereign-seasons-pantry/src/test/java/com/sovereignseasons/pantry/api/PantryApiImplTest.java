@@ -43,10 +43,11 @@ class PantryApiImplTest {
     private final Map<ItemStack, FoodState> states = new IdentityHashMap<>();
     private final AtomicLong clock = new AtomicLong(10_000L);
     private PantryApi api;
+    private PantryConfig config;
 
     @BeforeEach
     void setup() {
-        PantryConfig config = new PantryConfig(null);
+        config = new PantryConfig(null);
         FoodStateCodec codec = new FoodStateCodec() {
             @Override
             public Optional<FoodState> read(ItemStack item) {
@@ -58,7 +59,7 @@ class PantryApiImplTest {
                 states.put(item, state);
             }
         };
-        api = new PantryApiImpl(new DecayCalculator(config), codec, clock::get);
+        api = new PantryApiImpl(config, new DecayCalculator(config), codec, clock::get);
     }
 
     @Test
@@ -70,6 +71,9 @@ class PantryApiImplTest {
         assertThat(api.freshExpiresAt(Material.CARROT, 10_000L)).isEqualTo(10_000L + 12 * 24_000L);
         assertThat(api.roundExpiry(10_400L)).isEqualTo(10_000L);
         assertThat(api.roundExpiry(10_600L)).isEqualTo(11_000L);
+        assertThat(api.spoilsToRottenFlesh()).isTrue();
+        config.setSpoilToRottenFlesh(false);
+        assertThat(api.spoilsToRottenFlesh()).isFalse();
     }
 
     @Test

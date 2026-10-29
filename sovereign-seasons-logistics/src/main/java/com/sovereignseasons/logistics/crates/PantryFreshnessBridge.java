@@ -74,4 +74,9 @@ public final class PantryFreshnessBridge implements FreshnessBridge {
     public long round(long expiresAt) {
         return api.roundExpiry(expiresAt);
     }
+
+    @Override
+    public boolean spoilsToRottenFlesh() {
+        return api.spoilsToRottenFlesh();
+    }
 }

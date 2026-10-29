@@ -75,7 +75,7 @@ public class SovereignSeasonsPantryPlugin extends JavaPlugin {
 
         // Public API for other modules (e.g. Logistics crates keep food freshness while packed)
         getServer().getServicesManager().register(PantryApi.class,
-                new PantryApiImpl(calculator, decayService.getCodec(), tracker::now), this, ServicePriority.Normal);
+                new PantryApiImpl(this.config, calculator, decayService.getCodec(), tracker::now), this, ServicePriority.Normal);
 
         // 3. Register Listeners
         FoodLifecycleListener lifecycleListener = new FoodLifecycleListener(this.config, decayService, tracker, this.cellarDetector, this.foliaLib);

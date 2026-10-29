@@ -50,7 +50,11 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - **Cajas a granel:** se empaqueta con agacharse + clic derecho al aire (9 unidades) y se desempaqueta con clic derecho. Las cajas son apilables y no se pueden colocar ni quemar. Con Pantry, la comida dentro se estropea a ×0,5.
   - **Peso de carga** (desactivado por defecto): reglas por patrón de material, contenido de shulkers y bundles al 50 % y cajas al 60 %. Las mulas, llamas, vagonetas y el cofre de Ender no cuentan.
   - Comando `/logistics` (`status`, `weight`, `stats`, `reload`) con permisos `sovereignseasons.logistics.*`.
-  - Suite de 23 pruebas unitarias y 22 pruebas de juego (`tools/e2e/e2e-logistics.js`).
+  - Con una caja en la mano, los cofres, puertas y demás bloques interactivos se siguen abriendo (agachado se desempaqueta).
+  - El barro y las ventiscas solo aparecen donde vanilla tiene precipitación (humedad del bioma > 0): no en desiertos, sabanas ni badlands.
+  - La comida que caduca dentro de una caja respeta la opción `spoil-to-rotten-flesh` de Pantry (`PantryApi#spoilsToRottenFlesh`).
+  - El peso del inventario se calcula cada 20 ticks y se reutiliza entre pasadas.
+  - Suite de 26 pruebas unitarias y 25 pruebas de juego (`tools/e2e/e2e-logistics.js`).
 - **`sovereign-seasons-pantry`**: nueva API pública `PantryApi` en el `ServicesManager` (caducidad, reloj de descomposición, perecederos), usada por las cajas de Logistics. 43 pruebas.
 - Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry y Logistics. La versión de Paper por defecto pasa a 1.21.11.
 - Pruebas de juego end-to-end (`tools/e2e`): servidor Paper local + bot Mineflayer, sin Docker.

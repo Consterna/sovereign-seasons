@@ -77,6 +77,10 @@ public class MobilityService implements Listener {
     private final InventoryWeigher weigher;
     private final Map<UUID, Snapshot> snapshots = new ConcurrentHashMap<>();
     private final Map<UUID, WeightModel.Load> lastLoad = new ConcurrentHashMap<>();
+    // Inventory weighing (with shulker/bundle contents) is the expensive part: it is refreshed every other tick
+    private final Map<UUID, Double> cachedWeight = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> weighCountdown = new ConcurrentHashMap<>();
+    private static final int WEIGH_EVERY_N_TICKS = 2;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public MobilityService(LogisticsConfig config, SeasonService seasonService, TemperatureService temperatureService,
@@ -107,7 +111,7 @@ public class MobilityService implements Listener {
         boolean mounted = vehicle instanceof LivingEntity && config.getMounts().contains(vehicle.getType());
         LivingEntity mover = mounted ? (LivingEntity) vehicle : player;
 
-        double weight = config.isWeightEnabled() ? weigher.weigh(player.getInventory().getContents()) : 0.0;
+        double weight = config.isWeightEnabled() ? currentWeight(player) : 0.0;
         WeightModel.Load load = config.isWeightEnabled() ? weightModel.load(weight) : WeightModel.Load.LIGHT;
         warnOnLoadChange(player, load);
 
@@ -123,7 +127,8 @@ public class MobilityService implements Listener {
             int layers = ground.getBlockData() instanceof Snow snow ? snow.getLayers() : 0;
             TemperatureBand band = temperatureService.getBand(feet);
             boolean open = isSkyExposed(feet);
-            boolean precipitation = world.hasStorm() && open;
+            // Vanilla biomes without precipitation (deserts, savannas, badlands) have zero humidity: no rain, no snow
+            boolean precipitation = world.hasStorm() && open && ground.getHumidity() > 0.0;
             boolean raining = precipitation && band != TemperatureBand.FREEZING;
             blizzard = precipitation && season == Season.WINTER && band == TemperatureBand.FREEZING;
             surface = classifier.classify(ground.getType(), layers, under.getType(), raining, season);
@@ -134,6 +139,19 @@ public class MobilityService implements Listener {
         MovementModel.Effect effect = movement.evaluate(surface, mounted, snowProtected, blizzard, weightSlowness);
         apply(mover, effect);
         snapshots.put(player.getUniqueId(), new Snapshot(surface, mounted, blizzard, weight, load, effect));
+    }
+
+    private double currentWeight(Player player) {
+        UUID id = player.getUniqueId();
+        int countdown = weighCountdown.getOrDefault(id, 0);
+        Double cached = cachedWeight.get(id);
+        if (cached == null || countdown <= 0) {
+            cached = weigher.weigh(player.getInventory().getContents());
+            cachedWeight.put(id, cached);
+            countdown = WEIGH_EVERY_N_TICKS;
+        }
+        weighCountdown.put(id, countdown - 1);
+        return cached;
     }
 
     private void apply(LivingEntity entity, MovementModel.Effect effect) {
@@ -165,6 +183,8 @@ public class MobilityService implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         snapshots.remove(event.getPlayer().getUniqueId());
         lastLoad.remove(event.getPlayer().getUniqueId());
+        cachedWeight.remove(event.getPlayer().getUniqueId());
+        weighCountdown.remove(event.getPlayer().getUniqueId());
     }
 
     private static boolean isSnow(Material material) {

@@ -13,7 +13,7 @@ Sigue la filosofía *vanilla+*: viajar y cargar requiere planificación, y las s
   - 1–2 capas dan *Lentitud I*.
   - La nieve profunda (≥ 3 capas, bloque de nieve o nieve polvo) da *Lentitud II*.
   - Unas **botas de cuero** permiten andar sin penalización, como en la nieve polvo vanilla.
-- **Barro:** cuando **llueve** (no cuando nieva) en primavera u otoño, la hierba, la tierra, la tierra de cultivo, el podzol y el micelio ralentizan (*Lentitud I*). El bloque de barro ralentiza siempre.
+- **Barro:** cuando **llueve** (no cuando nieva) en primavera u otoño, la hierba, la tierra, la tierra de cultivo, el podzol y el micelio ralentizan (*Lentitud I*). El bloque de barro ralentiza siempre. En los biomas donde vanilla nunca llueve (desiertos, sabanas, badlands) una tormenta no crea barro ni ventisca.
 - **Monturas** (caballos, burros, mulas, llamas, camellos): sufren las mismas penalizaciones. Un caballo con **armadura de caballo de cuero** no se hunde en la nieve.
 
 ### 2. Caminos que se notan
@@ -39,16 +39,17 @@ Sigue la filosofía *vanilla+*: viajar y cargar requiere planificación, y las s
   - Se obtiene una *Caja de X* (9 unidades).
   - Al hacer clic derecho sobre un bloque se sigue plantando con normalidad.
   - El trigo ya tiene el fardo de heno vanilla.
-- **Desempaquetar:** clic derecho con la caja en la mano.
+- **Desempaquetar:** clic derecho con la caja en la mano, al aire o sobre un bloque normal. Sobre un cofre, una puerta u otro bloque interactivo, el clic abre ese bloque como siempre; agachado, desempaqueta.
 - Las cajas hechas del mismo stack se **apilan** (hasta 64 cajas = 576 unidades por casilla).
 - No se pueden colocar como barril ni quemar como combustible.
-- **Con Pantry:** dentro de la caja la comida se estropea a **×0,5**, sin importar dónde esté la caja. Al desempaquetar, recupera su frescura real; si caducó dentro, sale carne podrida.
+- **Con Pantry:** dentro de la caja la comida se estropea a **×0,5**, sin importar dónde esté la caja. Al desempaquetar, recupera su frescura real. Si caducó dentro, sale carne podrida, salvo que Pantry tenga desactivado `spoil-to-rotten-flesh`; en ese caso sale marcada como Podrida.
 - Se usa interacción en lugar de recetas de crafteo a propósito: el *crafter* automático no puede fabricar cajas sin estado que "refresquen" comida podrida.
 
 ### 6. Peso de carga *(desactivado por defecto)*
 - Cada ítem pesa según reglas configurables: bloques metálicos 9; piedra y minerales 1; herramientas y armaduras 2; cosechas y comida 0,25; el resto 0,5.
 - El contenido de las cajas de shulker y los bundles cuenta al 50 %, y las cajas de Logistics al 60 % de su contenido suelto.
 - Por encima del 60 % de la capacidad, *Lentitud I*; por encima del 85 %, *Lentitud II*. Se avisa en la barra de acción.
+- El inventario se pesa cada segundo (cada 2 pasadas de movilidad) para no penalizar el rendimiento.
 - **Animales de carga premiados:** solo cuenta lo que lleva encima el jugador. Mulas, llamas, caballos con cofre, vagonetas, cofres y el cofre de Ender no pesan. Ir montado tampoco ralentiza por peso.
 
 ---
@@ -96,11 +97,12 @@ tools/e2e/run-local.sh testserver /ruta/a/java 1.21.11
 ```
 
 - **Pruebas unitarias:** clasificación del terreno, efectos de movimiento, peso, matemática de las cajas, reglas de hielo, registro por chunk, configuración y comandos.
-- **Pruebas de juego** (`tools/e2e/e2e-logistics.js`, 22 comprobaciones en un servidor real):
+- **Pruebas de juego** (`tools/e2e/e2e-logistics.js`, 25 comprobaciones en un servidor real):
   - nieve, botas de cuero y barro con lluvia frente a sendero de tierra;
   - caballo en grava y en nieve, con y sin armadura de cuero;
   - ventisca a cielo abierto frente a bajo techo;
   - lago que se congela y se derrite sin tocar el hielo puesto a mano;
-  - peso y cajas, incluida la frescura conservada con Pantry.
+  - peso y cajas, incluida la frescura conservada con Pantry;
+  - tormenta en sabana sin barro, cofre que se abre con una caja en la mano y comida caducada que sale podrida.
 
 Artefacto compilado: `sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-1.0.0.jar` (FoliaLib relocalizado en `com.sovereignseasons.logistics.libs.folialib`).

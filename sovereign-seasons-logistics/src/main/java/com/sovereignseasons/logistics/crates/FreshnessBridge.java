@@ -43,4 +43,9 @@ public interface FreshnessBridge {
     void setExpiresAt(ItemStack item, long expiresAt);
 
     long round(long expiresAt);
+
+    /**
+     * Whether fully spoiled food turns into rotten flesh in Pantry.
+     */
+    boolean spoilsToRottenFlesh();
 }
