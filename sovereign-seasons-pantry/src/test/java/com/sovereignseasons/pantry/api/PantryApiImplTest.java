@@ -92,4 +92,37 @@ class PantryApiImplTest {
         assertThat(api.getExpiresAt(stone)).isEmpty();
         assertThat(api.getExpiresAt(null)).isEmpty();
     }
+
+    @Test
+    @DisplayName("Reports freshness and the spoiling stage with Pantry's own thresholds")
+    void freshnessAndSpoiling() {
+        long shelfLife = 12 * 24_000L; // carrots
+        ItemStack untracked = new ItemStack(Material.CARROT, 3);
+        assertThat(api.getFreshness(untracked)).hasValue(1.0);
+        assertThat(api.isSpoiling(untracked)).isFalse();
+
+        ItemStack half = new ItemStack(Material.CARROT, 3);
+        states.put(half, new FoodState(10_000L + shelfLife / 2, Preservation.NONE));
+        assertThat(api.getFreshness(half)).hasValue(0.5);
+        assertThat(api.isSpoiling(half)).isFalse();
+
+        ItemStack old = new ItemStack(Material.CARROT, 3);
+        states.put(old, new FoodState(10_000L + shelfLife / 10, Preservation.NONE)); // 10 % < stale-above 15 %
+        assertThat(api.isSpoiling(old)).isTrue();
+        ItemStack expired = new ItemStack(Material.CARROT, 3);
+        states.put(expired, new FoodState(9_000L, Preservation.NONE));
+        assertThat(api.getFreshness(expired)).hasValue(0.0);
+        assertThat(api.isSpoiling(expired)).isTrue();
+
+        assertThat(api.getFreshness(new ItemStack(Material.STONE))).isEmpty();
+        assertThat(api.isSpoiling(new ItemStack(Material.STONE))).isFalse();
+        assertThat(api.getFreshness(null)).isEmpty();
+        assertThat(api.isSpoiling(null)).isFalse();
+
+        // With decay disabled nothing ages, even items that still carry an old expiry
+        config.setDecayEnabled(false);
+        assertThat(api.isSpoiling(expired)).isFalse();
+        assertThat(api.getFreshness(expired)).isEmpty();
+        assertThat(api.expiryGranularity()).isEqualTo(1000L);
+    }
 }

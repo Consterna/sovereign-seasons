@@ -23,12 +23,14 @@ package com.sovereignseasons.pantry.api;
 import com.sovereignseasons.pantry.config.PantryConfig;
 import com.sovereignseasons.pantry.food.DecayCalculator;
 import com.sovereignseasons.pantry.food.FoodState;
+import com.sovereignseasons.pantry.food.FreshnessStage;
 import com.sovereignseasons.pantry.food.Preservation;
 import com.sovereignseasons.pantry.item.FoodStateCodec;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.function.LongSupplier;
 
@@ -87,7 +89,36 @@ public class PantryApiImpl implements PantryApi {
     }
 
     @Override
+    public long expiryGranularity() {
+        return Math.max(1L, config.getExpiryGranularityTicks());
+    }
+
+    @Override
     public boolean spoilsToRottenFlesh() {
         return config.isSpoilToRottenFlesh();
+    }
+
+    @Override
+    public OptionalDouble getFreshness(ItemStack item) {
+        // With decay disabled nothing ages, whatever expiry an item still carries
+        if (!config.isDecayEnabled() || item == null || !calculator.isPerishable(item.getType())) {
+            return OptionalDouble.empty();
+        }
+        return codec.read(item)
+                .map(state -> OptionalDouble.of(calculator.freshness(state, item.getType(), now())))
+                .orElse(OptionalDouble.of(1.0));
+    }
+
+    @Override
+    public boolean isSpoiling(ItemStack item) {
+        if (!config.isDecayEnabled() || item == null || !calculator.isPerishable(item.getType())) {
+            return false;
+        }
+        return codec.read(item)
+                .map(state -> {
+                    FreshnessStage stage = calculator.stage(state, item.getType(), now());
+                    return stage == FreshnessStage.SPOILING || stage == FreshnessStage.SPOILED;
+                })
+                .orElse(false);
     }
 }
