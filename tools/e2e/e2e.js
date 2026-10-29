@@ -332,6 +332,8 @@ async function main() {
     let chest = await bot.openContainer(await waitForBlockNamed(chestPos, 'chest'));
     chest.close();
     await rcon.command('season set summer world');
+    // The inventory check may warn as soon as the days are skipped, so count warnings from here
+    const warnBefore = actionBars.length;
     await rcon.command('time add 120000'); // five in-game days
     await sleep(1000);
     chest = await bot.openContainer(await waitForBlockNamed(chestPos, 'chest'));
@@ -342,7 +344,6 @@ async function main() {
 
     // ---------------------------------------------------------------- pantry: inventory spoilage warning
     // The test server config sets decay.player-check-interval-ticks to 100
-    const warnBefore = actionBars.length;
     await sleep(7000);
     const rottenInInventory = bot.inventory.items().filter((i) => i.name === 'rotten_flesh').reduce((n, i) => n + i.count, 0);
     check('Food rotting in the inventory warns the player', actionBars.slice(warnBefore).some((a) => /podrido|echando a perder/.test(a)),
