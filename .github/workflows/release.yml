@@ -62,6 +62,7 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: RELEASE_NOTES.md
           files: |
-            sovereign-seasons-core/build/libs/sovereign-seasons-core-*.jar
-            sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*.jar
+            sovereign-seasons-core/build/libs/sovereign-seasons-core-*[0-9].jar
+            sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*[0-9].jar
+            sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-*[0-9].jar
           generate_release_notes: true

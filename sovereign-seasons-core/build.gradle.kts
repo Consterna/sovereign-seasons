@@ -10,7 +10,8 @@ version = "1.1.0"
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            from(components["java"])
+            // Publish the plugin (shadow) JAR, as servers and dependent plugins use it
+            from(components["shadow"])
             groupId = "com.sovereignseasons"
             artifactId = "sovereign-seasons-core"
             version = "1.1.0"
@@ -87,6 +88,11 @@ tasks {
     compileTestJava {
         options.encoding = "UTF-8"
         options.release.set(21)
+    }
+
+    jar {
+        // The plugin JAR is the shadow JAR; the plain JAR gets a classifier so the two never overwrite each other
+        archiveClassifier.set("plain")
     }
 
     shadowJar {

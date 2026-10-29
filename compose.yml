@@ -34,6 +34,7 @@ services:
       - ./docker/data-itzg:/data
       - ./sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar:/plugins/sovereign-seasons-core.jar:ro
       - ./sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-1.0.0.jar:/plugins/sovereign-seasons-pantry.jar:ro
+      - ./sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-1.0.0.jar:/plugins/sovereign-seasons-logistics.jar:ro
     profiles:
       - itzg
     stdin_open: true
