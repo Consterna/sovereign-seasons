@@ -36,6 +36,33 @@ Un bloque se considera protegido dentro de un invernadero si cumple dos condicio
 - **Bandas cualitativas:** `FREEZING`, `COLD`, `MILD`, `WARM` y `HOT`, con umbrales configurables y estrictamente ascendentes.
 - `/season info` muestra la temperatura en la posición del jugador.
 
+### 5. Naturaleza Estacional
+- **Clima ideal por cultivo** (`crops.seasonal-growth`): cada cultivo define sus estaciones fértiles y sus bandas de temperatura ideales.
+  - Cada intento natural de crecer prospera con probabilidad `factor_estación × factor_clima`:
+    - estación: `1,0` en temporada y `0,5` fuera;
+    - clima: `1,0` en banda ideal, `0,6` en banda adyacente y `0,3` si está más lejos.
+  - Si falla, solo se omite ese paso: el cultivo nunca muere por esto.
+  - El invernadero ignora estación y clima. Bajo tierra (sin luz del cielo y `Y ≤ 48`) se ignora solo la estación.
+  - La verruga del Nether está exenta.
+- **Lluvia estacional** (`weather`): probabilidad de aceptar que empiece a llover de forma natural (primavera `1,0`, verano `0,5`, otoño `1,0`, invierno `0,8`). `/weather` y otros plugins no se ven afectados.
+- **Fauna** (`fauna`):
+  - gemelos al criar en primavera (`25 %`);
+  - *Strays* en lugar de esqueletos en invierno en zonas Frías o Heladas (`50 %`);
+  - *Husks* en lugar de zombis en verano en zonas Calurosas (`50 %`).
+
+### 6. Frío y Calor Suaves (`comfort`)
+- **Frío:** en banda Helada, a la intemperie, sin luz de bloque ≥ 10 (fuego, antorchas) y sin ninguna pieza de cuero, el jugador recibe escarcha visual y Lentitud I.
+  - Por defecto no hay daño: la congelación se queda por debajo del umbral vanilla.
+  - Con `comfort.cold.damage: true` se activa el daño vanilla por congelación.
+- **Calor:** en banda Calurosa, de día, bajo el sol directo, fuera del agua y sin Resistencia al fuego, el jugador sufre un pequeño cansancio extra (≈ 1 punto de hambre cada 80 s).
+- Aviso en la barra de acción con enfriamiento por tipo. No afecta al modo creativo ni al espectador.
+
+### 7. Interfaz
+- Título y sonido al cambiar de estación.
+- Usar un reloj muestra la fecha y la temperatura.
+- `/season hud` muestra una BossBar persistente por jugador.
+- **PlaceholderAPI** (opcional, `softdepend`): `%sovereignseasons_season%`, `_season_id`, `_subseason`, `_day`, `_days_per_season`, `_year`, `_progress`, `_temperature` y `_band`.
+
 ---
 
 ## 🕹️ Comandos y Permisos
@@ -43,6 +70,7 @@ Un bloque se considera protegido dentro de un invernadero si cumple dos condicio
 | Comando | Descripción | Permiso |
 |---|---|---|
 | `/season` o `/season info [mundo]` | Muestra la estación actual, día, progreso porcentual, año y protección del jugador. | `sovereignseasons.command.info` |
+| `/season hud` | Activa o desactiva la BossBar de estación y temperatura (se recuerda por jugador). | `sovereignseasons.command.hud` |
 | `/season greenhouse` | Auditoría en tiempo real del bloque actual (techo de cristal, distancia, fuente de calor y caché). | `sovereignseasons.command.greenhouse` |
 | `/season set <spring\|summer\|autumn\|winter> [mundo]` | Modifica de inmediato la estación del mundo especificado. | `sovereignseasons.admin` |
 | `/season setday <día> [mundo]` | Ajusta el día de la estación actual (validando rango `1..daysPerSeason`). | `sovereignseasons.admin` |
@@ -134,7 +162,7 @@ temperature:
 
 ## 🧪 Pruebas Unitarias y Calidad
 
-El módulo cuenta con una suite integral de **152 pruebas unitarias y de estrés automatizadas** en 23 clases de prueba con **100% de aprobación**:
+El módulo cuenta con una suite integral de **172 pruebas unitarias y de estrés automatizadas** en 27 clases de prueba con **100% de aprobación**:
 
 ```bash
 # Ejecutar todas las pruebas unitarias
@@ -145,4 +173,4 @@ El módulo cuenta con una suite integral de **152 pruebas unitarias y de estrés
 ```
 
 Artefacto compilado:
-`sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar`
+`sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar`

@@ -16,6 +16,11 @@ El ciclo de estaciones opera estrictamente en **días de juego de Minecraft (in-
 
 Para un desglose detallado de versiones y cambios, consulta el [CHANGELOG.md](CHANGELOG.md).
 
+### 🎯 Filosofía de diseño: *vanilla+*
+Sovereign Seasons añade **dificultad y planificación** sin convertir Minecraft en otro juego. No pretende ser un modpack *hardcore* como TerraFirmaCraft ni un simulador como Vintage Story. La idea es que el jugador tenga que pensar en las estaciones: qué plantar y dónde, cómo guardar la comida y cómo abrigarse. Todo ello con soluciones que ya existen en vanilla, como el cristal y el fuego para los invernaderos, el subsuelo y el hielo para las bodegas, el cuero contra el frío, y la sombra o el agua contra el calor.
+- Nada te mata por sorpresa: el frío no hace daño por defecto, y los cultivos fuera de temporada crecen más lento, pero no mueren.
+- Cada mecánica es configurable y se puede desactivar por separado.
+
 ---
 
 ## 🏛️ Arquitectura Modular (5 Módulos)
@@ -24,8 +29,8 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
-| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: Calendario de días de juego, congelación/marchitamiento de cultivos en Invierno, detección de invernaderos, temperatura estacional y API pública. | **Completado (152 tests / 100%)** |
-| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas subterráneas frías, neveras de hielo y ahumado. | **Completado v1.0 (39 tests / 100%)** |
+| [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: calendario de días de juego, invierno e invernaderos, temperatura estacional, cultivos con clima ideal, lluvia y fauna estacional, frío/calor suave, HUD y API pública. | **v1.1.0 (172 tests / 100%)** |
+| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas frías, neveras, barriles, ahumado, compost de comida podrida y avisos. | **v1.0.0 (41 tests / 100%)** |
 | [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Cajas/fardos de transporte masivo de cosechas, silos de grano y penalizaciones de movilidad por nieve/barro. | Esqueleto inicial |
 | [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
 | [**`sovereign-seasons-resourcepack`**](sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
@@ -46,11 +51,33 @@ En **Invierno (`WINTER`)**:
 
 ---
 
+## 🌱 Naturaleza Estacional (`core`)
+
+- **Clima ideal por cultivo:** Cada cultivo tiene estaciones fértiles y bandas de temperatura ideales. La temperatura combina bioma y estación.
+  - Las patatas, zanahorias y remolachas prefieren el frío templado.
+  - El trigo prefiere un clima templado.
+  - Los melones, el cacao, la caña y el cactus prefieren el calor.
+  - Fuera de su temporada o de su clima crecen más lento, pero nunca mueren por ello.
+  - El invernadero ignora estación y clima, y las granjas subterráneas ignoran la estación.
+- **Lluvia estacional:** Los veranos son más secos y los cambios de clima por comando nunca se bloquean.
+- **Fauna:**
+  - En primavera, criar animales puede dar gemelos.
+  - En invierno, en zonas frías, aparecen *Strays* en lugar de esqueletos.
+  - En verano, en zonas calurosas, aparecen *Husks* en lugar de zombis.
+
+## 🌡️ Frío y Calor Suaves (`core`)
+
+- **Frío** (zona Helada a la intemperie): escarcha visual y Lentitud, **sin daño** por defecto. Te protege llevar *una pieza de cuero*, igual que con la nieve polvo, o tener cerca fuego o antorchas.
+- **Calor** (zona Calurosa, de día y al sol): un poco más de hambre. Te proteges con sombra, agua o Resistencia al fuego.
+
 ## 🍲 Conservación de Alimentos (`pantry`)
 
 - **Descomposición estacional:** Los alimentos perecederos tienen una vida útil en días de juego que se acelera con el calor (Verano, desiertos, Nether) y se frena con el frío.
 - **Bodegas y neveras:** Los contenedores subterráneos sin luz del cielo y los rodeados de hielo conservan mucho mejor la comida.
 - **Ahumado:** Lo que sale de un ahumador queda `Ahumado` y dura cuatro veces más.
+- **Barriles:** Conservan mejor que los cofres (×0,75).
+- **Compost:** La carne podrida se puede echar al compostador.
+- **Avisos:** Se avisa cuando la comida de tu inventario se echa a perder.
 - **Podredumbre:** La comida en mal estado da *Hambre* y, al pudrirse por completo, se convierte en carne podrida.
 - Consulta [sovereign-seasons-pantry/README.md](sovereign-seasons-pantry/README.md) para conocer las mecánicas, los comandos (`/pantry`) y la configuración.
 
@@ -59,6 +86,7 @@ En **Invierno (`WINTER`)**:
 ## 🕹️ Comandos
 
 - `/season` o `/season info [mundo]`: Muestra la estación actual, día de la estación, barra de progreso porcentual, año y si el jugador está protegido en un invernadero (permiso `sovereignseasons.command.info`).
+- `/season hud`: Activa o desactiva una BossBar con la estación, el día, el año y la temperatura (permiso `sovereignseasons.command.hud`). Al usar un **reloj** (clic derecho), la fecha aparece en la barra de acción.
 - `/season greenhouse`: Diagnóstico exhaustivo del bloque actual (validez del techo de cristal, distancia, fuente de calor y estado de la caché; permiso `sovereignseasons.command.greenhouse`).
 - `/season set <spring|summer|autumn|winter> [mundo]`: Cambia inmediatamente la estación del mundo (permiso `sovereignseasons.admin`).
 - `/season setday <día> [mundo]`: Modifica el día de la estación actual validando el rango `1..daysPerSeason` (permiso `sovereignseasons.admin`).
@@ -67,20 +95,40 @@ En **Invierno (`WINTER`)**:
 
 ---
 
+## 🖥️ Instalación en un Servidor
+
+| Requisito | Detalle |
+|---|---|
+| Software | **Paper 1.20.4 – 1.21.11** o **Folia**. Probado en servidor real con Paper 1.21.11. Paper 26.x no se ha probado: requiere Java 25. |
+| Java | 21 o superior |
+| Plugins | `sovereign-seasons-core-1.1.0.jar` (obligatorio). `sovereign-seasons-pantry-1.0.0.jar` (opcional; requiere Core 1.1.0+ por el servicio de temperatura). |
+| Opcional | [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) 2.10+ para `%sovereignseasons_season%`, `_subseason`, `_day`, `_days_per_season`, `_year`, `_progress`, `_temperature` y `_band`. |
+
+1. Copia los JAR en la carpeta `plugins/` del servidor y reinícialo (no uses `/reload`).
+2. Edita `plugins/SovereignSeasons-Core/config.yml`: añade tus mundos en `calendar.enabled-worlds` y ajusta la duración de las estaciones.
+3. Edita `plugins/SovereignSeasons-Pantry/config.yml` si quieres cambiar la vida útil de los alimentos.
+4. Aplica los cambios con `/season reload` y `/pantry reload`. Los intervalos de las tareas periódicas necesitan reiniciar el servidor.
+
+No hacen falta otras dependencias: FoliaLib va incluido y relocalizado dentro de cada JAR.
+
+---
+
 ## 🛠️ Compilación y Pruebas
 
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (191 tests automatizados: 152 core + 39 pantry)
+# Ejecutar todas las pruebas unitarias (213 tests automatizados: 172 core + 41 pantry)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas
 ./gradlew shadowJar
 ```
 
+Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker. Consulta [tools/e2e/README.md](tools/e2e/README.md).
+
 Los artefactos compilados se generarán en:
-- `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.0.0.jar`
+- `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar`
 - `sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-1.0.0.jar`
 
 ---
@@ -137,7 +185,7 @@ docker compose --profile itzg up -d
 |---|---|---|
 | `EULA` | `true` (en compose) | Aceptación del Contrato de Licencia de Usuario Final (EULA) de Mojang. |
 | `MEMORY` | `2G` | Memoria RAM asignada a la JVM (`-Xms` y `-Xmx`). |
-| `MINECRAFT_VERSION` | `1.21.4` | Versión de Paper a descargar y ejecutar automáticamente. |
+| `MINECRAFT_VERSION` | `1.21.11` | Versión de Paper a descargar y ejecutar automáticamente. |
 | `SERVER_PORT` | `25565` | Puerto expuesto del servidor Minecraft. |
 
 Los datos de mundos, configuraciones del plugin y logs persisten localmente en el directorio `./docker/data`.
