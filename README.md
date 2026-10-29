@@ -30,9 +30,9 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 | Módulo | Tipo | Descripción | Estado |
 |---|---|---|---|
 | [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: calendario de días de juego, invierno e invernaderos, temperatura estacional, cultivos con clima ideal, lluvia y fauna estacional, frío/calor suave, HUD y API pública. | **v1.1.0 (173 tests / 100%)** |
-| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas frías, neveras, barriles, ahumado, compost de comida podrida y avisos. | **v1.0.0 (41 tests / 100%)** |
-| [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Nieve y barro estacionales, caminos, ventiscas, lagos helados, cajas a granel y peso de carga. | **v1.0.0 (26 tests / 100%)** |
-| [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
+| [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas frías, neveras, barriles, ahumado, compost de comida podrida y avisos. | **v1.0.0 (44 tests / 100%)** |
+| [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Nieve y barro estacionales, caminos, ventiscas, lagos helados, cajas a granel y peso de carga. | **v1.0.0 (29 tests / 100%)** |
+| [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía estacional con esmeraldas y aldeanos: precios por estación, ferias del vendedor ambulante, comida podrida rechazada y venta a granel de cajas. | **v1.0.0 (20 tests / 100%)** |
 | [**`sovereign-seasons-resourcepack`**](sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
 
 ---
@@ -95,6 +95,17 @@ En **Invierno (`WINTER`)**:
 
 ---
 
+## 💰 Economía Estacional (`commerce`)
+
+- **Sin plugins de economía:** se comercia como en vanilla, con esmeraldas y aldeanos.
+- **Precios por estación:** los cultivos abundan en su temporada y escasean en invierno. Un granjero que pide 22 zanahorias por esmeralda pide 28 en la cosecha y 16 en invierno, con el precio original tachado. La lana, el carbón y el pescado valen más en invierno y la carne abunda en otoño. El ajuste desaparece al cerrar el comercio.
+- **Ferias del vendedor ambulante:** semillas en primavera, hielo para las bodegas en verano, cuero contra la nieve en otoño, y fogatas y cristal para los invernaderos en invierno.
+- **Con Pantry:** los aldeanos rechazan la comida que se está pudriendo.
+- **Con Logistics:** agachado y con cajas en la mano, el aldeano te las compra al por mayor (+15 %) hasta un límite diario.
+- Consulta [sovereign-seasons-commerce/README.md](sovereign-seasons-commerce/README.md).
+
+---
+
 ## 🕹️ Comandos
 
 - `/season` o `/season info [mundo]`: Muestra la estación actual, día de la estación, barra de progreso porcentual, año y si el jugador está protegido en un invernadero (permiso `sovereignseasons.command.info`).
@@ -104,6 +115,7 @@ En **Invierno (`WINTER`)**:
 - `/season setday <día> [mundo]`: Modifica el día de la estación actual validando el rango `1..daysPerSeason` (permiso `sovereignseasons.admin`).
 - `/season stats`: Muestra estadísticas en vivo de la caché espacial (hits, misses, tamaño y tasa de acierto).
 - `/season reload`: Recarga la configuración `config.yml` y vacía la caché de invernaderos.
+- `/pantry`, `/logistics` (alias `/carga`) y `/commerce` (alias `/mercado`): consulta el README de cada módulo.
 
 ---
 
@@ -113,7 +125,7 @@ En **Invierno (`WINTER`)**:
 |---|---|
 | Software | **Paper 1.20.4 – 26.3** o **Folia**. Verificado en servidor real: Paper **1.21.11** y **26.1.2** (todas las pruebas de juego) y **26.3** (prueba de humo). |
 | Java | 21 o superior para Paper 1.21.x; **25** para Paper 26.x (exigencia de Paper, no del plugin). |
-| Plugins | `sovereign-seasons-core-1.1.0.jar` (obligatorio). `sovereign-seasons-pantry-1.0.0.jar` y `sovereign-seasons-logistics-1.0.0.jar` (opcionales, independientes entre sí; requieren Core 1.1.0+). Con los dos, las cajas de Logistics conservan la frescura de Pantry. |
+| Plugins | `sovereign-seasons-core-1.1.0.jar` (obligatorio). `sovereign-seasons-pantry-1.0.0.jar`, `sovereign-seasons-logistics-1.0.0.jar` y `sovereign-seasons-commerce-1.0.0.jar` (opcionales, independientes entre sí; requieren Core 1.1.0+). Juntos se complementan: las cajas de Logistics conservan la frescura de Pantry, y Commerce rechaza la comida podrida y compra las cajas al por mayor. |
 | Opcional | [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI) 2.10+ (verificado con 2.12.3) para `%sovereignseasons_season%`, `_subseason`, `_day`, `_days_per_season`, `_year`, `_progress`, `_temperature` y `_band`. |
 
 1. Copia los JAR en la carpeta `plugins/` del servidor y reinícialo (no uses `/reload`).
@@ -130,18 +142,20 @@ No hacen falta otras dependencias: FoliaLib va incluido y relocalizado dentro de
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (242 tests automatizados: 173 core + 43 pantry + 26 logistics)
+# Ejecutar todas las pruebas unitarias (266 tests automatizados: 173 core + 44 pantry + 29 logistics + 20 commerce)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas
 ./gradlew shadowJar
 ```
 
-Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker: 63 comprobaciones (core, pantry, logistics, lluvia natural y aparición de mobs) verificadas en Paper 1.21.11 y 26.1.2. Consulta [tools/e2e/README.md](tools/e2e/README.md) y, para revisar lo visual con tu cliente, [tools/e2e/MANUAL_CHECKS.md](tools/e2e/MANUAL_CHECKS.md).
+Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker: 87 comprobaciones (core, pantry, logistics, commerce, lluvia natural y aparición de mobs) verificadas en Paper 1.21.11 y 26.1.2. Consulta [tools/e2e/README.md](tools/e2e/README.md) y, para revisar lo visual con tu cliente, [tools/e2e/MANUAL_CHECKS.md](tools/e2e/MANUAL_CHECKS.md).
 
 Los artefactos compilados se generarán en:
 - `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar`
 - `sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-1.0.0.jar`
+- `sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-1.0.0.jar`
+- `sovereign-seasons-commerce/build/libs/sovereign-seasons-commerce-1.0.0.jar`
 
 ---
 

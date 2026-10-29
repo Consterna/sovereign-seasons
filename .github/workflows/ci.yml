@@ -48,5 +48,6 @@ jobs:
             sovereign-seasons-core/build/libs/sovereign-seasons-core-*[0-9].jar
             sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*[0-9].jar
             sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-*[0-9].jar
+            sovereign-seasons-commerce/build/libs/sovereign-seasons-commerce-*[0-9].jar
           if-no-files-found: error
           retention-days: 14
