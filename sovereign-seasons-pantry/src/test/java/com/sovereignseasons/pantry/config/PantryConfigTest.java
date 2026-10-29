@@ -114,6 +114,33 @@ class PantryConfigTest {
     }
 
     @Test
+    @DisplayName("Container multipliers, compost and warnings load with bounds")
+    void shouldLoadContainersAndCompost(@TempDir File tempDir) {
+        PantryConfig config = new PantryConfig(null);
+        assertThat(config.getContainerMultiplier("barrel")).isEqualTo(0.75);
+        assertThat(config.getContainerMultiplier("BARREL")).isEqualTo(0.75);
+        assertThat(config.getContainerMultiplier("chest")).isEqualTo(1.0);
+        assertThat(config.getContainerMultiplier(null)).isEqualTo(1.0);
+
+        config.load(tempDir, yaml("""
+                containers:
+                  chest: 1.2
+                  shulker_box: 99
+                compost:
+                  enabled: false
+                  rotten-flesh-chance: 3
+                warnings:
+                  spoilage: false
+                """));
+        assertThat(config.getContainerMultiplier("barrel")).isEqualTo(1.0); // section replaced
+        assertThat(config.getContainerMultiplier("chest")).isEqualTo(1.2);
+        assertThat(config.getContainerMultiplier("shulker_box")).isEqualTo(2.0);
+        assertThat(config.isCompostEnabled()).isFalse();
+        assertThat(config.getCompostChance()).isEqualTo(1.0);
+        assertThat(config.isSpoilageWarnings()).isFalse();
+    }
+
+    @Test
     @DisplayName("Invalid stage thresholds fall back to defaults")
     void shouldRejectInvalidStageThresholds(@TempDir File tempDir) {
         PantryConfig config = new PantryConfig(null);

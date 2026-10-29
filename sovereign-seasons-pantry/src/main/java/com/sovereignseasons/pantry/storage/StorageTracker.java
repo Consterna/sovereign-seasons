@@ -24,6 +24,7 @@ import com.sovereignseasons.api.temperature.TemperatureBand;
 import com.sovereignseasons.api.temperature.TemperatureService;
 import com.sovereignseasons.pantry.cellar.CellarDetector;
 import com.sovereignseasons.pantry.cellar.CellarReport;
+import com.sovereignseasons.pantry.config.PantryConfig;
 import com.sovereignseasons.pantry.food.FoodDecayService;
 import com.sovereignseasons.pantry.food.StorageContext;
 import org.bukkit.Bukkit;
@@ -51,13 +52,15 @@ import java.util.Objects;
  */
 public class StorageTracker {
     private final Plugin plugin;
+    private final PantryConfig config;
     private final FoodDecayService decayService;
     private final CellarDetector cellarDetector;
     private final TemperatureService temperatureService;
     private final NamespacedKey playerKey;
 
-    public StorageTracker(Plugin plugin, FoodDecayService decayService, CellarDetector cellarDetector, TemperatureService temperatureService) {
+    public StorageTracker(Plugin plugin, PantryConfig config, FoodDecayService decayService, CellarDetector cellarDetector, TemperatureService temperatureService) {
         this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
+        this.config = Objects.requireNonNull(config, "config cannot be null");
         this.decayService = Objects.requireNonNull(decayService, "decayService cannot be null");
         this.cellarDetector = Objects.requireNonNull(cellarDetector, "cellarDetector cannot be null");
         this.temperatureService = Objects.requireNonNull(temperatureService, "temperatureService cannot be null");
@@ -86,18 +89,20 @@ public class StorageTracker {
 
     public FoodDecayService.EvaluationResult evaluateContainer(Inventory inventory, Location location, boolean force) {
         if (inventory == null || location == null || location.getWorld() == null) {
-            return new FoodDecayService.EvaluationResult(0, 0, 0);
+            return FoodDecayService.EvaluationResult.EMPTY;
         }
         long now = now();
         NamespacedKey key = containerKey(location);
         PersistentDataContainer chunkData = location.getChunk().getPersistentDataContainer();
         long last = chunkData.getOrDefault(key, PersistentDataType.LONG, 0L);
         if (!force && !decayService.isDue(last, now)) {
-            return new FoodDecayService.EvaluationResult(0, 0, 0);
+            return FoodDecayService.EvaluationResult.EMPTY;
         }
         long elapsed = last > 0L && now > last ? now - last : 0L;
         ItemStack[] contents = inventory.getContents();
-        FoodDecayService.EvaluationResult result = decayService.evaluate(contents, resolveContext(location), elapsed, now);
+        StorageContext context = resolveContext(location)
+                .withContainerMultiplier(config.getContainerMultiplier(inventory.getType().name()));
+        FoodDecayService.EvaluationResult result = decayService.evaluate(contents, context, elapsed, now);
         if (result.changedAnything()) {
             inventory.setContents(contents);
         }
@@ -107,13 +112,13 @@ public class StorageTracker {
 
     public FoodDecayService.EvaluationResult evaluatePlayer(Player player, boolean force) {
         if (player == null || !player.isOnline()) {
-            return new FoodDecayService.EvaluationResult(0, 0, 0);
+            return FoodDecayService.EvaluationResult.EMPTY;
         }
         long now = now();
         PersistentDataContainer data = player.getPersistentDataContainer();
         long last = data.getOrDefault(playerKey, PersistentDataType.LONG, 0L);
         if (!force && !decayService.isDue(last, now)) {
-            return new FoodDecayService.EvaluationResult(0, 0, 0);
+            return FoodDecayService.EvaluationResult.EMPTY;
         }
         long elapsed = last > 0L && now > last ? now - last : 0L;
         PlayerInventory inventory = player.getInventory();

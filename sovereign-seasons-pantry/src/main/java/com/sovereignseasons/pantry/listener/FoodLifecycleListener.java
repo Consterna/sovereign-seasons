@@ -25,9 +25,21 @@ import com.sovereignseasons.pantry.config.PantryConfig;
 import com.sovereignseasons.pantry.food.FoodDecayService;
 import com.sovereignseasons.pantry.food.FreshnessStage;
 import com.sovereignseasons.pantry.storage.StorageTracker;
+import com.tcoded.folialib.FoliaLib;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Levelled;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -73,12 +85,32 @@ public class FoodLifecycleListener implements Listener {
     private final FoodDecayService decayService;
     private final StorageTracker tracker;
     private final CellarDetector cellarDetector;
+    private final FoliaLib foliaLib;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    public FoodLifecycleListener(PantryConfig config, FoodDecayService decayService, StorageTracker tracker, CellarDetector cellarDetector) {
+    public FoodLifecycleListener(PantryConfig config, FoodDecayService decayService, StorageTracker tracker, CellarDetector cellarDetector, FoliaLib foliaLib) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.decayService = Objects.requireNonNull(decayService, "decayService cannot be null");
         this.tracker = Objects.requireNonNull(tracker, "tracker cannot be null");
         this.cellarDetector = Objects.requireNonNull(cellarDetector, "cellarDetector cannot be null");
+        this.foliaLib = foliaLib;
+    }
+
+    /**
+     * Evaluates a player's inventory and warns them when food rotted or is about to.
+     * Must run on the player's own thread.
+     */
+    public void evaluatePlayer(Player player) {
+        FoodDecayService.EvaluationResult result = tracker.evaluatePlayer(player, false);
+        if (!config.isSpoilageWarnings() || player == null || !player.isOnline()) {
+            return;
+        }
+        if (result.spoiled() > 0) {
+            player.sendActionBar(miniMessage.deserialize("<red>☠ " + result.spoiled()
+                    + (result.spoiled() == 1 ? " pila de comida se ha podrido" : " pilas de comida se han podrido") + " en tu inventario.</red>"));
+        } else if (result.spoiling() > 0) {
+            player.sendActionBar(miniMessage.deserialize("<yellow>⚠ Parte de la comida de tu inventario se está echando a perder.</yellow>"));
+        }
     }
 
     // ---------------------------------------------------------------- evaluation
@@ -99,7 +131,63 @@ public class FoodLifecycleListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         if (config.isDecayEnabled()) {
-            tracker.evaluatePlayer(event.getPlayer(), false);
+            evaluatePlayer(event.getPlayer());
+        }
+    }
+
+    // ---------------------------------------------------------------- composting rotten food
+
+    /**
+     * Rotten flesh is not compostable in vanilla; here it can be used like a low-value compostable.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCompost(PlayerInteractEvent event) {
+        if (!config.isCompostEnabled() || event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        Block block = event.getClickedBlock();
+        if (block == null || block.getType() != Material.COMPOSTER || !(block.getBlockData() instanceof Levelled composter)) {
+            return;
+        }
+        Player player = event.getPlayer();
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand.getType() != Material.ROTTEN_FLESH || composter.getLevel() >= composter.getMaximumLevel() - 1) {
+            return;
+        }
+        event.setCancelled(true);
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            hand.setAmount(hand.getAmount() - 1);
+            player.getInventory().setItemInMainHand(hand.getAmount() > 0 ? hand : null);
+        }
+        Location center = block.getLocation().add(0.5, 0.8, 0.5);
+        boolean success = ThreadLocalRandom.current().nextDouble() < config.getCompostChance();
+        block.getWorld().playSound(center, success ? Sound.BLOCK_COMPOSTER_FILL_SUCCESS : Sound.BLOCK_COMPOSTER_FILL, SoundCategory.BLOCKS, 1.0f, 1.0f);
+        if (!success) {
+            return;
+        }
+        int newLevel = composter.getLevel() + 1;
+        composter.setLevel(newLevel);
+        block.setBlockData(composter);
+        block.getWorld().spawnParticle(Particle.COMPOSTER, center, 8, 0.25, 0.1, 0.25, 0.0);
+        if (newLevel == composter.getMaximumLevel() - 1) {
+            // Vanilla turns a full composter into a ready one shortly after; setting data directly skips that tick
+            Runnable ready = () -> markComposterReady(block);
+            if (foliaLib != null) {
+                foliaLib.getImpl().runAtLocationLater(block.getLocation(), ready, 20L);
+            } else {
+                ready.run();
+            }
+        }
+    }
+
+    private static void markComposterReady(Block block) {
+        if (block.getType() != Material.COMPOSTER || !(block.getBlockData() instanceof Levelled composter)) {
+            return;
+        }
+        if (composter.getLevel() == composter.getMaximumLevel() - 1) {
+            composter.setLevel(composter.getMaximumLevel());
+            block.setBlockData(composter);
+            block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.BLOCK_COMPOSTER_READY, SoundCategory.BLOCKS, 1.0f, 1.0f);
         }
     }
 

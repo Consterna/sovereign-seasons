@@ -32,7 +32,12 @@ Módulo encargado de la conservación de alimentos y de su descomposición segú
 - Un alimento ya ahumado no puede volver a ahumarse para refrescarlo.
 - *Salazón y fermentación están planificadas para la versión 1.1.*
 
-### 4. Diseño de rendimiento (evaluación diferida)
+### 4. Contenedores, compost y avisos
+- **Tipo de contenedor** (`containers`): los barriles conservan mejor que los cofres (×0,75), y el efecto se suma al de la bodega y la nevera. Se puede configurar para `chest`, `barrel`, `shulker_box`, `dispenser`, `dropper` y `hopper`.
+- **Compost** (`compost`): la carne podrida, que en vanilla no se puede compostar, se echa al compostador con un 30 % de probabilidad de subir de nivel.
+- **Avisos** (`warnings.spoilage`): cuando la revisión del inventario pudre pilas o deja comida en "Pudriéndose", aparece un aviso en la barra de acción.
+
+### 5. Diseño de rendimiento (evaluación diferida)
 - Nunca se recorre el mundo. El estado de cada alimento se actualiza solo cuando alguien lo observa:
   - al abrir un contenedor (cofres, barriles, cajas de shulker, dispensadores, soltadores, tolvas);
   - en el inventario de cada jugador, como máximo cada minuto;

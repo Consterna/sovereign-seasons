@@ -18,6 +18,7 @@ decay:
   expiry-granularity-ticks: 1000
 
   # Cada cuántos ticks se revisa el inventario de los jugadores conectados (1200 = 1 minuto real).
+  # Cambiarlo requiere reiniciar el servidor (no se aplica con /pantry reload).
   player-check-interval-ticks: 1200
 
   # Convertir los alimentos completamente podridos en carne podrida (ROTTEN_FLESH).
@@ -104,6 +105,20 @@ cellar:
 preservation:
   # Los alimentos sacados de un ahumador (SMOKER) quedan "Ahumados" y se descomponen a este ritmo relativo.
   smoked-multiplier: 0.25
+
+containers:
+  # Multiplicador de descomposición según el tipo de contenedor (se suma a bodega y nevera).
+  # Los barriles cerrados conservan mejor que los cofres. Tipos: chest, barrel, shulker_box, dispenser, dropper, hopper.
+  barrel: 0.75
+
+compost:
+  # Permite echar carne podrida al compostador (no compostable en vanilla).
+  enabled: true
+  rotten-flesh-chance: 0.3
+
+warnings:
+  # Aviso en la barra de acción cuando la comida del inventario se pudre o está a punto.
+  spoilage: true
 
 consumption:
   # Segundos de Hambre al comer un alimento Rancio (0 = desactivado).

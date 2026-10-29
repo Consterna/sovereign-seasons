@@ -132,6 +132,23 @@ class FoodDecayServiceTest {
     }
 
     @Test
+    @DisplayName("Barrels preserve better than chests and stacks close to rotting are counted")
+    void barrelShouldPreserveAndSpoilingShouldBeCounted() {
+        ItemStack inBarrel = new ItemStack(Material.BREAD, 1);
+        ItemStack inChest = new ItemStack(Material.BREAD, 1);
+        codec.write(inBarrel, new FoodState(7 * DAY, Preservation.NONE), FreshnessStage.FRESH);
+        codec.write(inChest, new FoodState(7 * DAY, Preservation.NONE), FreshnessStage.FRESH);
+        StorageContext barrel = MILD.withContainerMultiplier(config.getContainerMultiplier("BARREL"));
+
+        service.evaluate(new ItemStack[]{inBarrel}, barrel, 4 * DAY, 4 * DAY);
+        FoodDecayService.EvaluationResult chest = service.evaluate(new ItemStack[]{inChest}, MILD, 6 * DAY + DAY / 2, 6 * DAY + DAY / 2);
+
+        assertThat(codec.states.get(inBarrel).expiresAt()).isEqualTo(8 * DAY);
+        assertThat(chest.spoiling()).isEqualTo(1);
+        assertThat(chest.spoiled()).isZero();
+    }
+
+    @Test
     @DisplayName("Stacks with the same history end up identical so they keep stacking")
     void identicalHistoriesShouldStayIdentical() {
         ItemStack a = new ItemStack(Material.CARROT, 10);

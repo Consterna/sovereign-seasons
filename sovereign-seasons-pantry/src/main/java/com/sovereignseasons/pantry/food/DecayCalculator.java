@@ -70,6 +70,9 @@ public class DecayCalculator {
                 rate *= config.getIceMultiplier();
             }
         }
+        if (context != null) {
+            rate *= context.containerMultiplier();
+        }
         if (preservation == Preservation.SMOKED) {
             rate *= config.getSmokedMultiplier();
         }
