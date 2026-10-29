@@ -27,16 +27,28 @@ import java.util.Objects;
 /**
  * Environmental conditions of the place where food is stored (a container or a player's inventory).
  *
- * @param band     ambient temperature band
- * @param cellar   whether the place qualifies as a cold underground cellar
- * @param iceNearby whether ice blocks are close enough to act as an ice box
+ * @param band                ambient temperature band
+ * @param cellar              whether the place qualifies as a cold underground cellar
+ * @param iceNearby           whether ice blocks are close enough to act as an ice box
+ * @param containerMultiplier decay multiplier of the container type itself (1.0 = no effect, e.g. barrels preserve better)
  */
-public record StorageContext(TemperatureBand band, boolean cellar, boolean iceNearby) {
+public record StorageContext(TemperatureBand band, boolean cellar, boolean iceNearby, double containerMultiplier) {
     public StorageContext {
         Objects.requireNonNull(band, "band cannot be null");
+        if (!Double.isFinite(containerMultiplier) || containerMultiplier < 0.0) {
+            containerMultiplier = 1.0;
+        }
+    }
+
+    public StorageContext(TemperatureBand band, boolean cellar, boolean iceNearby) {
+        this(band, cellar, iceNearby, 1.0);
     }
 
     public static StorageContext open(TemperatureBand band) {
-        return new StorageContext(band, false, false);
+        return new StorageContext(band, false, false, 1.0);
+    }
+
+    public StorageContext withContainerMultiplier(double multiplier) {
+        return new StorageContext(band, cellar, iceNearby, multiplier);
     }
 }

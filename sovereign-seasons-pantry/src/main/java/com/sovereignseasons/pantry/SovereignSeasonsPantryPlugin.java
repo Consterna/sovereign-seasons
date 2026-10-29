@@ -68,10 +68,11 @@ public class SovereignSeasonsPantryPlugin extends JavaPlugin {
         this.cellarDetector = new CellarDetector(this.config);
         DecayCalculator calculator = new DecayCalculator(this.config);
         FoodDecayService decayService = new FoodDecayService(this.config, calculator, new PdcFoodStateCodec(this));
-        StorageTracker tracker = new StorageTracker(this, decayService, this.cellarDetector, temperatureService);
+        StorageTracker tracker = new StorageTracker(this, this.config, decayService, this.cellarDetector, temperatureService);
 
         // 3. Register Listeners
-        getServer().getPluginManager().registerEvents(new FoodLifecycleListener(this.config, decayService, tracker, this.cellarDetector), this);
+        FoodLifecycleListener lifecycleListener = new FoodLifecycleListener(this.config, decayService, tracker, this.cellarDetector, this.foliaLib);
+        getServer().getPluginManager().registerEvents(lifecycleListener, this);
 
         // 4. Register Commands
         PantryCommand pantryCmd = new PantryCommand(this.config, decayService, tracker, this.cellarDetector, getDataFolder());
@@ -88,7 +89,7 @@ public class SovereignSeasonsPantryPlugin extends JavaPlugin {
                 return;
             }
             for (Player player : Bukkit.getOnlinePlayers()) {
-                foliaLib.getImpl().runAtEntity(player, entityTask -> tracker.evaluatePlayer(player, false));
+                foliaLib.getImpl().runAtEntity(player, entityTask -> lifecycleListener.evaluatePlayer(player));
             }
         }, interval, interval);
 

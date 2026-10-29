@@ -48,8 +48,11 @@ public class FoodDecayService {
      * @param evaluated   perishable stacks whose state was advanced
      * @param initialized perishable stacks seen for the first time
      * @param spoiled     stacks that rotted and were replaced
+     * @param spoiling    stacks left in the SPOILING stage after the evaluation
      */
-    public record EvaluationResult(int evaluated, int initialized, int spoiled) {
+    public record EvaluationResult(int evaluated, int initialized, int spoiled, int spoiling) {
+        public static final EvaluationResult EMPTY = new EvaluationResult(0, 0, 0, 0);
+
         public boolean changedAnything() {
             return evaluated + initialized + spoiled > 0;
         }
@@ -76,11 +79,12 @@ public class FoodDecayService {
      */
     public EvaluationResult evaluate(ItemStack[] contents, StorageContext context, long elapsed, long now) {
         if (contents == null || !config.isDecayEnabled()) {
-            return new EvaluationResult(0, 0, 0);
+            return EvaluationResult.EMPTY;
         }
         int evaluated = 0;
         int initialized = 0;
         int spoiled = 0;
+        int spoiling = 0;
 
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
@@ -104,9 +108,13 @@ public class FoodDecayService {
                 spoiled++;
                 continue;
             }
-            codec.write(item, state, calculator.stage(state, type, now));
+            FreshnessStage stage = calculator.stage(state, type, now);
+            if (stage == FreshnessStage.SPOILING) {
+                spoiling++;
+            }
+            codec.write(item, state, stage);
         }
-        return new EvaluationResult(evaluated, initialized, spoiled);
+        return new EvaluationResult(evaluated, initialized, spoiled, spoiling);
     }
 
     /**

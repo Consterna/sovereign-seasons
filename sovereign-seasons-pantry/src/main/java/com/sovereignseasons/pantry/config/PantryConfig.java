@@ -72,6 +72,16 @@ public class PantryConfig {
     // Preservation
     private double smokedMultiplier = 0.25;
 
+    // Container types (lowercase InventoryType name -> decay multiplier)
+    private final Map<String, Double> containerMultipliers = new HashMap<>();
+
+    // Composting rotten food
+    private boolean compostEnabled = true;
+    private double compostChance = 0.3;
+
+    // Spoilage warnings for players
+    private boolean spoilageWarnings = true;
+
     // Consumption
     private int staleHungerSeconds = 10;
     private int spoilingHungerSeconds = 30;
@@ -126,6 +136,9 @@ public class PantryConfig {
         putShelfLife("MELON_SLICE", 3);
         putShelfLife("SWEET_BERRIES", 4);
         putShelfLife("GLOW_BERRIES", 5);
+
+        containerMultipliers.clear();
+        containerMultipliers.put("barrel", 0.75);
 
         iceMaterials.clear();
         addIfPresent(iceMaterials, "ICE");
@@ -231,6 +244,23 @@ public class PantryConfig {
 
         // Preservation
         setSmokedMultiplier(config.getDouble("preservation.smoked-multiplier", 0.25));
+
+        // Containers
+        ConfigurationSection containers = config.getConfigurationSection("containers");
+        if (containers != null) {
+            containerMultipliers.clear();
+            for (String key : containers.getKeys(false)) {
+                setContainerMultiplier(key, containers.getDouble(key, 1.0));
+            }
+        }
+
+        // Composting
+        this.compostEnabled = config.getBoolean("compost.enabled", true);
+        double chance = config.getDouble("compost.rotten-flesh-chance", 0.3);
+        this.compostChance = Double.isFinite(chance) ? Math.max(0.0, Math.min(1.0, chance)) : 0.3;
+
+        // Warnings
+        this.spoilageWarnings = config.getBoolean("warnings.spoilage", true);
 
         // Consumption
         this.staleHungerSeconds = Math.max(0, Math.min(600, config.getInt("consumption.stale-hunger-seconds", 10)));
@@ -341,6 +371,24 @@ public class PantryConfig {
 
     public double getSmokedMultiplier() { return smokedMultiplier; }
     public void setSmokedMultiplier(double multiplier) { this.smokedMultiplier = sanitizeMultiplier(multiplier, 0.25, 1.0); }
+
+    /**
+     * Decay multiplier for a container type (lowercase InventoryType name), 1.0 if not configured.
+     */
+    public double getContainerMultiplier(String containerType) {
+        if (containerType == null) return 1.0;
+        return containerMultipliers.getOrDefault(containerType.trim().toLowerCase(Locale.ROOT), 1.0);
+    }
+    public void setContainerMultiplier(String containerType, double multiplier) {
+        if (containerType == null || containerType.isBlank()) return;
+        containerMultipliers.put(containerType.trim().toLowerCase(Locale.ROOT), sanitizeMultiplier(multiplier, 1.0, 2.0));
+    }
+
+    public boolean isCompostEnabled() { return compostEnabled; }
+    public void setCompostEnabled(boolean enabled) { this.compostEnabled = enabled; }
+    public double getCompostChance() { return compostChance; }
+
+    public boolean isSpoilageWarnings() { return spoilageWarnings; }
 
     public int getStaleHungerSeconds() { return staleHungerSeconds; }
     public int getSpoilingHungerSeconds() { return spoilingHungerSeconds; }
