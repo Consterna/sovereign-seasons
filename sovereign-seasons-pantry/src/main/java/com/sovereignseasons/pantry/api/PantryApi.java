@@ -63,4 +63,9 @@ public interface PantryApi {
      * Rounds an expiry to Pantry's configured granularity, so stacks produced close in time keep stacking.
      */
     long roundExpiry(long expiresAt);
+
+    /**
+     * Whether fully spoiled food turns into rotten flesh (Pantry's {@code decay.spoil-to-rotten-flesh} option).
+     */
+    boolean spoilsToRottenFlesh();
 }

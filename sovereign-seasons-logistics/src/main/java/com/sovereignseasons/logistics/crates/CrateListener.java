@@ -26,6 +26,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -73,17 +74,21 @@ public class CrateListener implements Listener {
         ItemStack hand = player.getInventory().getItemInMainHand();
 
         Optional<CrateItems.Contents> contents = crates.read(hand);
-        if (contents.isPresent()) {
-            event.setCancelled(true); // never place the barrel
-            unpack(player, hand, contents.get());
-            return;
-        }
-        // Packing only in the air: sneak + right-click on farmland must still plant crops
-        if (action == Action.RIGHT_CLICK_AIR && player.isSneaking()
-                && config.getPackableMaterials().contains(hand.getType())
-                && hand.getAmount() >= config.getItemsPerCrate()) {
-            event.setCancelled(true);
-            pack(player, hand);
+        boolean canPack = config.getPackableMaterials().contains(hand.getType()) && hand.getAmount() >= config.getItemsPerCrate();
+        Block clicked = event.getClickedBlock();
+        boolean interactable = clicked != null && clicked.getType().isInteractable();
+        switch (CrateRules.decide(contents.isPresent(), canPack, action == Action.RIGHT_CLICK_AIR, player.isSneaking(), interactable)) {
+            case UNPACK -> {
+                event.setCancelled(true); // never place the barrel
+                unpack(player, hand, contents.get());
+            }
+            case PACK -> {
+                event.setCancelled(true);
+                pack(player, hand);
+            }
+            case IGNORE -> {
+                // vanilla behaviour (open the clicked chest, plant the crop...)
+            }
         }
     }
 
@@ -112,7 +117,7 @@ public class CrateListener implements Listener {
         if (freshness != null && contents.packedValue().isPresent() && freshness.isPerishable(contents.content())) {
             long now = freshness.now();
             long expiresAt = freshness.round(CrateMath.unpackedExpiresAt(contents.packedValue().getAsLong(), now, config.getPackedDecayRate()));
-            if (expiresAt <= now) {
+            if (CrateRules.unpackAsRottenFlesh(expiresAt, now, freshness.spoilsToRottenFlesh())) {
                 items = new ItemStack(Material.ROTTEN_FLESH, contents.count());
             } else {
                 freshness.setExpiresAt(items, expiresAt);

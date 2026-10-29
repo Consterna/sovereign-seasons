@@ -31,7 +31,7 @@ El proyecto está organizado en una suite de 5 módulos especializados:
 |---|---|---|---|
 | [**`sovereign-seasons-core`**](sovereign-seasons-core/README.md) | Plugin Paper/Folia | Motor central: calendario de días de juego, invierno e invernaderos, temperatura estacional, cultivos con clima ideal, lluvia y fauna estacional, frío/calor suave, HUD y API pública. | **v1.1.0 (173 tests / 100%)** |
 | [**`sovereign-seasons-pantry`**](sovereign-seasons-pantry/README.md) | Plugin Paper/Folia | Descomposición de alimentos según temperatura/estación, bodegas frías, neveras, barriles, ahumado, compost de comida podrida y avisos. | **v1.0.0 (41 tests / 100%)** |
-| [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Nieve y barro estacionales, caminos, ventiscas, lagos helados, cajas a granel y peso de carga. | **v1.0.0 (23 tests / 100%)** |
+| [**`sovereign-seasons-logistics`**](sovereign-seasons-logistics/README.md) | Plugin Paper/Folia | Nieve y barro estacionales, caminos, ventiscas, lagos helados, cajas a granel y peso de carga. | **v1.0.0 (26 tests / 100%)** |
 | [**`sovereign-seasons-commerce`**](sovereign-seasons-commerce/README.md) | Plugin Paper/Folia | Economía viva: fluctuación estacional de precios, contratos de abastecimiento y ferias de cosecha. | Esqueleto inicial |
 | [**`sovereign-seasons-resourcepack`**](sovereign-seasons-resourcepack/README.md) | Resource Pack | Iconos de interfaz (glifos), efectos visuales y tintes de follaje estacional. | Esqueleto inicial |
 
@@ -130,14 +130,14 @@ No hacen falta otras dependencias: FoliaLib va incluido y relocalizado dentro de
 El proyecto utiliza Java 21 y Gradle Wrapper autónomo:
 
 ```bash
-# Ejecutar todas las pruebas unitarias (239 tests automatizados: 173 core + 43 pantry + 23 logistics)
+# Ejecutar todas las pruebas unitarias (242 tests automatizados: 173 core + 43 pantry + 26 logistics)
 ./gradlew test
 
 # Compilar el artefacto final con dependencias relocalizadas
 ./gradlew shadowJar
 ```
 
-Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker: 60 comprobaciones (core, pantry, logistics, lluvia natural y aparición de mobs) verificadas en Paper 1.21.11 y 26.1.2. Consulta [tools/e2e/README.md](tools/e2e/README.md) y, para revisar lo visual con tu cliente, [tools/e2e/MANUAL_CHECKS.md](tools/e2e/MANUAL_CHECKS.md).
+Además hay **pruebas de juego reales** con un servidor Paper local y un bot (Mineflayer), sin necesidad de Docker: 63 comprobaciones (core, pantry, logistics, lluvia natural y aparición de mobs) verificadas en Paper 1.21.11 y 26.1.2. Consulta [tools/e2e/README.md](tools/e2e/README.md) y, para revisar lo visual con tu cliente, [tools/e2e/MANUAL_CHECKS.md](tools/e2e/MANUAL_CHECKS.md).
 
 Los artefactos compilados se generarán en:
 - `sovereign-seasons-core/build/libs/sovereign-seasons-core-1.1.0.jar`

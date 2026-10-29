@@ -5,15 +5,15 @@ Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/Prism
 | Suite | Archivo | Duración | Qué cubre |
 |---|---|---|---|
 | Principal | `e2e.js` | ~4 min | 33 comprobaciones de juego de core y pantry (+ PlaceholderAPI si está instalado) |
-| Logistics | `e2e-logistics.js` | ~3 min | 22 comprobaciones de nieve, barro, caminos, monturas, ventiscas, lagos helados, peso y cajas (+ frescura con Pantry) |
+| Logistics | `e2e-logistics.js` | ~3 min | 25 comprobaciones de nieve, barro, caminos, monturas, ventiscas, lagos helados, peso y cajas (+ frescura con Pantry) |
 | Naturaleza | `e2e-nature.js` | ~5 min | Lluvia natural por estación y aparición natural de Strays/Husks, acelerando el servidor con `/tick sprint` |
 
 ## Compatibilidad verificada
 
 | Versión de Paper | Java | Resultado (suites principal + logistics + naturaleza) |
 |---|---|---|
-| 1.21.11 (build 132) | Temurin 21 | 33/33 + 22/22 + 5/5, con PlaceholderAPI 2.12.3 |
-| 26.1.2 (build 74) | Temurin 25 | 33/33 + 22/22 + 5/5, con PlaceholderAPI 2.12.3 |
+| 1.21.11 (build 132) | Temurin 21 | 33/33 + 25/25 + 5/5, con PlaceholderAPI 2.12.3 |
+| 26.1.2 (build 74) | Temurin 25 | 33/33 + 25/25 + 5/5, con PlaceholderAPI 2.12.3 |
 | 26.3 (build 227) | Temurin 25 | Prueba de humo por consola: carga, comandos, placeholders, recargas y sprint sin errores. El bot no se usa porque Mineflayer aún no soporta el protocolo 26.3. |
 
 ## Requisitos
@@ -75,6 +75,8 @@ El mundo se borra en cada pasada porque el bot reaparece donde se desconectó y 
   - Un estanque en taiga se congela en invierno y se derrite en primavera sin tocar el hielo colocado a mano. Se usa taiga porque vanilla no lo congela, así que todo el hielo es del plugin.
   - El peso sobrecarga con 15 stacks de piedra.
   - Las cajas se empaquetan, se apilan, se desempaquetan, no se colocan y conservan la frescura de Pantry.
+  - Con una caja en la mano, un cofre se abre normalmente, y la comida que caduca dentro de la caja sale podrida.
+  - Una tormenta en una sabana (donde vanilla nunca llueve) no crea barro.
 - **Pantry:**
   - `/pantry inspect`, `/pantry stats` y `/pantry setfresh`. Comer comida rancia da Hambre.
   - El ahumador no se atasca y marca "Ahumado".

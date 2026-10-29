@@ -20,6 +20,7 @@
 
 package com.sovereignseasons.pantry.api;
 
+import com.sovereignseasons.pantry.config.PantryConfig;
 import com.sovereignseasons.pantry.food.DecayCalculator;
 import com.sovereignseasons.pantry.food.FoodState;
 import com.sovereignseasons.pantry.food.Preservation;
@@ -35,11 +36,13 @@ import java.util.function.LongSupplier;
  * Default {@link PantryApi} backed by Pantry's decay calculator and item codec.
  */
 public class PantryApiImpl implements PantryApi {
+    private final PantryConfig config;
     private final DecayCalculator calculator;
     private final FoodStateCodec codec;
     private final LongSupplier clock;
 
-    public PantryApiImpl(DecayCalculator calculator, FoodStateCodec codec, LongSupplier clock) {
+    public PantryApiImpl(PantryConfig config, DecayCalculator calculator, FoodStateCodec codec, LongSupplier clock) {
+        this.config = Objects.requireNonNull(config, "config cannot be null");
         this.calculator = Objects.requireNonNull(calculator, "calculator cannot be null");
         this.codec = Objects.requireNonNull(codec, "codec cannot be null");
         this.clock = Objects.requireNonNull(clock, "clock cannot be null");
@@ -81,5 +84,10 @@ public class PantryApiImpl implements PantryApi {
     @Override
     public long roundExpiry(long expiresAt) {
         return calculator.roundExpiry(expiresAt);
+    }
+
+    @Override
+    public boolean spoilsToRottenFlesh() {
+        return config.isSpoilToRottenFlesh();
     }
 }
