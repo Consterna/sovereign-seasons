@@ -32,5 +32,5 @@ docker/data/
 docker/data-itzg/
 
 # Local end-to-end test server and bot dependencies
-testserver/
+testserver*/
 tools/e2e/node_modules/

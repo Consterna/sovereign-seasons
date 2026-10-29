@@ -1,23 +1,38 @@
 # 🤖 Pruebas end-to-end (servidor Paper local + bot)
 
-Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/PrismarineJS/mineflayer) entra en un servidor Paper local en modo offline, y la consola se controla por RCON. El script devuelve código de salida `0` solo si **todas** las comprobaciones pasan.
+Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/PrismarineJS/mineflayer) entra en un servidor Paper local en modo offline, y la consola se controla por RCON. Cada suite devuelve código de salida `0` solo si **todas** sus comprobaciones pasan.
+
+| Suite | Archivo | Duración | Qué cubre |
+|---|---|---|---|
+| Principal | `e2e.js` | ~4 min | 33 comprobaciones de juego de core y pantry (+ PlaceholderAPI si está instalado) |
+| Naturaleza | `e2e-nature.js` | ~5 min | Lluvia natural por estación y aparición natural de Strays/Husks, acelerando el servidor con `/tick sprint` |
+
+## Compatibilidad verificada
+
+| Versión de Paper | Java | Resultado |
+|---|---|---|
+| 1.21.11 (build 132) | Temurin 21 | Suite principal 33/33 + naturaleza 5/5, con PlaceholderAPI 2.12.3 |
+| 26.1.2 (build 74) | Temurin 25 | Suite principal 33/33 + naturaleza 5/5, con PlaceholderAPI 2.12.3 |
+| 26.3 (build 227) | Temurin 25 | Prueba de humo por consola: carga, comandos, placeholders, recargas y sprint sin errores. El bot no se usa porque Mineflayer aún no soporta el protocolo 26.3. |
 
 ## Requisitos
-- Java 21+ (por ejemplo, Temurin 21).
+- Java 21 para Paper 1.21.x y **Java 25 para Paper 26.x**. Sirve un JDK portable en ZIP de [Adoptium](https://adoptium.net/); no hace falta instalarlo.
 - Node.js 18+.
-- Paper 1.21.11 (las gamerules usan los nombres nuevos `advance_time`, `spawn_mobs`, `random_tick_speed`) descargado desde la [API oficial de PaperMC](https://fill.papermc.io/v3/projects/paper/versions/1.21.11/builds/latest). Antes de usarlo, verifica su SHA-256.
+- El JAR de Paper descargado desde la [API oficial de PaperMC](https://fill.papermc.io/v3/projects/paper). Verifica su SHA-256.
 - Aceptar el [EULA de Minecraft](https://aka.ms/MinecraftEULA) (`eula.txt`).
+- Opcional: [PlaceholderAPI](https://github.com/PlaceholderAPI/PlaceholderAPI/releases) para probar los placeholders.
 
-## Preparación (una vez)
-1. Crea `testserver/` en la raíz del repositorio (está en `.gitignore`) y coloca ahí `paper.jar`.
-2. Crea `testserver/eula.txt` con `eula=true`, solo si aceptas el EULA.
-3. Crea `testserver/server.properties` con al menos:
+Las gamerules usan los nombres nuevos de 1.21.11+ (`advance_time`, `advance_weather`, `spawn_mobs`, `random_tick_speed`).
+
+## Preparación (una vez por versión)
+1. Crea una carpeta de servidor en la raíz del repositorio (`testserver*/` está en `.gitignore`) y coloca ahí `paper.jar`.
+2. Crea `eula.txt` con `eula=true`, solo si aceptas el EULA.
+3. Crea `server.properties` con al menos:
    ```properties
    server-ip=127.0.0.1
    server-port=25566
    online-mode=false
    level-type=minecraft\:flat
-   spawn-monsters=false
    enable-rcon=true
    rcon.port=25576
    rcon.password=<contraseña aleatoria local>
@@ -27,40 +42,38 @@ Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/Prism
 ## Ejecución
 ```bash
 ./gradlew clean build
-cp sovereign-seasons-core/build/libs/*.jar sovereign-seasons-pantry/build/libs/*.jar testserver/plugins/
-cd testserver && java -Xmx2G -jar paper.jar --nogui
+tools/e2e/run-local.sh testserver /ruta/a/jdk-21/bin/java 1.21.11 --nature --extra-plugin PlaceholderAPI-2.12.3.jar
 ```
 
-En otra terminal, cuando el servidor muestre `Done` por primera vez (así se generan las configs):
+El script `run-local.sh` hace todo el ciclo en cada pasada:
+1. Copia los JAR recién compilados.
+2. Arranca el servidor una vez para que se generen las configs.
+3. Aplica la configuración determinista de pruebas con `apply-test-config.js` (gemelos 100 %, compost 100 % y revisión del inventario cada 100 ticks).
+4. Reinicia el servidor sobre un **mundo limpio**.
+5. Ejecuta las suites y lista cualquier línea de error o aviso de los plugins.
 
-```bash
-# Hace deterministas las mecánicas aleatorias SOLO en el servidor de pruebas
-# (gemelos 100 %, compost 100 %, revisión de inventario cada 100 ticks)
-node tools/e2e/apply-test-config.js testserver
-node tools/e2e/rcon-cli.js testserver/server.properties stop
-```
+El mundo se borra en cada pasada porque el bot reaparece donde se desconectó y arrastraría el estado de la pasada anterior. Para Paper 26.1.x usa Java 25 y la versión de protocolo `26.1`.
 
-Antes de **cada** pasada, borra `testserver/world*` y `plugins/SovereignSeasons-Core/calendar_data.yml`: el bot reaparece donde se desconectó y el mundo arrastraría biomas, bloques y animales de la pasada anterior. Después vuelve a arrancar el servidor y ejecuta:
-
-```bash
-node tools/e2e/e2e.js
-node tools/e2e/rcon-cli.js testserver/server.properties stop
-```
-
-## Qué se comprueba (32 comprobaciones)
-- Ambos plugins habilitados. `/season info` muestra la temperatura y `/season hud` enseña la BossBar.
-- El reloj muestra la fecha y aparece un título al cambiar de estación.
-- **Frío:** las llanuras nevadas en invierno dan Lentitud y aviso, sin daño; una pieza de cuero protege.
-- **Calor:** el desierto en verano da el aviso de calor.
-- **Cultivos:** las patatas crecen más rápido en su clima ideal que en un desierto caluroso.
-- **Fauna:** gemelos al criar en primavera.
-- **Despensa:** `/pantry inspect`, `/pantry stats` y `/pantry setfresh`. Comer comida rancia da Hambre.
-- **Despensa:** el ahumador no se atasca y marca "Ahumado".
-- **Despensa:** la carne podrida llena el compostador, y la carne cruda de un cofre se pudre tras cinco días de verano.
-- **Despensa:** la carne del inventario se pudre y el jugador recibe el aviso.
+## Qué se comprueba
+- **Core:**
+  - Ambos plugins habilitados. `/season info` muestra la temperatura y `/season hud` enseña la BossBar.
+  - El reloj muestra la fecha y aparece un título al cambiar de estación.
+  - **Frío:** las llanuras nevadas en invierno dan Lentitud y aviso, sin daño; una pieza de cuero protege.
+  - **Calor:** el desierto en verano da el aviso de calor.
+  - **Cultivos:** las patatas crecen ~3 veces más en su clima ideal que en un desierto caluroso.
+  - **Fauna:** gemelos al criar en primavera.
+  - **PlaceholderAPI:** los 9 placeholders resuelven.
+- **Naturaleza:**
+  - Con probabilidad 1.0 la lluvia natural empieza; con 0.0 se bloquea **cada** inicio. El log del servidor (`weather.debug`) es la fuente de verdad, porque el bot también recibe el desvanecimiento de la lluvia anterior.
+  - El servidor sigue sano: no hay bucle de eventos.
+  - Los esqueletos pasan a Strays en llanuras en invierno y los zombis a Husks en sabana en verano. Se usan biomas donde vanilla **nunca** genera esas variantes.
+- **Pantry:**
+  - `/pantry inspect`, `/pantry stats` y `/pantry setfresh`. Comer comida rancia da Hambre.
+  - El ahumador no se atasca y marca "Ahumado".
+  - La carne podrida llena un compostador.
+  - La carne cruda de un cofre se pudre tras cinco días de verano.
+  - La carne del inventario se pudre y el jugador recibe el aviso.
 
 ## Lo que no cubre
-- **Lluvia estacional:** vanilla no permite provocar a voluntad un inicio de lluvia *natural*, así que solo la cubren los tests unitarios.
-- **Strays y Husks:** el servidor de pruebas desactiva la aparición natural de mobs para que no maten al bot, así que solo los cubren los tests unitarios.
-- **PlaceholderAPI:** no está instalado en el servidor de pruebas.
-- **Lo visual (escarcha en pantalla, colores):** requiere un cliente real.
+- **Lo visual (escarcha en pantalla, colores, tooltips):** sigue la guía [MANUAL_CHECKS.md](MANUAL_CHECKS.md) con tu propio cliente.
+- **El bot en Paper 26.3:** espera a que Mineflayer soporte ese protocolo. Mientras tanto, solo hay prueba de humo por consola.
