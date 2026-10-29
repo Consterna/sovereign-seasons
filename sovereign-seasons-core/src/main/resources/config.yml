@@ -45,6 +45,32 @@ crops:
     - TORCHFLOWER_CROP
     - PITCHER_CROP
 
+  # Fertilidad estacional y clima ideal (fuera del invierno). Cada intento natural de crecer
+  # tiene probabilidad = factor_estacion x factor_clima. Si falla, solo se omite ese paso: nunca muere.
+  # Invernadero: ignora estación y clima. Bajo tierra (sin luz del cielo y Y <= underground-y): ignora la estación.
+  seasonal-growth:
+    enabled: true
+    out-of-season-factor: 0.5   # Fuera de sus estaciones fértiles crece a la mitad de ritmo
+    adjacent-band-factor: 0.6   # Una banda de temperatura por encima/debajo de su clima ideal
+    far-band-factor: 0.3        # Dos o más bandas lejos de su clima ideal
+    underground-y: 48
+    # seasons: spring, summer, autumn, winter | bands: freezing, cold, mild, warm, hot
+    profiles:
+      WHEAT: { seasons: [spring, summer, autumn], bands: [mild, warm] }
+      CARROTS: { seasons: [spring, autumn], bands: [cold, mild] }
+      POTATOES: { seasons: [spring, autumn], bands: [cold, mild] }
+      BEETROOTS: { seasons: [spring, autumn], bands: [cold, mild] }
+      MELON_STEM: { seasons: [summer], bands: [warm, hot] }
+      ATTACHED_MELON_STEM: { seasons: [summer], bands: [warm, hot] }
+      PUMPKIN_STEM: { seasons: [summer, autumn], bands: [mild, warm] }
+      ATTACHED_PUMPKIN_STEM: { seasons: [summer, autumn], bands: [mild, warm] }
+      COCOA: { seasons: [spring, summer], bands: [warm, hot] }
+      SWEET_BERRY_BUSH: { seasons: [summer, autumn], bands: [cold, mild] }
+      SUGAR_CANE: { seasons: [spring, summer], bands: [warm, hot] }
+      CACTUS: { seasons: [spring, summer], bands: [warm, hot] }
+      TORCHFLOWER_CROP: { seasons: [spring, summer], bands: [mild, warm] }
+      PITCHER_CROP: { seasons: [spring, summer], bands: [mild, warm] }
+
 greenhouse:
   # Habilitar el sistema de detección de invernaderos.
   enabled: true
@@ -152,6 +178,54 @@ temperature:
     cold-below: 10.0
     mild-below: 20.0
     warm-below: 30.0
+
+weather:
+  # Probabilidad de aceptar que empiece a llover de forma natural en cada estación (1.0 = vanilla).
+  # Los cambios de clima por comando (/weather) u otros plugins nunca se bloquean.
+  enabled: true
+  rain-chance:
+    spring: 1.0
+    summer: 0.5
+    autumn: 1.0
+    winter: 0.8
+
+fauna:
+  enabled: true
+  # Probabilidad de gemelos al criar animales en primavera.
+  spring-twin-chance: 0.25
+  # En invierno, en zonas Frías o Heladas, los esqueletos naturales pueden aparecer como Stray.
+  winter-stray-chance: 0.5
+  # En verano, en zonas Calurosas, los zombis naturales pueden aparecer como Husk.
+  summer-husk-chance: 0.5
+
+comfort:
+  # Efectos suaves de temperatura sobre el jugador (no aplica en creativo/espectador).
+  enabled: true
+  # Cambiar el intervalo requiere reiniciar el servidor (no se aplica con /season reload).
+  interval-ticks: 20
+  cold:
+    # Banda Helada, a la intemperie, sin luz de bloque cercana (fuego/antorchas) y sin ninguna pieza de cuero.
+    enabled: true
+    # false = solo escarcha visual (por debajo del umbral de daño vanilla). true = daño por congelación vanilla.
+    damage: false
+    freeze-ticks: 120
+    slowness: true
+    warmth-block-light: 10
+  heat:
+    # Banda Calurosa, de día, bajo el sol directo, fuera del agua y sin Resistencia al fuego.
+    enabled: true
+    # Cansancio extra por segundo (4.0 = 1 punto de hambre). 0.05 = ~1 punto cada 80 s.
+    exhaustion-per-second: 0.05
+  # Segundos mínimos entre avisos en la barra de acción.
+  message-cooldown-seconds: 60
+
+interface:
+  # Título y sonido al cambiar de estación.
+  announce-season-change: true
+  # Clic derecho con un reloj muestra fecha y temperatura.
+  clock-shows-date: true
+  # Frecuencia de actualización del HUD de /season hud (requiere reiniciar el servidor).
+  hud-update-ticks: 100
 
 messages:
   prefix: "<gold><b>SovereignSeasons</b></gold> <gray>»</gray> "

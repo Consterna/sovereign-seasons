@@ -28,6 +28,7 @@ import com.sovereignseasons.api.temperature.TemperatureService;
 import com.sovereignseasons.api.greenhouse.GreenhouseReport;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
 import com.sovereignseasons.core.config.SeasonsConfig;
+import com.sovereignseasons.core.ui.SeasonInterface;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -52,6 +53,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
     private final SeasonService seasonService;
     private final GreenhouseService greenhouseService;
     private final TemperatureService temperatureService;
+    private final SeasonInterface seasonInterface;
     private final File dataFolder;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -61,7 +63,7 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             GreenhouseService greenhouseService,
             File dataFolder
     ) {
-        this(config, seasonService, greenhouseService, null, dataFolder);
+        this(config, seasonService, greenhouseService, null, null, dataFolder);
     }
 
     public SeasonCommand(
@@ -71,10 +73,22 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             TemperatureService temperatureService,
             File dataFolder
     ) {
+        this(config, seasonService, greenhouseService, temperatureService, null, dataFolder);
+    }
+
+    public SeasonCommand(
+            SeasonsConfig config,
+            SeasonService seasonService,
+            GreenhouseService greenhouseService,
+            TemperatureService temperatureService,
+            SeasonInterface seasonInterface,
+            File dataFolder
+    ) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.seasonService = Objects.requireNonNull(seasonService, "seasonService cannot be null");
         this.greenhouseService = Objects.requireNonNull(greenhouseService, "greenhouseService cannot be null");
         this.temperatureService = temperatureService;
+        this.seasonInterface = seasonInterface;
         this.dataFolder = dataFolder;
     }
 
@@ -97,8 +111,9 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             case "setday" -> handleSetDay(sender, args);
             case "stats" -> handleStats(sender);
             case "reload" -> handleReload(sender);
+            case "hud" -> handleHud(sender);
             default -> {
-                sendMsg(sender, "<red>Subcomando desconocido. Usa: <yellow>/" + label + " [info|greenhouse|set|setday|stats|reload]</yellow></red>");
+                sendMsg(sender, "<red>Subcomando desconocido. Usa: <yellow>/" + label + " [info|greenhouse|hud|set|setday|stats|reload]</yellow></red>");
             }
         }
         return true;
@@ -320,6 +335,21 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
         sendMsg(sender, "<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>");
     }
 
+    private void handleHud(CommandSender sender) {
+        if (!sender.hasPermission("sovereignseasons.command.hud")) {
+            sendMsg(sender, "<red>No tienes permiso para usar el HUD de estaciones.</red>");
+            return;
+        }
+        if (!(sender instanceof Player player) || seasonInterface == null) {
+            sendMsg(sender, "<red>Este comando solo puede ser ejecutado por un jugador en el juego.</red>");
+            return;
+        }
+        boolean enabled = seasonInterface.toggleHud(player);
+        sendMsg(sender, enabled
+                ? "<green>HUD de estaciones activado.</green> <gray>Vuelve a usar /season hud para ocultarlo.</gray>"
+                : "<yellow>HUD de estaciones ocultado.</yellow>");
+    }
+
     private void handleReload(CommandSender sender) {
         if (!sender.hasPermission("sovereignseasons.admin")) {
             sendMsg(sender, "<red>No tienes permiso para recargar la configuración.</red>");
@@ -353,6 +383,9 @@ public class SeasonCommand implements CommandExecutor, TabCompleter {
             }
             if (sender.hasPermission("sovereignseasons.command.greenhouse")) {
                 subcommands.add("greenhouse");
+            }
+            if (sender.hasPermission("sovereignseasons.command.hud")) {
+                subcommands.add("hud");
             }
             if (sender.hasPermission("sovereignseasons.admin")) {
                 subcommands.addAll(List.of("set", "setday", "stats", "reload"));

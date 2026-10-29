@@ -23,6 +23,9 @@ package com.sovereignseasons.core.crops;
 import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.event.CropWinterWitherEvent;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
+import com.sovereignseasons.api.Season;
+import com.sovereignseasons.api.temperature.TemperatureBand;
+import com.sovereignseasons.api.temperature.TemperatureService;
 import com.sovereignseasons.core.config.SeasonsConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -69,19 +72,23 @@ public class CropGrowthListener implements Listener {
     private final SeasonsConfig config;
     private final SeasonService seasonService;
     private final GreenhouseService greenhouseService;
+    private final TemperatureService temperatureService;
+    private final CropGrowthModel growthModel;
 
     public CropGrowthListener(SeasonsConfig config, SeasonService seasonService, GreenhouseService greenhouseService) {
+        this(config, seasonService, greenhouseService, null);
+    }
+
+    public CropGrowthListener(SeasonsConfig config, SeasonService seasonService, GreenhouseService greenhouseService, TemperatureService temperatureService) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.seasonService = Objects.requireNonNull(seasonService, "seasonService cannot be null");
         this.greenhouseService = Objects.requireNonNull(greenhouseService, "greenhouseService cannot be null");
+        this.temperatureService = temperatureService;
+        this.growthModel = new CropGrowthModel(config);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCropGrow(BlockGrowEvent event) {
-        if (!config.isWinterGrowthPaused()) {
-            return;
-        }
-
         Block block = event.getBlock();
         World world = block.getWorld();
 
@@ -89,15 +96,23 @@ public class CropGrowthListener implements Listener {
             return;
         }
 
-        if (!seasonService.isWinter(world)) {
-            return; // Only Winter pauses and withers crops
-        }
-
         Material cropType = block.getType();
         Material newType = event.getNewState() != null ? event.getNewState().getType() : cropType;
 
+        if (!config.isWinterGrowthPaused() || !seasonService.isWinter(world)) {
+            // Outside winter: seasonal fertility and climate preferences slow growth down
+            if (!allowSeasonalGrowth(block, cropType, newType, seasonService.getSeason(world))) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
         if (!config.getAffectedCrops().contains(cropType) && !config.getAffectedCrops().contains(newType)) {
-            return; // Not an affected crop
+            // Not frozen by winter (e.g. sugar cane, cactus): still subject to seasonal fertility
+            if (!allowSeasonalGrowth(block, cropType, newType, Season.WINTER)) {
+                event.setCancelled(true);
+            }
+            return;
         }
 
         // Check if inside a functional greenhouse
@@ -160,20 +175,23 @@ public class CropGrowthListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFruitSpread(BlockSpreadEvent event) {
-        if (!config.isWinterGrowthPaused()) {
-            return;
-        }
-
         Block source = event.getSource();
         World world = source.getWorld();
 
-        if (!seasonService.isEnabledInWorld(world) || !seasonService.isWinter(world)) {
+        if (!seasonService.isEnabledInWorld(world)) {
             return;
         }
 
         Material sourceType = source.getType();
         if (sourceType != Material.PUMPKIN_STEM && sourceType != Material.MELON_STEM
                 && sourceType != Material.ATTACHED_PUMPKIN_STEM && sourceType != Material.ATTACHED_MELON_STEM) {
+            return;
+        }
+
+        if (!config.isWinterGrowthPaused() || !seasonService.isWinter(world)) {
+            if (!allowSeasonalGrowth(source, sourceType, sourceType, seasonService.getSeason(world))) {
+                event.setCancelled(true);
+            }
             return;
         }
 
@@ -377,6 +395,48 @@ public class CropGrowthListener implements Listener {
         if (material == null) return false;
         String name = material.name();
         return name.endsWith("_SAPLING") || name.endsWith("_PROPAGULE") || name.equals("AZALEA") || name.equals("FLOWERING_AZALEA");
+    }
+
+    /**
+     * Rolls the seasonal growth chance for a crop. Greenhouse and climate lookups only happen when
+     * the crop has a profile, so unrelated block growth (grass, vines...) stays cheap.
+     */
+    private boolean allowSeasonalGrowth(Block block, Material cropType, Material newType, Season season) {
+        if (!config.isSeasonalGrowthEnabled()) {
+            return true;
+        }
+        CropProfile profile = config.getCropProfile(cropType);
+        if (profile == null) {
+            profile = config.getCropProfile(newType);
+        }
+        if (profile == null) {
+            return true;
+        }
+        TemperatureBand band = null;
+        if (temperatureService != null) {
+            try {
+                band = temperatureService.getBand(block.getLocation());
+            } catch (RuntimeException ignored) {
+                // Unknown climate: only the season factor applies
+            }
+        }
+        boolean underground = isUnderground(block);
+        double chance = growthModel.growthChance(profile, season, band, false, underground);
+        if (chance >= 1.0) {
+            return true;
+        }
+        if (greenhouseService.isGreenhouse(block.getLocation())) {
+            return true;
+        }
+        return ThreadLocalRandom.current().nextDouble() < chance;
+    }
+
+    private boolean isUnderground(Block block) {
+        try {
+            return block.getY() <= config.getUndergroundY() && block.getLightFromSky() == 0;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     private void playWitherEffects(World world, Location location) {

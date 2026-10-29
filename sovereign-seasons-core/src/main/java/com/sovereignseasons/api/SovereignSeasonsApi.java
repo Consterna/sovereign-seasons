@@ -40,7 +40,8 @@ public interface SovereignSeasonsApi {
 
     // Singleton holder
     final class Holder {
-        private static SovereignSeasonsApi instance;
+        // volatile: published from the enable thread and read from region threads on Folia
+        private static volatile SovereignSeasonsApi instance;
 
         private Holder() {}
 
