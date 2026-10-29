@@ -39,7 +39,7 @@ function check(name, ok, detail = '') {
 
 async function main() {
   const rcon = await new Rcon(HOST, Number(props['rcon.port']), props['rcon.password']).connect();
-  const bot = mineflayer.createBot({ host: HOST, port: PORT, username: BOT, auth: 'offline', version: '1.21.11' });
+  const bot = mineflayer.createBot({ host: HOST, port: PORT, username: BOT, auth: 'offline', version: process.env.MC_VERSION || '1.21.11' });
   const chat = [];
   const actionBars = [];
   const titles = [];
@@ -137,6 +137,13 @@ async function main() {
     const info = await playerCommand('/season info');
     check('/season info shows the calendar', /Estación actual/.test(info) && /Primavera/.test(info), info.split('\n')[1] || info);
     check('/season info shows the temperature', /Temperatura:\s*-?\d+(\.\d)?°C/.test(info));
+
+    // ---------------------------------------------------------------- optional PlaceholderAPI
+    if (/PlaceholderAPI/.test(plugins)) {
+      const papi = (await rcon.command(`papi parse ${BOT} %sovereignseasons_season%|%sovereignseasons_day%/%sovereignseasons_days_per_season%|`
+        + '%sovereignseasons_year%|%sovereignseasons_progress%|%sovereignseasons_temperature%|%sovereignseasons_band%|%sovereignseasons_season_id%')).trim();
+      check('PlaceholderAPI placeholders resolve', /Primavera\|\d+\/\d+\|\d+\|\d+\|-?\d+\.\d°C\|\S+\|spring/.test(papi), papi);
+    }
 
     const consoleInfo = await rcon.command('season info world');
     check('Console /season info works', /Calendario/.test(consoleInfo) || /Calendario/.test(chat.join('\n')), consoleInfo.slice(0, 80));
