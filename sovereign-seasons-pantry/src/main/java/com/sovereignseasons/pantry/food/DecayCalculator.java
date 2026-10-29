@@ -124,6 +124,13 @@ public class DecayCalculator {
         return isPerishable(material) && state != null && state.expiresAt() <= now;
     }
 
+    /**
+     * Rounds an expiry to the configured granularity (public for other modules via the Pantry API).
+     */
+    public long roundExpiry(long tick) {
+        return round(tick);
+    }
+
     long round(long tick) {
         long granularity = config.getExpiryGranularityTicks();
         if (granularity <= 1L) {
