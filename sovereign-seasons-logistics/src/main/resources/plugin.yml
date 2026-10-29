@@ -1,0 +1,29 @@
+name: SovereignSeasons-Logistics
+version: '${version}'
+main: com.sovereignseasons.logistics.SovereignSeasonsLogisticsPlugin
+api-version: '1.20'
+folia-supported: true
+author: Cristian
+website: https://github.com/Consterna/sovereign-seasons
+description: Movilidad estacional, caminos, cajas a granel, peso de carga y lagos helados para Sovereign Seasons.
+depend:
+  - SovereignSeasons-Core
+softdepend:
+  - SovereignSeasons-Pantry
+
+commands:
+  logistics:
+    description: Estado de viaje, carga y diagnostico de logistica.
+    aliases:
+      - carga
+    usage: /logistics [status|weight|stats|reload]
+
+permissions:
+  sovereignseasons.logistics.status:
+    description: Permite consultar el terreno, los efectos de movilidad y la carga.
+    default: true
+  sovereignseasons.logistics.admin:
+    description: Permite recargar Logistics y ver estadisticas.
+    default: op
+    children:
+      sovereignseasons.logistics.status: true
