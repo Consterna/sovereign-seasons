@@ -30,3 +30,7 @@ world_the_end/
 # Docker runtime data
 docker/data/
 docker/data-itzg/
+
+# Local end-to-end test server and bot dependencies
+testserver/
+tools/e2e/node_modules/

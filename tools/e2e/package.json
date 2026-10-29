@@ -1,0 +1,14 @@
+{
+  "name": "sovereign-seasons-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "End-to-end gameplay checks for Sovereign Seasons against a local offline-mode Paper server",
+  "license": "GPL-3.0-or-later",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node e2e.js"
+  },
+  "dependencies": {
+    "mineflayer": "4.39.0"
+  }
+}
