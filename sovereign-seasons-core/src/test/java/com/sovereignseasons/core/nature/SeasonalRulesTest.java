@@ -24,6 +24,7 @@ import com.sovereignseasons.api.Season;
 import com.sovereignseasons.api.temperature.TemperatureBand;
 import com.sovereignseasons.core.config.SeasonsConfig;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,17 @@ class SeasonalRulesTest {
         assertThat(SeasonalRules.rainAllowed(config, Season.SPRING, 0.999)).isTrue();
         assertThat(SeasonalRules.rainAllowed(config, Season.WINTER, 0.85)).isFalse();
         assertThat(SeasonalRules.rainAllowed(config, null, 0.999)).isTrue();
+    }
+
+    @Test
+    @DisplayName("Only natural (or unknown-cause) rain starts are filtered")
+    void onlyNaturalRainIsFiltered() {
+        assertThat(SeasonalRules.isFilteredRainCause(WeatherChangeEvent.Cause.NATURAL)).isTrue();
+        assertThat(SeasonalRules.isFilteredRainCause(WeatherChangeEvent.Cause.UNKNOWN)).isTrue();
+        assertThat(SeasonalRules.isFilteredRainCause(WeatherChangeEvent.Cause.COMMAND)).isFalse();
+        assertThat(SeasonalRules.isFilteredRainCause(WeatherChangeEvent.Cause.PLUGIN)).isFalse();
+        assertThat(SeasonalRules.isFilteredRainCause(WeatherChangeEvent.Cause.SLEEP)).isFalse();
+        assertThat(SeasonalRules.isFilteredRainCause(null)).isFalse();
     }
 
     @Test

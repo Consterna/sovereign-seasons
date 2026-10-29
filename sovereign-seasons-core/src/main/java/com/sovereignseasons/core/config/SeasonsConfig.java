@@ -86,6 +86,7 @@ public class SeasonsConfig {
 
     // Seasonal weather
     private boolean seasonalWeatherEnabled = true;
+    private boolean weatherDebug = false;
     private final Map<Season, Double> rainChance = new EnumMap<>(Season.class);
 
     // Seasonal fauna
@@ -342,6 +343,7 @@ public class SeasonsConfig {
 
         // Seasonal weather
         this.seasonalWeatherEnabled = config.getBoolean("weather.enabled", true);
+        this.weatherDebug = config.getBoolean("weather.debug", false);
         for (Season season : Season.values()) {
             double fallback = rainChance.getOrDefault(season, 1.0);
             rainChance.put(season, unitInterval(config.getDouble("weather.rain-chance." + season.getIdentifier(), fallback), fallback));
@@ -520,6 +522,7 @@ public class SeasonsConfig {
 
     public boolean isSeasonalWeatherEnabled() { return seasonalWeatherEnabled; }
     public void setSeasonalWeatherEnabled(boolean enabled) { this.seasonalWeatherEnabled = enabled; }
+    public boolean isWeatherDebug() { return weatherDebug; }
     public double getRainChance(Season season) { return season == null ? 1.0 : rainChance.getOrDefault(season, 1.0); }
     public void setRainChance(Season season, double chance) { if (season != null) rainChance.put(season, unitInterval(chance, 1.0)); }
 

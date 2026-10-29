@@ -44,7 +44,7 @@ Un bloque se considera protegido dentro de un invernadero si cumple dos condicio
   - Si falla, solo se omite ese paso: el cultivo nunca muere por esto.
   - El invernadero ignora estación y clima. Bajo tierra (sin luz del cielo y `Y ≤ 48`) se ignora solo la estación.
   - La verruga del Nether está exenta.
-- **Lluvia estacional** (`weather`): probabilidad de aceptar que empiece a llover de forma natural (primavera `1,0`, verano `0,5`, otoño `1,0`, invierno `0,8`). `/weather` y otros plugins no se ven afectados.
+- **Lluvia estacional** (`weather`): probabilidad de aceptar que empiece a llover de forma natural (primavera `1,0`, verano `0,5`, otoño `1,0`, invierno `0,8`). `/weather`, dormir y otros plugins no se ven afectados. Con `weather.debug: true` se registra en consola cada inicio de lluvia con su causa y la decisión tomada.
 - **Fauna** (`fauna`):
   - gemelos al criar en primavera (`25 %`);
   - *Strays* en lugar de esqueletos en invierno en zonas Frías o Heladas (`50 %`);
@@ -162,7 +162,7 @@ temperature:
 
 ## 🧪 Pruebas Unitarias y Calidad
 
-El módulo cuenta con una suite integral de **172 pruebas unitarias y de estrés automatizadas** en 27 clases de prueba con **100% de aprobación**:
+El módulo cuenta con una suite integral de **173 pruebas unitarias y de estrés automatizadas** en 27 clases de prueba con **100% de aprobación**:
 
 ```bash
 # Ejecutar todas las pruebas unitarias
