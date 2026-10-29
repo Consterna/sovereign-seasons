@@ -25,5 +25,7 @@ El bot no puede *ver* la pantalla. Esta guía sirve para comprobar a ojo lo visu
 | 8 | Comida rancia | Con el pan en la mano: `/pantry setfresh 30` | El tooltip pasa a **Rancio** en amarillo. Al comerlo, tienes Hambre unos segundos. |
 | 9 | Ahumado | Cocina carne cruda en un **ahumador** y sácala | Tooltip con **Conservación: Ahumado** en dorado. El ahumador sigue cocinando el resto. |
 | 10 | Compost | `/give @s rotten_flesh 16` y clic derecho en un compostador | Las partículas verdes y que el nivel del compostador sube a veces (30 %). |
+| 11 | Precios de invierno | `/season set winter world`, `/summon villager ~2 ~ ~ {NoAI:1b,Xp:10,VillagerData:{profession:"minecraft:farmer",level:2,type:"minecraft:plains"},Offers:{Recipes:[{buy:{id:"minecraft:carrot",count:22},sell:{id:"minecraft:emerald",count:1},maxUses:99}]}}` y clic derecho sobre él | En el trato de zanahorias, el **22 tachado** y al lado **16**; en la barra de acción, "Precios de Invierno". Al cerrar y volver en verano (`/season set summer world`), vuelve a 22 sin tachar. |
+| 12 | Feria de verano | `/season set summer world`, `/summon wandering_trader ~2 ~ ~ {NoAI:1b}` y clic derecho | Al final de la lista, hielo, hielo compacto y hielo azul; en la barra de acción, "Feria de Verano: ofertas de temporada". |
 
 Si algo no se ve como dice la tabla, anota el número de la prueba y lo que viste, y lo revisamos.

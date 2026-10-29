@@ -55,10 +55,19 @@ reset_world() {
          "$SERVER_DIR"/plugins/SovereignSeasons-Core/calendar_data.yml
 }
 
+# Refuse to test stale plugins: './gradlew assemble' only rebuilds the plain jars, the plugin jar is the shadow jar
+for module in core pantry logistics commerce; do
+  jar=$(ls "$REPO_DIR"/sovereign-seasons-$module/build/libs/sovereign-seasons-$module-*[0-9].jar 2>/dev/null | head -n 1)
+  if [[ -z "$jar" ]] || [[ -n "$(find "$REPO_DIR/sovereign-seasons-$module/src/main" -newer "$jar" -type f -print -quit)" ]]; then
+    echo "sovereign-seasons-$module: plugin jar missing or older than its sources. Run ./gradlew shadowJar first."
+    exit 3
+  fi
+done
+
 # Fresh plugin jars (and plugin configs) for every run
 mkdir -p "$SERVER_DIR/plugins"
-rm -rf "$SERVER_DIR"/plugins/sovereign-seasons-*.jar "$SERVER_DIR"/plugins/SovereignSeasons-Core "$SERVER_DIR"/plugins/SovereignSeasons-Pantry "$SERVER_DIR"/plugins/SovereignSeasons-Logistics
-for module in core pantry logistics; do
+rm -rf "$SERVER_DIR"/plugins/sovereign-seasons-*.jar "$SERVER_DIR"/plugins/SovereignSeasons-Core "$SERVER_DIR"/plugins/SovereignSeasons-Pantry "$SERVER_DIR"/plugins/SovereignSeasons-Logistics "$SERVER_DIR"/plugins/SovereignSeasons-Commerce
+for module in core pantry logistics commerce; do
   cp "$REPO_DIR"/sovereign-seasons-$module/build/libs/sovereign-seasons-$module-*[0-9].jar "$SERVER_DIR/plugins/"
 done
 for jar in "${EXTRA_PLUGINS[@]}"; do cp "$jar" "$SERVER_DIR/plugins/"; done
@@ -74,12 +83,13 @@ reset_world
 start_server
 MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e.js" "$PROPS" || STATUS=$?
 MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e-logistics.js" "$PROPS" || STATUS=$?
+MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e-commerce.js" "$PROPS" || STATUS=$?
 if [[ "$RUN_NATURE" == true ]]; then
   MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e-nature.js" "$PROPS" || STATUS=$?
 fi
 
 echo
 echo "Plugin log lines with errors or warnings:"
-grep -nE 'SovereignSeasons|Pantry|Logistics' "$SERVER_DIR/console.log" | grep -E 'ERROR|WARN|Exception' || echo "  none"
+grep -nE 'SovereignSeasons|Pantry|Logistics|Commerce' "$SERVER_DIR/console.log" | grep -E 'ERROR|WARN|Exception' || echo "  none"
 grep -nE 'Exception' "$SERVER_DIR/console.log" | grep -viE 'UnknownHostException|PaperVersionFetcher' | head -5 || true
 exit "$STATUS"
