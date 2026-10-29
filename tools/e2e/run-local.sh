@@ -57,8 +57,10 @@ reset_world() {
 
 # Fresh plugin jars (and plugin configs) for every run
 mkdir -p "$SERVER_DIR/plugins"
-rm -rf "$SERVER_DIR"/plugins/sovereign-seasons-*.jar "$SERVER_DIR"/plugins/SovereignSeasons-Core "$SERVER_DIR"/plugins/SovereignSeasons-Pantry
-cp "$REPO_DIR"/sovereign-seasons-core/build/libs/sovereign-seasons-core-*.jar "$REPO_DIR"/sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*.jar "$SERVER_DIR/plugins/"
+rm -rf "$SERVER_DIR"/plugins/sovereign-seasons-*.jar "$SERVER_DIR"/plugins/SovereignSeasons-Core "$SERVER_DIR"/plugins/SovereignSeasons-Pantry "$SERVER_DIR"/plugins/SovereignSeasons-Logistics
+for module in core pantry logistics; do
+  cp "$REPO_DIR"/sovereign-seasons-$module/build/libs/sovereign-seasons-$module-*[0-9].jar "$SERVER_DIR/plugins/"
+done
 for jar in "${EXTRA_PLUGINS[@]}"; do cp "$jar" "$SERVER_DIR/plugins/"; done
 
 # First boot generates the plugin configs; the deterministic test overrides need a restart
@@ -71,12 +73,13 @@ STATUS=0
 reset_world
 start_server
 MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e.js" "$PROPS" || STATUS=$?
+MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e-logistics.js" "$PROPS" || STATUS=$?
 if [[ "$RUN_NATURE" == true ]]; then
   MC_VERSION="$MC_VERSION" node "$E2E_DIR/e2e-nature.js" "$PROPS" || STATUS=$?
 fi
 
 echo
 echo "Plugin log lines with errors or warnings:"
-grep -nE 'SovereignSeasons|Pantry' "$SERVER_DIR/console.log" | grep -E 'ERROR|WARN|Exception' || echo "  none"
+grep -nE 'SovereignSeasons|Pantry|Logistics' "$SERVER_DIR/console.log" | grep -E 'ERROR|WARN|Exception' || echo "  none"
 grep -nE 'Exception' "$SERVER_DIR/console.log" | grep -viE 'UnknownHostException|PaperVersionFetcher' | head -5 || true
 exit "$STATUS"
