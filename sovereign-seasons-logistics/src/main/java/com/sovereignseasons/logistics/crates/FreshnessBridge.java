@@ -42,7 +42,10 @@ public interface FreshnessBridge {
 
     void setExpiresAt(ItemStack item, long expiresAt);
 
-    long round(long expiresAt);
+    /**
+     * Pantry's expiry granularity in ticks (crate values are rounded down to it, see {@link CrateMath#floorTo}).
+     */
+    long granularity();
 
     /**
      * Whether fully spoiled food turns into rotten flesh in Pantry.

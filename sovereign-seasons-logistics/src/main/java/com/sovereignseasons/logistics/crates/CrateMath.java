@@ -40,6 +40,18 @@ public final class CrateMath {
         return packedValue + shift(now, packedDecayRate);
     }
 
+    /**
+     * Rounds down to Pantry's expiry granularity. Rounding to the nearest value on both packing and unpacking
+     * could add up to one granularity step per cycle, so repacking would slowly refresh food; flooring never
+     * adds freshness and still gives crates packed from one stack the same value, so they keep stacking.
+     */
+    public static long floorTo(long value, long granularity) {
+        if (granularity <= 1L) {
+            return value;
+        }
+        return Math.floorDiv(value, granularity) * granularity;
+    }
+
     private static long shift(long ticks, double rate) {
         double clamped = Double.isFinite(rate) ? Math.max(0.0, Math.min(1.0, rate)) : 1.0;
         return Math.round(Math.max(0L, ticks) * (1.0 - clamped));

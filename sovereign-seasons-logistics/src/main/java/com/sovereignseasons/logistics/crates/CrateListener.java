@@ -53,12 +53,14 @@ public class CrateListener implements Listener {
     private final LogisticsConfig config;
     private final CrateItems crates;
     private final FreshnessBridge freshness;
+    private final CrateUnpacker unpacker;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    public CrateListener(LogisticsConfig config, CrateItems crates, FreshnessBridge freshness) {
+    public CrateListener(LogisticsConfig config, CrateItems crates, FreshnessBridge freshness, CrateUnpacker unpacker) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
         this.crates = Objects.requireNonNull(crates, "crates cannot be null");
         this.freshness = freshness;
+        this.unpacker = Objects.requireNonNull(unpacker, "unpacker cannot be null");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -100,7 +102,7 @@ public class CrateListener implements Listener {
             OptionalLong expiresAt = freshness.expiresAt(hand);
             if (expiresAt.isPresent()) {
                 long packed = CrateMath.packedValue(expiresAt.getAsLong(), freshness.now(), config.getPackedDecayRate());
-                value = OptionalLong.of(freshness.round(packed));
+                value = OptionalLong.of(CrateMath.floorTo(packed, freshness.granularity()));
             }
         }
         if (player.getGameMode() != GameMode.CREATIVE) {
@@ -113,16 +115,7 @@ public class CrateListener implements Listener {
     }
 
     private void unpack(Player player, ItemStack hand, CrateItems.Contents contents) {
-        ItemStack items = new ItemStack(contents.content(), contents.count());
-        if (freshness != null && contents.packedValue().isPresent() && freshness.isPerishable(contents.content())) {
-            long now = freshness.now();
-            long expiresAt = freshness.round(CrateMath.unpackedExpiresAt(contents.packedValue().getAsLong(), now, config.getPackedDecayRate()));
-            if (CrateRules.unpackAsRottenFlesh(expiresAt, now, freshness.spoilsToRottenFlesh())) {
-                items = new ItemStack(Material.ROTTEN_FLESH, contents.count());
-            } else {
-                freshness.setExpiresAt(items, expiresAt);
-            }
-        }
+        ItemStack items = unpacker.unpack(contents);
         if (player.getGameMode() != GameMode.CREATIVE) {
             hand.setAmount(hand.getAmount() - 1);
             player.getInventory().setItemInMainHand(hand.getAmount() > 0 ? hand : null);

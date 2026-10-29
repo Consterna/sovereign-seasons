@@ -71,8 +71,8 @@ public final class PantryFreshnessBridge implements FreshnessBridge {
     }
 
     @Override
-    public long round(long expiresAt) {
-        return api.roundExpiry(expiresAt);
+    public long granularity() {
+        return api.expiryGranularity();
     }
 
     @Override

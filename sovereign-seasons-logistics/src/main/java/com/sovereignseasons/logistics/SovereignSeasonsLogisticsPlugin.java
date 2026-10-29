@@ -24,10 +24,13 @@ import com.sovereignseasons.api.SovereignSeasonsApi;
 import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.greenhouse.GreenhouseService;
 import com.sovereignseasons.api.temperature.TemperatureService;
+import com.sovereignseasons.logistics.api.LogisticsApi;
+import com.sovereignseasons.logistics.api.LogisticsApiImpl;
 import com.sovereignseasons.logistics.command.LogisticsCommand;
 import com.sovereignseasons.logistics.config.LogisticsConfig;
 import com.sovereignseasons.logistics.crates.CrateItems;
 import com.sovereignseasons.logistics.crates.CrateListener;
+import com.sovereignseasons.logistics.crates.CrateUnpacker;
 import com.sovereignseasons.logistics.crates.FreshnessBridge;
 import com.sovereignseasons.logistics.crates.PantryFreshnessBridge;
 import com.sovereignseasons.logistics.ice.FrozenWaterService;
@@ -38,6 +41,7 @@ import com.tcoded.folialib.FoliaLib;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
@@ -83,13 +87,17 @@ public class SovereignSeasonsLogisticsPlugin extends JavaPlugin {
 
         // 3. Subsystems
         CrateItems crates = new CrateItems(this);
+        CrateUnpacker unpacker = new CrateUnpacker(config, freshness);
         WeightModel weightModel = new WeightModel(config);
         InventoryWeigher weigher = new InventoryWeigher(weightModel, crates);
         MobilityService mobility = new MobilityService(config, seasonService, temperatureService, weightModel, weigher);
         FrozenWaterService ice = new FrozenWaterService(this, config, seasonService, temperatureService, greenhouseService, foliaLib);
 
+        // Public API for other modules (Commerce reads crates through it)
+        getServer().getServicesManager().register(LogisticsApi.class, new LogisticsApiImpl(crates, unpacker), this, ServicePriority.Normal);
+
         // 4. Listeners
-        getServer().getPluginManager().registerEvents(new CrateListener(config, crates, freshness), this);
+        getServer().getPluginManager().registerEvents(new CrateListener(config, crates, freshness, unpacker), this);
         getServer().getPluginManager().registerEvents(mobility, this);
         getServer().getPluginManager().registerEvents(ice, this);
 
@@ -135,6 +143,7 @@ public class SovereignSeasonsLogisticsPlugin extends JavaPlugin {
         if (foliaLib != null) {
             foliaLib.getImpl().cancelAllTasks();
         }
+        getServer().getServicesManager().unregisterAll(this);
         getLogger().info("Sovereign Seasons Logistics disabled successfully.");
     }
 }
