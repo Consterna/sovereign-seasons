@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sovereignseasons"
-version = "1.0.0"
+version = "1.1.0"
 
 publishing {
     publications {
@@ -13,7 +13,7 @@ publishing {
             from(components["java"])
             groupId = "com.sovereignseasons"
             artifactId = "sovereign-seasons-core"
-            version = "1.0.0"
+            version = "1.1.0"
 
             pom {
                 name.set("Sovereign Seasons Core")
@@ -58,8 +58,17 @@ java {
     }
 }
 
+repositories {
+    maven {
+        name = "helpchat"
+        url = uri("https://repo.helpch.at/releases")
+    }
+}
+
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    // Optional integration, only used when PlaceholderAPI is installed on the server
+    compileOnly("me.clip:placeholderapi:2.12.3")
     implementation("com.github.TechnicallyCoded:FoliaLib:0.4.4")
 
     testImplementation("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")

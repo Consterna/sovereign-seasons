@@ -31,6 +31,11 @@ import com.sovereignseasons.core.config.SeasonsConfig;
 import com.sovereignseasons.core.crops.CropGrowthListener;
 import com.sovereignseasons.core.greenhouse.GreenhouseDetector;
 import com.sovereignseasons.core.temperature.TemperatureManager;
+import com.sovereignseasons.core.comfort.ComfortService;
+import com.sovereignseasons.core.integration.SeasonsPlaceholderExpansion;
+import com.sovereignseasons.core.nature.SeasonalNatureListener;
+import com.sovereignseasons.core.ui.SeasonInterface;
+import org.bukkit.entity.Player;
 import com.tcoded.folialib.FoliaLib;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -49,6 +54,7 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
     private WorldCalendarManager calendarManager;
     private GreenhouseDetector greenhouseDetector;
     private TemperatureManager temperatureManager;
+    private SeasonInterface seasonInterface;
     private FoliaLib foliaLib;
 
     @Override
@@ -74,10 +80,15 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
 
         // 4. Register Listeners
         getServer().getPluginManager().registerEvents(new CalendarListener(this.calendarManager, this.foliaLib), this);
-        getServer().getPluginManager().registerEvents(new CropGrowthListener(this.config, this.calendarManager, this.greenhouseDetector), this);
+        getServer().getPluginManager().registerEvents(new CropGrowthListener(this.config, this.calendarManager, this.greenhouseDetector, this.temperatureManager), this);
+        getServer().getPluginManager().registerEvents(new SeasonalNatureListener(this.config, this.calendarManager, this.temperatureManager), this);
+        ComfortService comfortService = new ComfortService(this.config, this.calendarManager, this.temperatureManager);
+        getServer().getPluginManager().registerEvents(comfortService, this);
+        this.seasonInterface = new SeasonInterface(this, this.config, this.calendarManager, this.temperatureManager, this.foliaLib);
+        getServer().getPluginManager().registerEvents(this.seasonInterface, this);
 
         // 5. Register Commands
-        SeasonCommand seasonCmd = new SeasonCommand(this.config, this.calendarManager, this.greenhouseDetector, this.temperatureManager, getDataFolder());
+        SeasonCommand seasonCmd = new SeasonCommand(this.config, this.calendarManager, this.greenhouseDetector, this.temperatureManager, this.seasonInterface, getDataFolder());
         PluginCommand cmd = getCommand("season");
         if (cmd != null) {
             cmd.setExecutor(seasonCmd);
@@ -91,6 +102,32 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
             }
         }, 20L, 20L);
 
+        // 7. Player comfort (cold & heat), dispatched to each player's own thread (Folia-safe)
+        long comfortInterval = config.getComfortIntervalTicks();
+        foliaLib.getImpl().runTimer(task -> {
+            if (!config.isComfortEnabled()) {
+                return;
+            }
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                foliaLib.getImpl().runAtEntity(player, entityTask -> comfortService.tick(player));
+            }
+        }, comfortInterval, comfortInterval);
+
+        // 8. Season HUD refresh
+        long hudInterval = config.getHudUpdateTicks();
+        foliaLib.getImpl().runTimer(task -> seasonInterface.forEachHudPlayer(uuid -> {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                foliaLib.getImpl().runAtEntity(player, entityTask -> seasonInterface.updateHud(player));
+            }
+        }), hudInterval, hudInterval);
+
+        // 9. Optional PlaceholderAPI integration
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new SeasonsPlaceholderExpansion(this, this.calendarManager, this.temperatureManager).register();
+            getLogger().info("PlaceholderAPI detected: %sovereignseasons_*% placeholders registered.");
+        }
+
         // Startup banner
         getLogger().info("=================================================");
         getLogger().info(" Sovereign Seasons Core v" + getDescription().getVersion() + " ENABLED");
@@ -98,6 +135,8 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
         getLogger().info(" - Winter Crop Pause & Withering: ACTIVE");
         getLogger().info(" - Spatial LRU Greenhouse Detection: ACTIVE");
         getLogger().info(" - Seasonal Temperature Service: ACTIVE");
+        getLogger().info(" - Seasonal Crops, Weather & Fauna: " + (config.isSeasonalGrowthEnabled() ? "ACTIVE" : "DISABLED"));
+        getLogger().info(" - Player Cold & Heat Comfort: " + (config.isComfortEnabled() ? "ACTIVE" : "DISABLED"));
         getLogger().info("=================================================");
     }
 
@@ -109,6 +148,10 @@ public class SovereignSeasonsCorePlugin extends JavaPlugin implements SovereignS
 
         if (greenhouseDetector != null) {
             greenhouseDetector.clearCache();
+        }
+
+        if (seasonInterface != null) {
+            seasonInterface.hideAll();
         }
 
         if (foliaLib != null) {

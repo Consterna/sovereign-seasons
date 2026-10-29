@@ -6,13 +6,15 @@ folia-supported: true
 author: Cristian
 website: https://github.com/Consterna/sovereign-seasons
 description: Sistema avanzado de estaciones modulares basado en dias de juego de Minecraft.
+softdepend:
+  - PlaceholderAPI
 
 commands:
   season:
     description: Consulta y gestion del calendario de estaciones e invernaderos.
     aliases:
       - seasons
-    usage: /season [info|greenhouse|set|setday|stats|reload]
+    usage: /season [info|greenhouse|hud|set|setday|stats|reload]
 
 permissions:
   sovereignseasons.command.info:
@@ -21,9 +23,13 @@ permissions:
   sovereignseasons.command.greenhouse:
     description: Permite inspeccionar el estado de invernadero del bloque actual.
     default: true
+  sovereignseasons.command.hud:
+    description: Permite activar el HUD (BossBar) de estaciones y temperatura.
+    default: true
   sovereignseasons.admin:
     description: Permite modificar estaciones, dias, recargar el plugin y ver estadisticas de cache.
     default: op
     children:
       sovereignseasons.command.info: true
       sovereignseasons.command.greenhouse: true
+      sovereignseasons.command.hud: true
