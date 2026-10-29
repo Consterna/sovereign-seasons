@@ -36,6 +36,11 @@ tasks {
         options.release.set(21)
     }
 
+    jar {
+        // The plugin JAR is the shadow JAR; the plain JAR gets a classifier so the two never overwrite each other
+        archiveClassifier.set("plain")
+    }
+
     shadowJar {
         archiveClassifier.set("")
         relocate("com.tcoded.folialib", "com.sovereignseasons.pantry.libs.folialib")
@@ -47,8 +52,6 @@ tasks {
 
     test {
         useJUnitPlatform()
-        // Core's shadow JAR overwrites its plain JAR (empty classifier), which is on this test classpath
-        mustRunAfter(":sovereign-seasons-core:shadowJar")
     }
 
     processResources {
