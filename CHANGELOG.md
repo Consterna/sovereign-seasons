@@ -41,7 +41,18 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - La carne podrida se puede echar al compostador.
   - Aviso al jugador cuando la comida de su inventario se pudre o está a punto.
   - Suite de 41 pruebas unitarias.
-- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen el JAR de Pantry. La versión de Paper por defecto pasa a 1.21.11.
+- **Módulo `sovereign-seasons-logistics` v1.0.0 (Transporte y movilidad)**:
+  - **Nieve:** las capas ralentizan (Lentitud I) y la nieve profunda más (II). Las botas de cuero y la armadura de caballo de cuero protegen, como con la nieve polvo vanilla.
+  - **Barro:** cuando llueve en primavera u otoño, la hierba y la tierra ralentizan; el bloque de barro, siempre.
+  - **Caminos** (senderos, grava, adoquines, ladrillos, tablones, hormigón…): anulan la nieve fina y el barro y dan Velocidad a las monturas. La nieve profunda hay que despejarla.
+  - **Ventiscas:** en invierno, en zona Helada, nevando y a cielo abierto, un nivel extra de Lentitud. Resguardarse la anula.
+  - **Lagos helados:** el agua quieta superficial se congela en inviernos helados (por muestreo cerca de los jugadores) y en primavera se derrite solo el hielo registrado por el plugin en el PDC de cada chunk.
+  - **Cajas a granel:** se empaqueta con agacharse + clic derecho al aire (9 unidades) y se desempaqueta con clic derecho. Las cajas son apilables y no se pueden colocar ni quemar. Con Pantry, la comida dentro se estropea a ×0,5.
+  - **Peso de carga** (desactivado por defecto): reglas por patrón de material, contenido de shulkers y bundles al 50 % y cajas al 60 %. Las mulas, llamas, vagonetas y el cofre de Ender no cuentan.
+  - Comando `/logistics` (`status`, `weight`, `stats`, `reload`) con permisos `sovereignseasons.logistics.*`.
+  - Suite de 23 pruebas unitarias y 22 pruebas de juego (`tools/e2e/e2e-logistics.js`).
+- **`sovereign-seasons-pantry`**: nueva API pública `PantryApi` en el `ServicesManager` (caducidad, reloj de descomposición, perecederos), usada por las cajas de Logistics. 43 pruebas.
+- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry y Logistics. La versión de Paper por defecto pasa a 1.21.11.
 - Pruebas de juego end-to-end (`tools/e2e`): servidor Paper local + bot Mineflayer, sin Docker.
   - Suite principal de 33 comprobaciones y suite de naturaleza de 5 (lluvia natural, Strays y Husks), con `/tick sprint`.
   - `run-local.sh` automatiza el ciclo completo sobre un mundo limpio.
@@ -50,6 +61,7 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
 - Guía de instalación para servidores y sección de filosofía de diseño en el README.
 
 ### Corregido
+- El JAR normal (`jar`) y el JAR del plugin (`shadowJar`) de cada módulo escribían en el mismo archivo. Un módulo dependiente podía regenerar el normal y dejar un plugin sin FoliaLib (`ClassNotFoundException` al arrancar). El JAR normal pasa a llevar el clasificador `-plain`, y la publicación Maven del core publica el JAR del plugin (`components["shadow"]`).
 - `SovereignSeasonsApi.Holder` publica la instancia de forma segura entre hilos (`volatile`), algo necesario en Folia.
 - La Lentitud por frío se resuelve por clave de registro (`minecraft:slowness`), porque el campo Java cambió de nombre en 1.20.5.
 
