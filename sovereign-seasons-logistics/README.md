@@ -42,8 +42,9 @@ Sigue la filosofía *vanilla+*: viajar y cargar requiere planificación, y las s
 - **Desempaquetar:** clic derecho con la caja en la mano, al aire o sobre un bloque normal. Sobre un cofre, una puerta u otro bloque interactivo, el clic abre ese bloque como siempre; agachado, desempaqueta.
 - Las cajas hechas del mismo stack se **apilan** (hasta 64 cajas = 576 unidades por casilla).
 - No se pueden colocar como barril ni quemar como combustible.
-- **Con Pantry:** dentro de la caja la comida se estropea a **×0,5**, sin importar dónde esté la caja. Al desempaquetar, recupera su frescura real. Si caducó dentro, sale carne podrida, salvo que Pantry tenga desactivado `spoil-to-rotten-flesh`; en ese caso sale marcada como Podrida.
+- **Con Pantry:** dentro de la caja la comida se estropea a **×0,5**, sin importar dónde esté la caja. Al desempaquetar, recupera su frescura real. El valor de la caja se redondea siempre hacia abajo, así que empaquetar y desempaquetar repetidamente nunca refresca la comida. Si caducó dentro, sale carne podrida, salvo que Pantry tenga desactivado `spoil-to-rotten-flesh`; en ese caso sale marcada como Podrida.
 - Se usa interacción en lugar de recetas de crafteo a propósito: el *crafter* automático no puede fabricar cajas sin estado que "refresquen" comida podrida.
+- **API para otros módulos:** `com.sovereignseasons.logistics.api.LogisticsApi`, registrada en el `ServicesManager`, lee el contenido de una caja (`readCrate`) y muestra lo que daría al desempaquetarla ahora, frescura incluida (`previewContents`), sin modificarla. **Commerce** la usa para comprar cajas al por mayor.
 
 ### 6. Peso de carga *(desactivado por defecto)*
 - Cada ítem pesa según reglas configurables: bloques metálicos 9; piedra y minerales 1; herramientas y armaduras 2; cosechas y comida 0,25; el resto 0,5.
@@ -96,7 +97,7 @@ Todos los valores se validan y acotan al cargarse. Si el YAML está mal formado,
 tools/e2e/run-local.sh testserver /ruta/a/java 1.21.11
 ```
 
-- **Pruebas unitarias:** clasificación del terreno, efectos de movimiento, peso, matemática de las cajas, reglas de hielo, registro por chunk, configuración y comandos.
+- **Pruebas unitarias** (29): clasificación del terreno, efectos de movimiento, peso, matemática de las cajas, desempaquetado con frescura, reglas de hielo, registro por chunk, configuración y comandos.
 - **Pruebas de juego** (`tools/e2e/e2e-logistics.js`, 25 comprobaciones en un servidor real):
   - nieve, botas de cuero y barro con lluvia frente a sendero de tierra;
   - caballo en grava y en nieve, con y sin armadura de cuero;
