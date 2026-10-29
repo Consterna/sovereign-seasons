@@ -6,15 +6,16 @@ Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/Prism
 |---|---|---|---|
 | Principal | `e2e.js` | ~4 min | 33 comprobaciones de juego de core y pantry (+ PlaceholderAPI si está instalado) |
 | Logistics | `e2e-logistics.js` | ~3 min | 25 comprobaciones de nieve, barro, caminos, monturas, ventiscas, lagos helados, peso y cajas (+ frescura con Pantry) |
+| Commerce | `e2e-commerce.js` | ~2 min | 24 comprobaciones de precios estacionales (cliente y servidor), comida podrida rechazada, venta a granel de cajas, límite diario y ferias del vendedor ambulante |
 | Naturaleza | `e2e-nature.js` | ~5 min | Lluvia natural por estación y aparición natural de Strays/Husks, acelerando el servidor con `/tick sprint` |
 
 ## Compatibilidad verificada
 
-| Versión de Paper | Java | Resultado (suites principal + logistics + naturaleza) |
+| Versión de Paper | Java | Resultado (suites principal + logistics + commerce + naturaleza) |
 |---|---|---|
-| 1.21.11 (build 132) | Temurin 21 | 33/33 + 25/25 + 5/5, con PlaceholderAPI 2.12.3 |
-| 26.1.2 (build 74) | Temurin 25 | 33/33 + 25/25 + 5/5, con PlaceholderAPI 2.12.3 |
-| 26.3 (build 227) | Temurin 25 | Prueba de humo por consola: carga, comandos, placeholders, recargas y sprint sin errores. El bot no se usa porque Mineflayer aún no soporta el protocolo 26.3. |
+| 1.21.11 (build 132) | Temurin 21 | 33/33 + 25/25 + 24/24 + 5/5, con PlaceholderAPI 2.12.3 |
+| 26.1.2 (build 74) | Temurin 25 | 33/33 + 25/25 + 24/24 + 5/5, con PlaceholderAPI 2.12.3 |
+| 26.3 (build 227) | Temurin 25 | Prueba de humo por consola: carga de los cuatro plugins, comandos (incluido `/commerce`), placeholders y recargas sin errores. El bot no se usa porque Mineflayer aún no soporta el protocolo 26.3. |
 
 ## Requisitos
 - Java 21 para Paper 1.21.x y **Java 25 para Paper 26.x**. Sirve un JDK portable en ZIP de [Adoptium](https://adoptium.net/); no hace falta instalarlo.
@@ -47,11 +48,12 @@ tools/e2e/run-local.sh testserver /ruta/a/jdk-21/bin/java 1.21.11 --nature --ext
 ```
 
 El script `run-local.sh` hace todo el ciclo en cada pasada:
-1. Copia los JAR recién compilados.
-2. Arranca el servidor una vez para que se generen las configs.
-3. Aplica la configuración determinista de pruebas con `apply-test-config.js` (gemelos 100 %, compost 100 % y revisión del inventario cada 100 ticks).
-4. Reinicia el servidor sobre un **mundo limpio**.
-5. Ejecuta las suites y lista cualquier línea de error o aviso de los plugins.
+1. Comprueba que ningún JAR de plugin sea más antiguo que el código de su módulo y, si lo es, se para. `./gradlew assemble` solo regenera los JAR normales; el del plugin sale de `shadowJar` (o de `build`).
+2. Copia los JAR recién compilados.
+3. Arranca el servidor una vez para que se generen las configs.
+4. Aplica la configuración determinista de pruebas con `apply-test-config.js` (gemelos 100 %, compost 100 % y revisión del inventario cada 100 ticks).
+5. Reinicia el servidor sobre un **mundo limpio**.
+6. Ejecuta las suites y lista cualquier línea de error o aviso de los plugins.
 
 El mundo se borra en cada pasada porque el bot reaparece donde se desconectó y arrastraría el estado de la pasada anterior. Para Paper 26.1.x usa Java 25 y la versión de protocolo `26.1`.
 
@@ -77,6 +79,13 @@ El mundo se borra en cada pasada porque el bot reaparece donde se desconectó y 
   - Las cajas se empaquetan, se apilan, se desempaquetan, no se colocan y conservan la frescura de Pantry.
   - Con una caja en la mano, un cofre se abre normalmente, y la comida que caduca dentro de la caja sale podrida.
   - Una tormenta en una sabana (donde vanilla nunca llueve) no crea barro.
+- **Commerce:**
+  - En invierno el granjero pide 16 zanahorias por esmeralda en vez de 22 (visto por el cliente y en el NBT del servidor), 28 en otoño y 22 en verano. Las zanahorias doradas suben de 3 a 4 esmeraldas y un trato de 1 esmeralda no baja de 1.
+  - Al cerrar el comercio no queda ningún ajuste guardado en el aldeano.
+  - Un trato real a precio de invierno con zanahorias de Pantry funciona, y las zanahorias que se pudren se rechazan sin perder nada.
+  - Agachado y con cajas en la mano, el aldeano las compra a precio de temporada sin abrir el comercio. Respeta el límite diario, rechaza cajas de comida podrida y un aldeano que no compra zanahorias tampoco compra sus cajas.
+  - El vendedor ambulante añade la feria de verano, la sustituye por la de invierno al cambiar de estación y sus precios se borran al cerrar sin acumularse. Al desactivar las ferias, devuelve las ofertas añadidas y conserva las suyas.
+  - Mineflayer siempre declara «no agachado» al usar una entidad, así que la prueba envía ella misma el paquete `use_entity` con `sneaking: true`, como un cliente real.
 - **Pantry:**
   - `/pantry inspect`, `/pantry stats` y `/pantry setfresh`. Comer comida rancia da Hambre.
   - El ahumador no se atasca y marca "Ahumado".
