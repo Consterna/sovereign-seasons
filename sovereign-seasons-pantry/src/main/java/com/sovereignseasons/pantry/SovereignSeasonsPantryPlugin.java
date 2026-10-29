@@ -22,6 +22,8 @@ package com.sovereignseasons.pantry;
 
 import com.sovereignseasons.api.SovereignSeasonsApi;
 import com.sovereignseasons.api.temperature.TemperatureService;
+import com.sovereignseasons.pantry.api.PantryApi;
+import com.sovereignseasons.pantry.api.PantryApiImpl;
 import com.sovereignseasons.pantry.cellar.CellarDetector;
 import com.sovereignseasons.pantry.command.PantryCommand;
 import com.sovereignseasons.pantry.config.PantryConfig;
@@ -34,6 +36,7 @@ import com.tcoded.folialib.FoliaLib;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
@@ -69,6 +72,10 @@ public class SovereignSeasonsPantryPlugin extends JavaPlugin {
         DecayCalculator calculator = new DecayCalculator(this.config);
         FoodDecayService decayService = new FoodDecayService(this.config, calculator, new PdcFoodStateCodec(this));
         StorageTracker tracker = new StorageTracker(this, this.config, decayService, this.cellarDetector, temperatureService);
+
+        // Public API for other modules (e.g. Logistics crates keep food freshness while packed)
+        getServer().getServicesManager().register(PantryApi.class,
+                new PantryApiImpl(calculator, decayService.getCodec(), tracker::now), this, ServicePriority.Normal);
 
         // 3. Register Listeners
         FoodLifecycleListener lifecycleListener = new FoodLifecycleListener(this.config, decayService, tracker, this.cellarDetector, this.foliaLib);
@@ -110,6 +117,9 @@ public class SovereignSeasonsPantryPlugin extends JavaPlugin {
         if (foliaLib != null) {
             foliaLib.getImpl().cancelAllTasks();
         }
+        try {
+            getServer().getServicesManager().unregisterAll(this);
+        } catch (Throwable ignored) {}
         getLogger().info("Sovereign Seasons Pantry disabled successfully.");
     }
 
