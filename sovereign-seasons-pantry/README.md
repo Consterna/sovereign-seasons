@@ -38,8 +38,8 @@ Módulo encargado de la conservación de alimentos y de su descomposición segú
 - **Avisos** (`warnings.spoilage`): cuando la revisión del inventario pudre pilas o deja comida en "Pudriéndose", aparece un aviso en la barra de acción.
 
 ### 5. API para otros módulos
-- `com.sovereignseasons.pantry.api.PantryApi`, registrada en el `ServicesManager` de Bukkit, permite leer y escribir la caducidad de un alimento, consultar el reloj de descomposición y saber si un material es perecedero.
-- La usan las cajas de **Logistics** para que la comida empaquetada conserve su frescura.
+- `com.sovereignseasons.pantry.api.PantryApi`, registrada en el `ServicesManager` de Bukkit, permite leer y escribir la caducidad de un alimento, consultar el reloj de descomposición, saber si un material es perecedero y conocer la frescura ya calculada de una pila (`getFreshness`, con la conservación incluida) o si se está pudriendo (`isSpoiling`).
+- La usan las cajas de **Logistics** para que la comida empaquetada conserve su frescura, y **Commerce** para que los aldeanos rechacen la comida que se está pudriendo.
 
 ### 6. Diseño de rendimiento (evaluación diferida)
 - Nunca se recorre el mundo. El estado de cada alimento se actualiza solo cuando alguien lo observa:

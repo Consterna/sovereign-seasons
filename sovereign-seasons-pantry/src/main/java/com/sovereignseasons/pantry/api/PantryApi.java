@@ -23,6 +23,7 @@ package com.sovereignseasons.pantry.api;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 /**
@@ -65,7 +66,25 @@ public interface PantryApi {
     long roundExpiry(long expiresAt);
 
     /**
+     * Pantry's expiry granularity in ticks ({@code decay.expiry-granularity-ticks}); 1 means no rounding.
+     */
+    long expiryGranularity();
+
+    /**
      * Whether fully spoiled food turns into rotten flesh (Pantry's {@code decay.spoil-to-rotten-flesh} option).
      */
     boolean spoilsToRottenFlesh();
+
+    /**
+     * Remaining freshness fraction of a food stack in [0, 1], with its preservation method taken into account.
+     * Untracked perishable stacks count as freshly produced (1.0); empty if the stack is not perishable or
+     * Pantry's decay is disabled.
+     */
+    OptionalDouble getFreshness(ItemStack item);
+
+    /**
+     * Whether a food stack is in the SPOILING stage or already spoiled (Pantry's {@code stages.stale-above} threshold).
+     * Untracked and non-perishable stacks are never spoiling, and nothing is while Pantry's decay is disabled.
+     */
+    boolean isSpoiling(ItemStack item);
 }
