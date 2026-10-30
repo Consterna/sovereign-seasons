@@ -27,5 +27,8 @@ El bot no puede *ver* la pantalla. Esta guía sirve para comprobar a ojo lo visu
 | 10 | Compost | `/give @s rotten_flesh 16` y clic derecho en un compostador | Las partículas verdes y que el nivel del compostador sube a veces (30 %). |
 | 11 | Precios de invierno | `/season set winter world`, `/summon villager ~2 ~ ~ {NoAI:1b,Xp:10,VillagerData:{profession:"minecraft:farmer",level:2,type:"minecraft:plains"},Offers:{Recipes:[{buy:{id:"minecraft:carrot",count:22},sell:{id:"minecraft:emerald",count:1},maxUses:99}]}}` y clic derecho sobre él | En el trato de zanahorias, el **22 tachado** y al lado **16**; en la barra de acción, "Precios de Invierno". Al cerrar y volver en verano (`/season set summer world`), vuelve a 22 sin tachar. |
 | 12 | Feria de verano | `/season set summer world`, `/summon wandering_trader ~2 ~ ~ {NoAI:1b}` y clic derecho | Al final de la lista, hielo, hielo compacto y hielo azul; en la barra de acción, "Feria de Verano: ofertas de temporada". |
+| 13 | Resource pack | Al entrar, acepta el pack (dos avisos: base y estación); `/season set autumn world` | La hierba y las hojas de roble se vuelven doradas y naranjas tras recargar texturas un par de segundos. Las de abeto y abedul no cambian (el juego las pinta con color fijo). |
+| 14 | Caja con modelo | `/give @s carrot 9`, agáchate y haz clic derecho al aire | La caja se ve como una caja de madera con zanahorias en la tapa, no como un barril. |
+| 15 | Icono de estación | `/season hud` | En la BossBar, el icono de la estación (una hoja en otoño) delante del nombre. |
 
 Si algo no se ve como dice la tabla, anota el número de la prueba y lo que viste, y lo revisamos.
