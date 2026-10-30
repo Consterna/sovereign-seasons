@@ -54,6 +54,7 @@ class LogisticsConfigTest {
         assertThat(config.getPackableMaterials()).contains(Material.CARROT, Material.POTATO).doesNotContain(Material.WHEAT);
         assertThat(config.getWeightRules()).hasSize(4);
         assertThat(config.getItemsPerCrate()).isEqualTo(9);
+        assertThat(config.isCrateModelData()).isTrue();
     }
 
     @Test

@@ -48,6 +48,21 @@ class CrateRulesTest {
     }
 
     @Test
+    @DisplayName("Each packable crop has its own crate model number, unknown contents use the generic crate")
+    void crateModels() {
+        assertThat(CrateModels.of(org.bukkit.Material.CARROT)).isEqualTo(7_301_001);
+        assertThat(CrateModels.of(org.bukkit.Material.SUGAR_CANE)).isEqualTo(7_301_009);
+        assertThat(CrateModels.of(org.bukkit.Material.DIAMOND)).isEqualTo(CrateModels.BASE);
+        assertThat(CrateModels.of(null)).isEqualTo(CrateModels.BASE);
+        assertThat(CrateModels.END).isEqualTo(7_301_010);
+        // Floats hold every integer below 2^24 exactly, and 1.21.4+ stores custom model data as floats
+        assertThat((int) (float) CrateModels.END).isEqualTo(CrateModels.END);
+        for (String crop : CrateModels.CROPS) {
+            assertThat(org.bukkit.Material.matchMaterial(crop)).as(crop).isNotNull();
+        }
+    }
+
+    @Test
     @DisplayName("Expired food comes out as rotten flesh only when Pantry converts spoiled food")
     void expiredFood() {
         assertThat(CrateRules.unpackAsRottenFlesh(100L, 100L, true)).isTrue();

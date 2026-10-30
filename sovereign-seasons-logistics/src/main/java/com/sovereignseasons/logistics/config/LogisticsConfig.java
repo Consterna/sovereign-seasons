@@ -84,6 +84,7 @@ public class LogisticsConfig {
     private boolean cratesEnabled = true;
     private int itemsPerCrate = 9;
     private double packedDecayRate = 0.5;
+    private boolean crateModelData = true;
     private final Set<Material> packableMaterials = EnumSet.noneOf(Material.class);
 
     // Frozen lakes
@@ -282,6 +283,7 @@ public class LogisticsConfig {
         this.cratesEnabled = config.getBoolean("crates.enabled", true);
         this.itemsPerCrate = clamp(config.getInt("crates.items-per-crate", 9), 2, 64);
         this.packedDecayRate = fraction(config.getDouble("crates.packed-decay-rate", 0.5), 0.5);
+        this.crateModelData = config.getBoolean("crates.custom-model-data", true);
         if (config.contains("crates.packable")) {
             packableMaterials.clear();
             for (String name : config.getStringList("crates.packable")) addItemIfPresent(packableMaterials, name);
@@ -378,6 +380,8 @@ public class LogisticsConfig {
     public void setCratesEnabled(boolean enabled) { this.cratesEnabled = enabled; }
     public int getItemsPerCrate() { return itemsPerCrate; }
     public double getPackedDecayRate() { return packedDecayRate; }
+    public boolean isCrateModelData() { return crateModelData; }
+    public void setCrateModelData(boolean enabled) { this.crateModelData = enabled; }
     public Set<Material> getPackableMaterials() { return Collections.unmodifiableSet(packableMaterials); }
 
     public boolean isIceEnabled() { return iceEnabled; }

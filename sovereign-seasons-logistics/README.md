@@ -44,6 +44,7 @@ Sigue la filosofía *vanilla+*: viajar y cargar requiere planificación, y las s
 - No se pueden colocar como barril ni quemar como combustible.
 - **Con Pantry:** dentro de la caja la comida se estropea a **×0,5**, sin importar dónde esté la caja. Al desempaquetar, recupera su frescura real. El valor de la caja se redondea siempre hacia abajo, así que empaquetar y desempaquetar repetidamente nunca refresca la comida. Si caducó dentro, sale carne podrida, salvo que Pantry tenga desactivado `spoil-to-rotten-flesh`; en ese caso sale marcada como Podrida.
 - Se usa interacción en lugar de recetas de crafteo a propósito: el *crafter* automático no puede fabricar cajas sin estado que "refresquen" comida podrida.
+- **Modelo propio con el resource pack:** cada caja lleva un número de modelo (`custom_model_data`) según su cultivo, y el resource pack de Sovereign Seasons la dibuja como una caja de madera con su cosecha en la tapa. Sin el pack se ve como un barril. Se desactiva con `crates.custom-model-data: false`.
 - **API para otros módulos:** `com.sovereignseasons.logistics.api.LogisticsApi`, registrada en el `ServicesManager`, lee el contenido de una caja (`readCrate`) y muestra lo que daría al desempaquetarla ahora, frescura incluida (`previewContents`), sin modificarla. **Commerce** la usa para comprar cajas al por mayor.
 
 ### 6. Peso de carga *(desactivado por defecto)*
@@ -97,7 +98,7 @@ Todos los valores se validan y acotan al cargarse. Si el YAML está mal formado,
 tools/e2e/run-local.sh testserver /ruta/a/java 1.21.11
 ```
 
-- **Pruebas unitarias** (29): clasificación del terreno, efectos de movimiento, peso, matemática de las cajas, desempaquetado con frescura, reglas de hielo, registro por chunk, configuración y comandos.
+- **Pruebas unitarias** (30): clasificación del terreno, efectos de movimiento, peso, matemática de las cajas, desempaquetado con frescura, reglas de hielo, registro por chunk, configuración y comandos.
 - **Pruebas de juego** (`tools/e2e/e2e-logistics.js`, 25 comprobaciones en un servidor real):
   - nieve, botas de cuero y barro con lluvia frente a sendero de tierra;
   - caballo en grava y en nieve, con y sin armadura de cuero;

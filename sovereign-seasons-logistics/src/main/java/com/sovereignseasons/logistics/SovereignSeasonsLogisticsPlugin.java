@@ -86,7 +86,7 @@ public class SovereignSeasonsLogisticsPlugin extends JavaPlugin {
         }
 
         // 3. Subsystems
-        CrateItems crates = new CrateItems(this);
+        CrateItems crates = new CrateItems(this, config::isCrateModelData);
         CrateUnpacker unpacker = new CrateUnpacker(config, freshness);
         WeightModel weightModel = new WeightModel(config);
         InventoryWeigher weigher = new InventoryWeigher(weightModel, crates);

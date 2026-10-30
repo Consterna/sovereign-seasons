@@ -103,6 +103,10 @@ crates:
   items-per-crate: 9
   # Con Sovereign Seasons Pantry instalado, la comida dentro de una caja se estropea a este ritmo relativo.
   packed-decay-rate: 0.5
+  # Número de modelo (custom model data) que usa el resource pack de Sovereign Seasons para dibujar cada caja
+  # con su propio modelo. Sin el pack las cajas se ven como barriles; desactívalo si usas otro pack que ya
+  # asigne modelos a los barriles.
+  custom-model-data: true
   packable:
     - CARROT
     - POTATO
