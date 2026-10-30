@@ -7,6 +7,8 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-29
+
 ### Añadido
 - **`sovereign-seasons-core` — Servicio de temperatura estacional**:
   - Nueva API `TemperatureService` y enum `TemperatureBand` (`FREEZING`, `COLD`, `MILD`, `WARM`, `HOT`) en `com.sovereignseasons.api.temperature`, accesible mediante `SovereignSeasonsApi#getTemperatureService()` y el `ServicesManager` de Bukkit.
