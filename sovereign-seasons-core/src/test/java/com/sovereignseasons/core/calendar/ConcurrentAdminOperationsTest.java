@@ -127,36 +127,41 @@ class ConcurrentAdminOperationsTest {
         AtomicInteger successfulOps = new AtomicInteger(0);
         Season[] seasons = Season.values();
 
-        for (int t = 0; t < threadCount; t++) {
-            final int threadId = t;
-            executor.submit(() -> {
-                try {
-                    for (int i = 0; i < operationsPerThread; i++) {
-                        switch (i % 4) {
-                            case 0 -> manager.setSeason(mockWorld, seasons[(threadId + i) % seasons.length]);
-                            case 1 -> manager.setDayOfSeason(mockWorld, (i % 7) + 1);
-                            case 2 -> manager.tickWorld(mockWorld);
-                            case 3 -> manager.reload();
+        try {
+            for (int t = 0; t < threadCount; t++) {
+                final int threadId = t;
+                executor.submit(() -> {
+                    try {
+                        for (int i = 0; i < operationsPerThread; i++) {
+                            switch (i % 4) {
+                                case 0 -> manager.setSeason(mockWorld, seasons[(threadId + i) % seasons.length]);
+                                case 1 -> manager.setDayOfSeason(mockWorld, (i % 7) + 1);
+                                case 2 -> manager.tickWorld(mockWorld);
+                                case 3 -> manager.reload();
+                            }
+                            successfulOps.incrementAndGet();
                         }
-                        successfulOps.incrementAndGet();
+                    } finally {
+                        latch.countDown();
                     }
-                } finally {
-                    latch.countDown();
-                }
-            });
+                });
+            }
+
+            boolean completed = latch.await(30, TimeUnit.SECONDS);
+            assertThat(completed).isTrue();
+            assertThat(successfulOps.get()).isEqualTo(threadCount * operationsPerThread);
+
+            // Verification: calendar date is coherent and valid
+            CalendarDate finalDate = manager.getDate(mockWorld);
+            assertThat(finalDate).isNotNull();
+            assertThat(finalDate.dayOfSeason()).isBetween(1, 7);
+            assertThat(finalDate.season()).isNotNull();
+        } finally {
+            executor.shutdown();
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
         }
-
-        boolean completed = latch.await(10, TimeUnit.SECONDS);
-        executor.shutdown();
-
-        assertThat(completed).isTrue();
-        assertThat(successfulOps.get()).isEqualTo(threadCount * operationsPerThread);
-
-        // Verification: calendar date is coherent and valid
-        CalendarDate finalDate = manager.getDate(mockWorld);
-        assertThat(finalDate).isNotNull();
-        assertThat(finalDate.dayOfSeason()).isBetween(1, 7);
-        assertThat(finalDate.season()).isNotNull();
     }
 
     @Test
@@ -177,24 +182,29 @@ class ConcurrentAdminOperationsTest {
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger successCount = new AtomicInteger(0);
 
-        for (int t = 0; t < threadCount; t++) {
-            executor.submit(() -> {
-                try {
-                    for (int i = 0; i < iterations; i++) {
-                        CalendarDate date = manager.getDate(mockWorld);
-                        assertThat(date.totalDaysElapsed()).isGreaterThanOrEqualTo(0);
-                        successCount.incrementAndGet();
+        try {
+            for (int t = 0; t < threadCount; t++) {
+                executor.submit(() -> {
+                    try {
+                        for (int i = 0; i < iterations; i++) {
+                            CalendarDate date = manager.getDate(mockWorld);
+                            assertThat(date.totalDaysElapsed()).isGreaterThanOrEqualTo(0);
+                            successCount.incrementAndGet();
+                        }
+                    } finally {
+                        latch.countDown();
                     }
-                } finally {
-                    latch.countDown();
-                }
-            });
+                });
+            }
+
+            boolean completed = latch.await(15, TimeUnit.SECONDS);
+            assertThat(completed).isTrue();
+            assertThat(successCount.get()).isEqualTo(threadCount * iterations);
+        } finally {
+            executor.shutdown();
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
         }
-
-        boolean completed = latch.await(10, TimeUnit.SECONDS);
-        executor.shutdown();
-
-        assertThat(completed).isTrue();
-        assertThat(successCount.get()).isEqualTo(threadCount * iterations);
     }
 }

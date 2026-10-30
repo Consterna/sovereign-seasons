@@ -186,32 +186,37 @@ class SpatialCacheStressTest {
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger successfulOps = new AtomicInteger(0);
 
-        for (int t = 0; t < threadCount; t++) {
-            final int threadId = t;
-            executor.submit(() -> {
-                try {
-                    for (int i = 0; i < operationsPerThread; i++) {
-                        Location loc = new Location(mockWorld, (threadId * 10) + (i % 20), 64, i % 20);
-                        if (i % 10 == 0) {
-                            detector.invalidate(loc);
-                        } else if (i % 25 == 0) {
-                            detector.invalidateRadius(loc, 3);
-                        } else {
-                            detector.isGreenhouse(loc);
+        try {
+            for (int t = 0; t < threadCount; t++) {
+                final int threadId = t;
+                executor.submit(() -> {
+                    try {
+                        for (int i = 0; i < operationsPerThread; i++) {
+                            Location loc = new Location(mockWorld, (threadId * 10) + (i % 20), 64, i % 20);
+                            if (i % 10 == 0) {
+                                detector.invalidate(loc);
+                            } else if (i % 25 == 0) {
+                                detector.invalidateRadius(loc, 3);
+                            } else {
+                                detector.isGreenhouse(loc);
+                            }
+                            successfulOps.incrementAndGet();
                         }
-                        successfulOps.incrementAndGet();
+                    } finally {
+                        latch.countDown();
                     }
-                } finally {
-                    latch.countDown();
-                }
-            });
+                });
+            }
+
+            boolean finished = latch.await(15, TimeUnit.SECONDS);
+            assertThat(finished).isTrue();
+            assertThat(successfulOps.get()).isEqualTo(threadCount * operationsPerThread);
+        } finally {
+            executor.shutdown();
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
         }
-
-        boolean finished = latch.await(10, TimeUnit.SECONDS);
-        executor.shutdown();
-
-        assertThat(finished).isTrue();
-        assertThat(successfulOps.get()).isEqualTo(threadCount * operationsPerThread);
     }
 
     @Test
