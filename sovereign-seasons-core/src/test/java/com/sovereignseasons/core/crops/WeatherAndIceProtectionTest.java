@@ -372,7 +372,11 @@ class WeatherAndIceProtectionTest {
         );
 
         try {
-            java.lang.reflect.Constructor<?> ctor = org.bukkit.event.player.PlayerBucketEmptyEvent.class.getConstructors()[0];
+            // The full constructor, never getConstructors()[0]: reflection order is unspecified and the deprecated
+            // 5-argument constructor stores blockClicked.getRelative(face) as the clicked block
+            java.lang.reflect.Constructor<?> ctor = org.bukkit.event.player.PlayerBucketEmptyEvent.class.getConstructor(
+                    org.bukkit.entity.Player.class, Block.class, Block.class, org.bukkit.block.BlockFace.class,
+                    Material.class, org.bukkit.inventory.ItemStack.class, org.bukkit.inventory.EquipmentSlot.class);
             Class<?>[] paramTypes = ctor.getParameterTypes();
             Object[] args = new Object[paramTypes.length];
             for (int i = 0; i < paramTypes.length; i++) {
@@ -402,7 +406,9 @@ class WeatherAndIceProtectionTest {
             assertThat(invalidatedRadiiLocations).isNotEmpty();
 
             // Test bucket fill
-            java.lang.reflect.Constructor<?> fillCtor = org.bukkit.event.player.PlayerBucketFillEvent.class.getConstructors()[0];
+            java.lang.reflect.Constructor<?> fillCtor = org.bukkit.event.player.PlayerBucketFillEvent.class.getConstructor(
+                    org.bukkit.entity.Player.class, Block.class, Block.class, org.bukkit.block.BlockFace.class,
+                    Material.class, org.bukkit.inventory.ItemStack.class, org.bukkit.inventory.EquipmentSlot.class);
             Class<?>[] fillParamTypes = fillCtor.getParameterTypes();
             Object[] fillArgs = new Object[fillParamTypes.length];
             for (int i = 0; i < fillParamTypes.length; i++) {
