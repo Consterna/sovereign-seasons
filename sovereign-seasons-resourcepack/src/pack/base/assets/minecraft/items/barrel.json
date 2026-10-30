@@ -1,0 +1,90 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "entries": [
+      {
+        "threshold": 7301000,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate"
+        }
+      },
+      {
+        "threshold": 7301001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_carrot"
+        }
+      },
+      {
+        "threshold": 7301002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_potato"
+        }
+      },
+      {
+        "threshold": 7301003,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_beetroot"
+        }
+      },
+      {
+        "threshold": 7301004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_apple"
+        }
+      },
+      {
+        "threshold": 7301005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_sweet_berries"
+        }
+      },
+      {
+        "threshold": 7301006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_glow_berries"
+        }
+      },
+      {
+        "threshold": 7301007,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_melon_slice"
+        }
+      },
+      {
+        "threshold": 7301008,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_cocoa_beans"
+        }
+      },
+      {
+        "threshold": 7301009,
+        "model": {
+          "type": "minecraft:model",
+          "model": "sovereignseasons:item/crate_sugar_cane"
+        }
+      },
+      {
+        "threshold": 7301010,
+        "model": {
+          "type": "minecraft:model",
+          "model": "minecraft:block/barrel"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/barrel"
+    }
+  }
+}
