@@ -1,0 +1,27 @@
+name: SovereignSeasons-ResourcePack
+version: '${version}'
+main: com.sovereignseasons.resourcepack.SovereignSeasonsResourcePackPlugin
+api-version: '1.20'
+folia-supported: true
+author: Cristian
+website: https://github.com/Consterna/sovereign-seasons
+description: Resource pack de Sovereign Seasons con colores de estacion, cajas e iconos, enviado y alojado por el propio plugin.
+depend:
+  - SovereignSeasons-Core
+
+commands:
+  seasonpack:
+    description: Estado del resource pack de estaciones y reenvio.
+    aliases:
+      - texturas
+    usage: /seasonpack [status|resend|stats]
+
+permissions:
+  sovereignseasons.pack.use:
+    description: Permite consultar el resource pack y pedir que se reenvie.
+    default: true
+  sovereignseasons.pack.admin:
+    description: Permite ver las estadisticas del resource pack.
+    default: op
+    children:
+      sovereignseasons.pack.use: true

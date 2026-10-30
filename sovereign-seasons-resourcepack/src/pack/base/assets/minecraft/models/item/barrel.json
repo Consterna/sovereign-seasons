@@ -1,0 +1,71 @@
+{
+  "parent": "minecraft:block/barrel",
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 7301000
+      },
+      "model": "sovereignseasons:item/crate"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301001
+      },
+      "model": "sovereignseasons:item/crate_carrot"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301002
+      },
+      "model": "sovereignseasons:item/crate_potato"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301003
+      },
+      "model": "sovereignseasons:item/crate_beetroot"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301004
+      },
+      "model": "sovereignseasons:item/crate_apple"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301005
+      },
+      "model": "sovereignseasons:item/crate_sweet_berries"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301006
+      },
+      "model": "sovereignseasons:item/crate_glow_berries"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301007
+      },
+      "model": "sovereignseasons:item/crate_melon_slice"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301008
+      },
+      "model": "sovereignseasons:item/crate_cocoa_beans"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301009
+      },
+      "model": "sovereignseasons:item/crate_sugar_cane"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7301010
+      },
+      "model": "minecraft:block/barrel"
+    }
+  ]
+}

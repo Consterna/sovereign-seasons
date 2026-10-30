@@ -1,0 +1,12 @@
+{
+  "pack": {
+    "description": "Sovereign Seasons: hierba y hojas de invierno",
+    "pack_format": 22,
+    "supported_formats": [
+      22,
+      64
+    ],
+    "min_format": 22,
+    "max_format": 97
+  }
+}

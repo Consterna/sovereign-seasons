@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "sovereignseasons:item/crate_top_beetroot",
+    "side": "sovereignseasons:item/crate_side",
+    "bottom": "sovereignseasons:item/crate_bottom"
+  }
+}

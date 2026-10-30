@@ -1,0 +1,43 @@
+# ==========================================================================
+#  Sovereign Seasons - Resource Pack
+#  Colores de estación, modelo de las cajas e iconos, enviados por el propio plugin.
+#  Los cambios de este archivo se aplican al reiniciar el servidor (el servidor HTTP se abre al arrancar).
+# ==========================================================================
+
+packs:
+  # Pack base: modelo de las cajas de Logistics e iconos de estación en el título, el reloj y la BossBar.
+  base: true
+
+  # Colores de hierba y hojas según la estación (se cambia solo este pack al cambiar la estación).
+  seasonal-colors: true
+  # Estaciones con colores propios. El verano usa los colores normales del juego (no tiene pack).
+  seasons-with-colors: [spring, autumn, winter]
+
+  # Mostrar el icono de la estación junto a su nombre (solo a quien tenga el pack base cargado).
+  season-icons: true
+
+  # Obligar a aceptar el pack (si se rechaza, el jugador sale del servidor). Por defecto es opcional:
+  # quien lo rechaza juega igual, sin estos detalles visuales, y no se le vuelve a preguntar.
+  force: false
+  # Mensaje de la ventana de aceptación (MiniMessage).
+  prompt: "<gold>Sovereign Seasons</gold><gray>: cajas, iconos y colores de la estación (opcional).</gray>"
+  # Espera tras entrar antes de enviar los packs (ticks).
+  send-delay-ticks: 20
+
+hosting:
+  # self: el plugin sirve los packs con un servidor HTTP mínimo (solo los zip, solo lectura).
+  # external: los packs están en tu propio alojamiento (copia los zip de plugins/SovereignSeasons-ResourcePack/packs/).
+  mode: self
+  self:
+    # Interfaz y puerto del servidor HTTP. El puerto debe estar abierto para los jugadores.
+    bind-address: "0.0.0.0"
+    port: 8163
+    # Dirección pública si los jugadores no pueden llegar a la misma dirección con la que entran al juego
+    # (por ejemplo, detrás de un proxy): "http://mi-servidor.com:8163". Vacío = la dirección que usó el jugador.
+    public-url: ""
+  external:
+    # URL de la carpeta donde subiste los zip, por ejemplo "https://cdn.mi-servidor.com/packs".
+    base-url: ""
+
+messages:
+  prefix: "<gold><b>Texturas</b></gold> <gray>»</gray> "
