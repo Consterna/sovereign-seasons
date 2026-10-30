@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("com.gradleup.shadow") version "8.3.6"
+    id("com.gradleup.shadow") version "8.3.11"
 }
 
 group = "com.sovereignseasons"
@@ -22,7 +22,7 @@ dependencies {
     testImplementation(project(":sovereign-seasons-core"))
     // The pack's crate models must match the custom model data that Logistics gives its crates
     testImplementation(project(":sovereign-seasons-logistics"))
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:5.14.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.27.7")
 }
