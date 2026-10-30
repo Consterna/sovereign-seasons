@@ -53,7 +53,7 @@ subprojects {
     plugins.withType<JavaPlugin> {
         dependencies {
             constraints {
-                add("implementation", "org.apache.commons:commons-lang3:3.18.0")
+                add("implementation", "org.apache.commons:commons-lang3:3.21.0")
             }
         }
     }
