@@ -7,14 +7,15 @@ Pruebas de juego reales sin Docker: un bot [Mineflayer](https://github.com/Prism
 | Principal | `e2e.js` | ~4 min | 33 comprobaciones de juego de core y pantry (+ PlaceholderAPI si está instalado) |
 | Logistics | `e2e-logistics.js` | ~3 min | 25 comprobaciones de nieve, barro, caminos, monturas, ventiscas, lagos helados, peso y cajas (+ frescura con Pantry) |
 | Commerce | `e2e-commerce.js` | ~2 min | 24 comprobaciones de precios estacionales (cliente y servidor), comida podrida rechazada, venta a granel de cajas, límite diario y ferias del vendedor ambulante |
+| Resource pack | `e2e-resourcepack.js` | ~1 min | 16 comprobaciones: el bot hace de cliente (recibe los packs, los descarga y comprueba su SHA-1, responde y sigue los cambios de estación) |
 | Naturaleza | `e2e-nature.js` | ~5 min | Lluvia natural por estación y aparición natural de Strays/Husks, acelerando el servidor con `/tick sprint` |
 
 ## Compatibilidad verificada
 
-| Versión de Paper | Java | Resultado (suites principal + logistics + commerce + naturaleza) |
+| Versión de Paper | Java | Resultado (suites principal + logistics + commerce + resource pack + naturaleza) |
 |---|---|---|
-| 1.21.11 (build 132) | Temurin 21 | 33/33 + 25/25 + 24/24 + 5/5, con PlaceholderAPI 2.12.3 |
-| 26.1.2 (build 74) | Temurin 25 | 33/33 + 25/25 + 24/24 + 5/5, con PlaceholderAPI 2.12.3 |
+| 1.21.11 (build 132) | Temurin 21 | 33/33 + 25/25 + 24/24 + 16/16 + 5/5, con PlaceholderAPI 2.12.3 |
+| 26.1.2 (build 74) | Temurin 25 | 33/33 + 25/25 + 24/24 + 16/16 + 5/5, con PlaceholderAPI 2.12.3 |
 | 26.3 (build 227) | Temurin 25 | Prueba de humo por consola: carga de los cuatro plugins, comandos (incluido `/commerce`), placeholders y recargas sin errores. El bot no se usa porque Mineflayer aún no soporta el protocolo 26.3. |
 
 ## Requisitos
@@ -86,6 +87,12 @@ El mundo se borra en cada pasada porque el bot reaparece donde se desconectó y 
   - Agachado y con cajas en la mano, el aldeano las compra a precio de temporada sin abrir el comercio. Respeta el límite diario, rechaza cajas de comida podrida y un aldeano que no compra zanahorias tampoco compra sus cajas.
   - El vendedor ambulante añade la feria de verano, la sustituye por la de invierno al cambiar de estación y sus precios se borran al cerrar sin acumularse. Al desactivar las ferias, devuelve las ofertas añadidas y conserva las suyas.
   - Mineflayer siempre declara «no agachado» al usar una entidad, así que la prueba envía ella misma el paquete `use_entity` con `sneaking: true`, como un cliente real.
+- **Resource pack:**
+  - Al entrar, el cliente recibe el pack base y el de la estación, opcionales. Cada zip se descarga de su URL con el SHA-1 anunciado, y el servidor de packs no sirve nada más (404) ni acepta otros métodos (405).
+  - Con el pack cargado, el HUD muestra el icono de la estación; un segundo bot que nunca carga el pack no recibe icono.
+  - En otoño se quita el pack de primavera y se pone el de otoño; en verano se quita sin poner otro. Tras rechazar un pack no se insiste, y `/seasonpack resend` lo vuelve a enviar.
+  - Las cajas de Logistics llevan `custom_model_data` 7301001 (zanahorias).
+  - Mineflayer ya usa `bot.bossBars`, así que la suite guarda los títulos con otro nombre.
 - **Pantry:**
   - `/pantry inspect`, `/pantry stats` y `/pantry setfresh`. Comer comida rancia da Hambre.
   - El ahumador no se atasca y marca "Ahumado".
