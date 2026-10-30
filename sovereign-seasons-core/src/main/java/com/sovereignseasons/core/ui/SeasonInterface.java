@@ -26,12 +26,14 @@ import com.sovereignseasons.api.calendar.SeasonService;
 import com.sovereignseasons.api.event.SeasonChangeEvent;
 import com.sovereignseasons.api.temperature.TemperatureBand;
 import com.sovereignseasons.api.temperature.TemperatureService;
+import com.sovereignseasons.api.ui.SeasonIconProvider;
 import com.sovereignseasons.core.config.SeasonsConfig;
 import com.tcoded.folialib.FoliaLib;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -45,6 +47,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServiceRegisterEvent;
+import org.bukkit.event.server.ServiceUnregisterEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -66,6 +70,8 @@ public class SeasonInterface implements Listener {
     private final NamespacedKey hudKey;
     private final Map<UUID, BossBar> bars = new ConcurrentHashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private volatile SeasonIconProvider iconProvider;
+    private volatile boolean iconProviderLoaded;
 
     public SeasonInterface(Plugin plugin, SeasonsConfig config, SeasonService seasonService, TemperatureService temperatureService, FoliaLib foliaLib) {
         this.config = Objects.requireNonNull(config, "config cannot be null");
@@ -83,14 +89,12 @@ public class SeasonInterface implements Listener {
             return;
         }
         Season season = event.getNewSeason();
-        Title title = Title.title(
-                miniMessage.deserialize(season.getMiniMessageTag()),
-                miniMessage.deserialize("<gray>Comienza una nueva estación · Año " + event.getYear() + "</gray>"),
-                Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofSeconds(1))
-        );
+        Component subtitle = miniMessage.deserialize("<gray>Comienza una nueva estación · Año " + event.getYear() + "</gray>");
+        Title.Times times = Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofSeconds(1));
         for (Player player : event.getWorld().getPlayers()) {
             runFor(player, () -> {
-                player.showTitle(title);
+                // Built per player: the season icon depends on whether that client loaded the resource pack
+                player.showTitle(Title.title(miniMessage.deserialize(icon(player, season) + season.getMiniMessageTag()), subtitle, times));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, SoundCategory.AMBIENT, 0.8f, 1.2f);
             });
         }
@@ -158,7 +162,7 @@ public class SeasonInterface implements Listener {
         }
         double celsius = temperatureService.getTemperature(player.getLocation());
         TemperatureBand band = temperatureService.classify(celsius);
-        bar.name(miniMessage.deserialize(SeasonDisplay.hudLine(date, celsius, band)));
+        bar.name(miniMessage.deserialize(icon(player, date.season()) + SeasonDisplay.hudLine(date, celsius, band)));
         bar.progress(SeasonDisplay.progress(date));
         bar.color(SeasonDisplay.color(date.season()));
     }
@@ -214,7 +218,54 @@ public class SeasonInterface implements Listener {
             return null;
         }
         double celsius = temperatureService.getTemperature(player.getLocation());
-        return SeasonDisplay.hudLine(date, celsius, temperatureService.classify(celsius));
+        return icon(player, date.season()) + SeasonDisplay.hudLine(date, celsius, temperatureService.classify(celsius));
+    }
+
+    /**
+     * Season icon of an optional {@link SeasonIconProvider} (the Sovereign Seasons resource pack), or "" when none
+     * is installed. The provider is cached: ServicesManager lookups take a global lock, and the HUD asks for the
+     * icon of every player on every refresh. The cache is dropped whenever that service is (un)registered.
+     */
+    private String icon(Player player, Season season) {
+        if (!iconProviderLoaded) {
+            try {
+                iconProvider = Bukkit.getServicesManager().load(SeasonIconProvider.class);
+            } catch (RuntimeException | LinkageError e) {
+                iconProvider = null;
+            }
+            iconProviderLoaded = true;
+        }
+        return icon(iconProvider, player, season);
+    }
+
+    /**
+     * The icon of a provider, or "" when there is none or it fails: the icon is decoration and must never break
+     * the interface.
+     */
+    static String icon(SeasonIconProvider provider, Player player, Season season) {
+        if (provider == null) {
+            return "";
+        }
+        try {
+            String icon = provider.icon(player, season);
+            return icon != null ? icon : "";
+        } catch (RuntimeException | LinkageError e) {
+            return "";
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onServiceRegister(ServiceRegisterEvent event) {
+        if (event.getProvider().getService() == SeasonIconProvider.class) {
+            iconProviderLoaded = false;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onServiceUnregister(ServiceUnregisterEvent event) {
+        if (event.getProvider().getService() == SeasonIconProvider.class) {
+            iconProviderLoaded = false;
+        }
     }
 
     private void runFor(Player player, Runnable action) {
