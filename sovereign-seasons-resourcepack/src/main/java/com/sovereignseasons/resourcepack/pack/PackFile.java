@@ -52,6 +52,11 @@ public record PackFile(String name, byte[] data, byte[] sha1, UUID id) {
         return UUID.nameUUIDFromBytes(("sovereignseasons:resourcepack:" + name).getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * SHA-1 of a pack. Not a security use and not replaceable: the Minecraft protocol identifies server resource
+     * packs by their SHA-1 (Player#addResourcePack takes exactly these 20 bytes), and the client uses it to check
+     * the download and to reuse its cached copy. Any other digest would make every client reject the pack.
+     */
     public static byte[] sha1(byte[] data) {
         try {
             return MessageDigest.getInstance("SHA-1").digest(data);
