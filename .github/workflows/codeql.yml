@@ -51,7 +51,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Compile Java Code for CodeQL Extraction
-        run: ./gradlew clean compileJava compileTestJava --no-daemon
+        run: ./gradlew clean compileJava compileTestJava --no-daemon --no-build-cache
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
