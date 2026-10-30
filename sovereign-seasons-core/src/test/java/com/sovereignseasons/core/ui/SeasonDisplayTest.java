@@ -51,6 +51,11 @@ class SeasonDisplayTest {
         CalendarDate date = new CalendarDate(Season.SPRING, SubSeason.EARLY, 1, 7, 0, 1, 0);
         assertThat(plain(SeasonDisplay.hudLine(date, Double.NaN, TemperatureBand.MILD))).isEqualTo("Primavera (Temprano) · Día 1/7 · Año 1");
         assertThat(plain(SeasonDisplay.hudLine(date, 10.0, null))).doesNotContain("°C");
+        // The season icon is decoration: no provider, a null answer or a failing provider all give no icon
+        assertThat(SeasonInterface.icon(null, null, Season.SPRING)).isEmpty();
+        assertThat(SeasonInterface.icon((player, season) -> null, null, Season.SPRING)).isEmpty();
+        assertThat(SeasonInterface.icon((player, season) -> { throw new IllegalStateException("boom"); }, null, Season.SPRING)).isEmpty();
+        assertThat(SeasonInterface.icon((player, season) -> "<font:x:y>a</font> ", null, Season.WINTER)).isEqualTo("<font:x:y>a</font> ");
     }
 
     @Test
