@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.BooleanSupplier;
 
 /**
  * Builds and reads crate items: a barrel item carrying its contents in the PersistentDataContainer.
@@ -70,10 +71,19 @@ public class CrateItems {
     private final NamespacedKey contentKey;
     private final NamespacedKey countKey;
     private final NamespacedKey valueKey;
+    private final BooleanSupplier modelData;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public CrateItems(Plugin plugin) {
+        this(plugin, () -> false);
+    }
+
+    /**
+     * @param modelData whether crates get the custom model data the resource pack draws them with ({@link CrateModels})
+     */
+    public CrateItems(Plugin plugin, BooleanSupplier modelData) {
         Objects.requireNonNull(plugin, "plugin cannot be null");
+        this.modelData = Objects.requireNonNull(modelData, "modelData cannot be null");
         this.contentKey = new NamespacedKey(plugin, "crate_content");
         this.countKey = new NamespacedKey(plugin, "crate_count");
         this.valueKey = new NamespacedKey(plugin, "crate_value");
@@ -105,6 +115,9 @@ public class CrateItems {
         }
         lore.add(line("<dark_gray>Clic derecho para desempaquetar</dark_gray>"));
         meta.lore(lore);
+        if (modelData.getAsBoolean()) {
+            meta.setCustomModelData(CrateModels.of(content));
+        }
         crate.setItemMeta(meta);
         return crate;
     }
