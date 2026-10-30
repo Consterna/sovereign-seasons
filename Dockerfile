@@ -12,21 +12,23 @@ COPY sovereign-seasons-core/build.gradle.kts ./sovereign-seasons-core/
 COPY sovereign-seasons-pantry/build.gradle.kts ./sovereign-seasons-pantry/
 COPY sovereign-seasons-logistics/build.gradle.kts ./sovereign-seasons-logistics/
 COPY sovereign-seasons-commerce/build.gradle.kts ./sovereign-seasons-commerce/
+COPY sovereign-seasons-resourcepack/build.gradle.kts ./sovereign-seasons-resourcepack/
 
 # Copiar código fuente de los módulos implementados
 COPY sovereign-seasons-core/src/ ./sovereign-seasons-core/src/
 COPY sovereign-seasons-pantry/src/ ./sovereign-seasons-pantry/src/
 COPY sovereign-seasons-logistics/src/ ./sovereign-seasons-logistics/src/
 COPY sovereign-seasons-commerce/src/ ./sovereign-seasons-commerce/src/
+COPY sovereign-seasons-resourcepack/src/ ./sovereign-seasons-resourcepack/src/
 
 # Compilar JARs sombreados con dependencias relocalizadas
-RUN chmod +x ./gradlew && ./gradlew :sovereign-seasons-core:shadowJar :sovereign-seasons-pantry:shadowJar :sovereign-seasons-logistics:shadowJar :sovereign-seasons-commerce:shadowJar --no-daemon
+RUN chmod +x ./gradlew && ./gradlew :sovereign-seasons-core:shadowJar :sovereign-seasons-pantry:shadowJar :sovereign-seasons-logistics:shadowJar :sovereign-seasons-commerce:shadowJar :sovereign-seasons-resourcepack:shadowJar --no-daemon
 
 # Stage 2: Servidor Paper 1.21.x containerizado
 FROM eclipse-temurin:21-jre-jammy AS runtime
 
 LABEL org.opencontainers.image.title="Sovereign Seasons Paper Server" \
-      org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core, Pantry, Logistics y Commerce" \
+      org.opencontainers.image.description="Servidor Paper 1.21.x containerizado con Sovereign Seasons Core, Pantry, Logistics, Commerce y ResourcePack" \
       org.opencontainers.image.authors="Cristian <cristianguerrero1958@outlook.com>" \
       org.opencontainers.image.source="https://github.com/Consterna/sovereign-seasons" \
       org.opencontainers.image.licenses="GPL-3.0"
@@ -51,12 +53,15 @@ COPY --from=builder /build/sovereign-seasons-core/build/libs/sovereign-seasons-c
 COPY --from=builder /build/sovereign-seasons-pantry/build/libs/sovereign-seasons-pantry-*[0-9].jar /opt/plugins/sovereign-seasons-pantry.jar
 COPY --from=builder /build/sovereign-seasons-logistics/build/libs/sovereign-seasons-logistics-*[0-9].jar /opt/plugins/sovereign-seasons-logistics.jar
 COPY --from=builder /build/sovereign-seasons-commerce/build/libs/sovereign-seasons-commerce-*[0-9].jar /opt/plugins/sovereign-seasons-commerce.jar
+COPY --from=builder /build/sovereign-seasons-resourcepack/build/libs/sovereign-seasons-resourcepack-*[0-9].jar /opt/plugins/sovereign-seasons-resourcepack.jar
 
 # Script de inicio
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 25565
+# Servidor HTTP del resource pack (hosting.self.port)
+EXPOSE 8163
 
 VOLUME ["/server/data"]
 

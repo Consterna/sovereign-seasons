@@ -67,9 +67,20 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Comando `/commerce` (`prices [estación]`, `stats`, `reload`; alias `/mercado`) con permisos `sovereignseasons.commerce.*`.
   - Compatible con 1.20.4–26.x: no usa `Villager.Profession` ni `InventoryView`, que cambiaron de tipo en 1.21.
   - 20 pruebas unitarias y 24 pruebas de juego (`tools/e2e/e2e-commerce.js`), verificadas en Paper 1.21.11 y 26.1.2.
+- **Módulo `sovereign-seasons-resourcepack` v1.0.0 (Resource pack de estaciones)**:
+  - Pack `base`: modelo propio para cada tipo de caja de Logistics (`range_dispatch` sobre `custom_model_data` en 1.21.4+ y `overrides` hasta 1.21.3) e iconos de estación en una fuente propia (`sovereignseasons:icons`).
+  - Packs `spring`, `autumn` y `winter`: colormaps de hierba, hojas y hojarasca. El verano usa los colores vanilla. El plugin cambia solo ese pack al cambiar la estación o de mundo.
+  - Arte original y procedural (`tools/resourcepack/generate_pack.py`); zip reproducibles con SHA-1 estable.
+  - Un único `pack.mcmeta` válido de 1.20.4 a 26.3 (`pack_format` 22, `supported_formats` [22, 64], `min_format` 22, `max_format` 97), comprobado con el lector real de 1.21.11, 26.1.2 y 26.3; modelos, definiciones de ítem y fuente comprobados con el cliente 26.3.
+  - Servidor HTTP mínimo propio (solo los zip, `GET`/`HEAD`, sin depender de módulos opcionales de Java) o alojamiento externo; URL según la dirección con la que entró el jugador.
+  - Packs opcionales por defecto; quien rechaza uno no vuelve a ser preguntado hasta `/seasonpack resend`.
+  - Comando `/seasonpack` (`status`, `resend`, `stats`; alias `/texturas`) con permisos `sovereignseasons.pack.*`.
+  - 20 pruebas unitarias y 16 pruebas de juego (`tools/e2e/e2e-resourcepack.js`).
+- **`sovereign-seasons-core`**: API `SeasonIconProvider` (opcional, por el `ServicesManager`) para mostrar un icono junto al nombre de la estación en el título, el reloj y la BossBar.
+- **`sovereign-seasons-logistics`**: las cajas llevan `custom_model_data` por cultivo (`CrateModels`, opción `crates.custom-model-data`) para el resource pack.
 - **`sovereign-seasons-logistics`**: nueva API pública `LogisticsApi` en el `ServicesManager` (`readCrate`, `previewContents`) y desempaquetado compartido (`CrateUnpacker`). 29 pruebas.
 - **`sovereign-seasons-pantry`**: `PantryApi#expiryGranularity`.
-- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry, Logistics y Commerce. La versión de Paper por defecto pasa a 1.21.11.
+- Imagen Docker, `compose.yml` y workflows de CI/Release incluyen los JAR de Pantry, Logistics, Commerce y ResourcePack (y los zip de cada pack); se expone el puerto 8163 del servidor de packs. La versión de Paper por defecto pasa a 1.21.11.
 - Pruebas de juego end-to-end (`tools/e2e`): servidor Paper local + bot Mineflayer, sin Docker.
   - Suite principal de 33 comprobaciones y suite de naturaleza de 5 (lluvia natural, Strays y Husks), con `/tick sprint`.
   - `run-local.sh` automatiza el ciclo completo sobre un mundo limpio y se niega a probar un JAR de plugin más antiguo que su código.
@@ -80,6 +91,7 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.
 ### Corregido
 - **Cajas de Logistics:** el valor de la caja se redondeaba al más cercano al empaquetar y otra vez al desempaquetar; en un empate cada ciclo sumaba hasta un paso de granularidad (1000 ticks) y repetirlo refrescaba la comida. Ahora se redondea siempre hacia abajo.
 - **`PantryApi#getFreshness` e `isSpoiling`** respetan `decay.enabled: false`: con la descomposición desactivada nada cuenta como podrido.
+- El `pack.mcmeta` del esqueleto del resource pack declaraba `pack_format: 46`, que solo carga en 1.21.4 (comprobado con el lector del juego).
 - El JAR normal (`jar`) y el JAR del plugin (`shadowJar`) de cada módulo escribían en el mismo archivo. Un módulo dependiente podía regenerar el normal y dejar un plugin sin FoliaLib (`ClassNotFoundException` al arrancar). El JAR normal pasa a llevar el clasificador `-plain`, y la publicación Maven del core publica el JAR del plugin (`components["shadow"]`).
 - `SovereignSeasonsApi.Holder` publica la instancia de forma segura entre hilos (`volatile`), algo necesario en Folia.
 - La Lentitud por frío se resuelve por clave de registro (`minecraft:slowness`), porque el campo Java cambió de nombre en 1.20.5.
