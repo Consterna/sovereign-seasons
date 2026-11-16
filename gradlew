@@ -116,14 +116,6 @@ esac
 
 CLASSPATH="\\\"\\\""
 
-if [ -z "$GRADLE_USER_HOME" ] && [ -d "C:/dev/tools" ] ; then
-    GRADLE_USER_HOME="C:/dev/tools/.gradle"
-    export GRADLE_USER_HOME
-fi
-if [ -z "$JAVA_HOME" ] && [ -x "C:/dev/tools/jdk-21/bin/java.exe" ] ; then
-    JAVA_HOME="C:/dev/tools/jdk-21"
-fi
-
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then

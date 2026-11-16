@@ -36,16 +36,10 @@ set APP_HOME=%DIRNAME%
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" "-Djava.net.preferIPv4Stack=true"
-
-if not defined GRADLE_USER_HOME if exist "C:\dev\tools" set "GRADLE_USER_HOME=C:\dev\tools\.gradle"
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
-if exist "C:\dev\tools\jdk-21\bin\java.exe" (
-    set "JAVA_HOME=C:\dev\tools\jdk-21"
-    goto findJavaFromJavaHome
-)
 
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
